@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource';
 import { Stack } from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
 const backend = defineBackend({
@@ -40,9 +41,12 @@ new AwsCustomResource(storageStack, 'BucketCors', {
     },
     physicalResourceId: PhysicalResourceId.of(`${existingBucket.bucketName}-cors`),
   },
-  policy: AwsCustomResourcePolicy.fromSdkCalls({
-    resources: [`arn:aws:s3:::${existingBucket.bucketName}`],
-  }),
+  policy: AwsCustomResourcePolicy.fromStatements([
+    new iam.PolicyStatement({
+      actions: ['s3:PutBucketCors'],
+      resources: [`arn:aws:s3:::${existingBucket.bucketName}`],
+    }),
+  ]),
 });
 
 backend.addOutput({
