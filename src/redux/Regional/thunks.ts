@@ -33,7 +33,7 @@ export const fetchRegionalData = createAsyncThunk<
     const s3Path = `outbreaks/${OutbreakNames[outbreakName]}/admin2/simplified.json`;
 
     try {
-        const { url } = await getUrl({ path: s3Path });
+        const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
         const fetchedCases = await fetchCasesData(url.toString());
         const regionalData = mapToRegionalData(fetchedCases);
 

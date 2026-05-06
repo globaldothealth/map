@@ -34,7 +34,7 @@ export const fetchCountriesData = createAsyncThunk<
     const outbreakName = getState().app.outbreakName;
     const s3Path = `outbreaks/${OutbreakNames[outbreakName]}/admin0/simplified.json`;
     try {
-        const { url } = await getUrl({ path: s3Path });
+        const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
         const fetchedCases = await fetchCasesData(url.toString());
         const countriesData = mapToCountryData(fetchedCases);
         if (countriesData.length === 0) {
@@ -55,7 +55,7 @@ export const fetchCountriesData = createAsyncThunk<
 
         return { countriesData, totalNumberOfCases, lastUpdateDate };
     } catch (err: any) {
-        console.log(err)
+        console.log('ERR',err)
         if (err.response) return rejectWithValue(err.response.message);
         throw err;
     }

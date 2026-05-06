@@ -1,4 +1,4 @@
-import { LegendRow } from 'models/LegendRow';
+import { LegendRow } from 'src/models/LegendRow';
 import { LegendContainer, Title, Row, ColorSample, Label } from './styled';
 
 interface LegendProps {

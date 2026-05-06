@@ -1,12 +1,8 @@
-import Backdrop, {BackdropProps} from '@mui/material/Backdrop';
-import Button from '@mui/material/Button';
-import CloseIcon from '@mui/icons-material/Close';
-import HelpIcon from '@mui/icons-material/Help';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import Paper, {PaperProps} from '@mui/material/Paper';
-import Draggable from 'react-draggable';
 import {useEffect, useRef, useState} from 'react';
+import {Backdrop, Button, DialogContent, DialogContentText, Paper} from '@mui/material';
+import {Close as CloseIcon, Help as HelpIcon} from '@mui/icons-material';
+import {PaperProps} from '@mui/material/Paper';
+import Draggable from 'react-draggable';
 
 import {
     StyledMapGuideDialog,
@@ -50,7 +46,7 @@ export const MapGuide: React.FC = () => {
     return (
         <StyledMapGuideButton>
             <Button onClick={handleClickOpen()}>
-                <HelpIcon />
+                <HelpIcon/>
                 Map guide
             </Button>
             <StyledMapGuideDialog
@@ -59,8 +55,8 @@ export const MapGuide: React.FC = () => {
                 open={open}
                 onClose={handleClose}
                 PaperComponent={PaperComponent}
-                slots={{ backdrop: Backdrop }}
-                slotProps={{ backdrop: { invisible: false } }}
+                slots={{backdrop: Backdrop}}
+                slotProps={{backdrop: {invisible: false}}}
                 scroll="paper"
                 aria-labelledby="map-guide"
             >

@@ -320,7 +320,7 @@ const SideBar = () => {
                     </FormControl>
                 </div>
             </SideBarHeader>
-            <LatestGlobal id="latest-global">
+            <LatestGlobal id="latest-global" $sidebaropen={openSidebar}>
                 {totalCountryCasesCountIsLoading ? (
                     <SideBarTitlesSkeleton
                         animation="pulse"

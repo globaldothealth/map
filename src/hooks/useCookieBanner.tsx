@@ -1,10 +1,6 @@
 import { useTheme, Theme } from '@mui/material/styles';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
 const POLICY_ID = import.meta.env.VITE_POLICY_PUBLIC_ID;
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
 const SITE_ID = import.meta.env.VITE_COOKIE_CONSENT_PUBLIC_ID;
 
 interface CookieInitialiser {

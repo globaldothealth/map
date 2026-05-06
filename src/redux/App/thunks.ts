@@ -5,6 +5,7 @@ import { fetchCasesData, FetchedCaseData } from 'src/redux/fetchCasesData';
 import { RootState } from 'src/redux/store';
 import { OutbreakNames } from 'src/redux/App/slice';
 
+
 const mapToAppData = (
     cases: FetchedCaseData[],
 ): { caseCount: number; lastUpdated: string }[] => {
@@ -24,7 +25,7 @@ export const fetchAppData = createAsyncThunk<
     const outbreakName = getState().app.outbreakName;
     const s3Path = `outbreaks/${OutbreakNames[outbreakName]}/admin0/simplified.json`;
     try {
-        const { url } = await getUrl({ path: s3Path });
+        const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
 
         const fetchedCases = await fetchCasesData(url.toString());
         const appData = mapToAppData(fetchedCases);
@@ -39,6 +40,7 @@ export const fetchAppData = createAsyncThunk<
 
         return { totalNumberOfCases, lastUpdateDate };
     } catch (err: any) {
+        console.log('ERR', err);
         if (err.response) return rejectWithValue(err.response.message);
         throw err;
     }
