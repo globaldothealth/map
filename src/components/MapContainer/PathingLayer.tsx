@@ -31,6 +31,7 @@ export const usePathingLayer = (
         };
     },
     pathData: any,
+    overlaysOpen: { [key: string]: boolean },
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
@@ -58,7 +59,13 @@ export const usePathingLayer = (
         "Praia, Cape Verde": { long: -23.5087, lat: 14.9330 },
         "Tenerife, Canary Islands": { long: -16.6291, lat: 28.2916 },
     }
-    const shipPath = ['Ushuaia Argentina', "Tristan de Cunha", "St. Helena", "Ascension", "Praia, Cape Verde", "Tenerife, Canary Islands"
+    const shipPath = [
+        {location: 'Ushuaia Argentina', date: 'April 1st 2026'},
+        {location: 'Tristan de Cunha', date: 'April 13th-16th 2026'},
+        {location: 'St. Helena', date: 'April 24th 2026'},
+        {location: 'Ascension', date: 'April 27th 2026'},
+        {location: 'Praia, Cape Verde', date: 'May 6th 2026'},
+        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026'},
         ]
 
 
@@ -120,7 +127,7 @@ export const usePathingLayer = (
                             'geometry': {
                                 'type': 'LineString',
                                 'coordinates': shipPath.map(sp =>
-                                    [locationNameToLongLat[sp].long, locationNameToLongLat[sp].lat],
+                                    [locationNameToLongLat[sp.location].long, locationNameToLongLat[sp.location].lat],
                                 )
                             }
                         }
@@ -137,11 +144,59 @@ export const usePathingLayer = (
                 },
                 'paint': {
                     'line-color': '#454545',
-                    'line-width': 6,
+                    'line-width': 3,
                     'line-dasharray': [2, 1]
                 }
             });
+
+            // Ship route markers
+            map.addSource('ship-stops', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': shipPath.map(sp => ({
+                        'type': 'Feature' as const,
+                        'properties': {
+                            'label': `${sp.location}\n${sp.date}`,
+                        },
+                        'geometry': {
+                            'type': 'Point' as const,
+                            'coordinates': [locationNameToLongLat[sp.location].long, locationNameToLongLat[sp.location].lat]
+                        }
+                    }))
+                }
+            });
+            map.addLayer({
+                'id': 'ship-stops-circle',
+                'type': 'circle',
+                'source': 'ship-stops',
+                'paint': {
+                    'circle-radius': 6,
+                    'circle-color': '#454545',
+                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-width': 2
+                }
+            });
+            map.addLayer({
+                'id': 'ship-stops-label',
+                'type': 'symbol',
+                'source': 'ship-stops',
+                'layout': {
+                    'text-field': ['get', 'label'],
+                    'text-size': 14,
+                    'text-offset': [0, 1],
+                    'text-anchor': 'top',
+                    'text-font': ['Open Sans Regular'],
+                },
+                'paint': {
+                    'text-color': '#454545',
+                    'text-halo-color': '#ffffff',
+                    'text-halo-width': 2.5
+                }
+            });
         }
+
+
 
         const setupLayer = async () => {
             try {
@@ -358,6 +413,17 @@ export const usePathingLayer = (
 
         setupLayer();
     }, [mapLoaded, dataFeatureSet]);
+
+    // Toggle ship overlay visibility
+    useEffect(() => {
+        if (!map) return;
+        const visibility = overlaysOpen['ship'] ? 'visible' : 'none';
+        ['ship', 'ship-stops-circle', 'ship-stops-label'].forEach(layerId => {
+            if (map.getLayer(layerId)) {
+                map.setLayoutProperty(layerId, 'visibility', visibility);
+            }
+        });
+    }, [overlaysOpen['ship'], map]);
 
     // Fly to country
     useEffect(() => {

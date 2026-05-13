@@ -24,8 +24,9 @@ export const Title = styled('p')`
 
 export const Row = styled('div')`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    gap: 0.5rem;
 
     &:not(:last-of-type) {
         margin-bottom: 0.8rem;
@@ -42,7 +43,7 @@ export const ColorSample = styled('div')<ColorSampleProps>`
     border: 1px solid #ccc;
     border-radius: 50%;
     background-color: ${(props) => props.color};
-    margin-bottom: 0.3rem;
+    flex-shrink: 0;
 `;
 
 export const Label = styled('p')`

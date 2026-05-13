@@ -47,6 +47,8 @@ const MapContainer = ({
 }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
+    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true});
+    console.log(overlaysOpen)
 
     // Fetch map data from CSV
     useEffect(() => {
@@ -122,7 +124,8 @@ const MapContainer = ({
         setFocusedArea,
         focusedArea,
         dataLayerBounds,
-        pathData
+        pathData,
+        overlaysOpen
     );
 
     return (
@@ -133,8 +136,10 @@ const MapContainer = ({
                 $isLoading={!mapLoaded || !dataFeatureSet}
             />
             <Legend
-                title="Confirmed cases"
+                title="Overlays"
                 legendRows={getDataLayersFromBounds(dataLayerBounds)}
+                // legendRows={<><p>Oko</p></>}
+                overlays={[{ color: '#454545', label: 'Ship Route', open: overlaysOpen['ship'], toggle: () => setOverlaysOpen(prev => ({...prev, ship: !prev['ship']})) }]}
             />
             <CopyStateLinkButton map={map} chartType={chartType} />
         </>
