@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Feature, FeatureCollection } from 'geojson';
-import { Map, Popup } from 'maplibre-gl';
+import { DataDrivenPropertyValueSpecification, Map, Popup } from 'maplibre-gl';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
@@ -137,7 +137,7 @@ export const usePathingLayer = (
                         ['get', 'status'],
                         ...Object.entries(statusColors).flatMap(([status, color]) => [status, color]),
                         '#888'
-                    ],
+                    ] as unknown as DataDrivenPropertyValueSpecification<string>,
                     'line-width': 4,
                     // 'line-offset': [
                     //     'match',
