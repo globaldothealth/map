@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Feature, FeatureCollection } from 'geojson';
 import { Map, Popup } from 'maplibre-gl';
@@ -37,6 +37,7 @@ export const usePathingLayer = (
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    const traceDestinationsFeaturesRef = useRef<any[]>([]);
 
     // Constants
     const locationNameToLongLat: Record<string, { long: number; lat: number }> = {
@@ -77,6 +78,20 @@ export const usePathingLayer = (
 
         // Check if source route already exists (in case of re-render), if not add it and the layer
         if(!map.getSource('paths')) {
+
+            const traceDataDestinations: any = {}
+            for (const entry of pathData) {
+                if (entry.travel_to && entry.travel_to != 'NA' && ((entry.travel_from && entry.travel_from != 'NA') || (entry.left_location && entry.left_location != 'NA'))) {
+                    if (!traceDataDestinations[entry.travel_to]) {
+                        traceDataDestinations[entry.travel_to] = [entry.status];
+                    } else if (!traceDataDestinations[entry.travel_to].includes(entry.status)) {
+                        traceDataDestinations[entry.travel_to].push(entry.status);
+                    }
+                }
+            }
+
+            // Add destination markers
+
 
             map.addSource('paths', {
                 'type': 'geojson',
@@ -124,14 +139,85 @@ export const usePathingLayer = (
                         '#888'
                     ],
                     'line-width': 4,
-                    'line-offset': [
-                        'match',
-                        ['get', 'status'],
-                        ...Object.entries(statusColors).flatMap(([status], i) => [status, (i - (Object.keys(statusColors).length - 1) / 2) * 4]),
-                        0
-                    ]
+                    // 'line-offset': [
+                    //     'match',
+                    //     ['get', 'status'],
+                    //     ...Object.entries(statusColors).flatMap(([status], i) => [status, (i - (Object.keys(statusColors).length - 1) / 2) * 4]),
+                    //     0
+                    // ]
                 }
             });
+
+            const traceDestinationsFeatures = Object.entries(traceDataDestinations)
+                .filter(([dest]) => locationNameToLongLat[dest])
+                .map(([dest, statuses]) => ({
+                    'type': 'Feature' as const,
+                    'properties': {
+                        'label': dest,
+                        'statuses': (statuses as string[]).join(', '),
+                    },
+                    'geometry': {
+                        'type': 'Point' as const,
+                        'coordinates': [locationNameToLongLat[dest].long, locationNameToLongLat[dest].lat]
+                    }
+                }));
+            traceDestinationsFeaturesRef.current = traceDestinationsFeatures;
+
+            map.addSource('trace-destinations', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': traceDestinationsFeatures
+                }
+            });
+            map.addLayer({
+                'id': 'trace-destinations-circle',
+                'type': 'circle',
+                'source': 'trace-destinations',
+                'paint': {
+                    'circle-radius': 6,
+                    'circle-color': '#454545',
+                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-width': 2
+                }
+            });
+            map.addLayer({
+                'id': 'trace-destinations-label',
+                'type': 'symbol',
+                'source': 'trace-destinations',
+                'layout': {
+                    'text-field': ['get', 'label'],
+                    'text-size': 12,
+                    'text-offset': [0, 1],
+                    'text-anchor': 'top',
+                    'text-font': ['Open Sans Regular'],
+                },
+                'paint': {
+                    'text-color': '#454545',
+                    'text-halo-color': '#ffffff',
+                    'text-halo-width': 2.5
+                }
+            });
+
+            // Apply initial visibility filter based on overlaysOpen
+            const initialVisibleStatuses = Object.entries(overlaysOpen)
+                .filter(([key, value]) => key !== 'ship' && value)
+                .map(([key]) => key);
+
+            if (initialVisibleStatuses.length === 0) {
+                map.setFilter('paths', ['==', ['get', 'status'], '__none__']);
+            } else {
+                map.setFilter('paths', ['in', ['get', 'status'], ['literal', initialVisibleStatuses]]);
+            }
+
+            const initialFiltered = {
+                type: 'FeatureCollection' as const,
+                features: traceDestinationsFeatures.filter((f) => {
+                    const statuses = (f.properties?.statuses || '').split(', ');
+                    return statuses.some((s: string) => initialVisibleStatuses.includes(s));
+                }),
+            };
+            (map.getSource('trace-destinations') as any).setData(initialFiltered);
         }
         if(!map.getSource('ship')) {
 
@@ -444,7 +530,7 @@ export const usePathingLayer = (
         });
     }, [overlaysOpen['ship'], map]);
 
-    // Toggle paths visibility based on status
+    // Toggle paths and trace-destinations visibility based on status
     useEffect(() => {
         if (!map || !map.getSource('paths')) return;
         const visibleStatuses = Object.entries(overlaysOpen)
@@ -455,6 +541,18 @@ export const usePathingLayer = (
             map.setFilter('paths', ['==', ['get', 'status'], '__none__']);
         } else {
             map.setFilter('paths', ['in', ['get', 'status'], ['literal', visibleStatuses]]);
+        }
+
+        // Filter trace-destination markers: show only if at least one of their statuses is visible
+        if (map.getSource('trace-destinations')) {
+            const filtered = {
+                type: 'FeatureCollection' as const,
+                features: traceDestinationsFeaturesRef.current.filter((f) => {
+                    const statuses = (f.properties?.statuses || '').split(', ');
+                    return statuses.some((s: string) => visibleStatuses.includes(s));
+                }),
+            };
+            (map.getSource('trace-destinations') as any).setData(filtered);
         }
     }, [overlaysOpen, map]);
 
