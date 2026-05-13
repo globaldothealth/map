@@ -97,7 +97,7 @@ export const usePathingLayer = (
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': pathData.map(pd => {
+                    'features': pathData.map((pd: any) => {
 
                         let coordinates = []
                         if (pd.travel_from && locationNameToLongLat[pd.travel_from]) {

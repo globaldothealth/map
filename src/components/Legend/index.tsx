@@ -19,12 +19,13 @@ const Legend: React.FC<LegendProps> = ({ title, legendRows, overlays }: LegendPr
         <LegendContainer>
             <Title>{title}</Title>
 
-            {/*{legendRows.map((row) => (*/}
-            {/*    <Row key={row.label}>*/}
-            {/*        <ColorSample color={row.color} />*/}
-            {/*        <Label>{row.label}</Label>*/}
-            {/*    </Row>*/}
-            {/*))}*/}
+            {legendRows.map((row) => (
+                <Row key={row.label}>
+                    <ColorSample color={row.color} />
+                    <Label>{row.label}</Label>
+                </Row>
+            ))}
+            <Title>Overlays</Title>
             {overlays && overlays.map((overlay) => (
                 <Row key={overlay.label}>
                     <Checkbox

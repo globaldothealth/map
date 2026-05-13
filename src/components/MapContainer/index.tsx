@@ -143,7 +143,7 @@ const MapContainer = ({
                 $isLoading={!mapLoaded || !dataFeatureSet}
             />
             <Legend
-                title="Overlays"
+                title="Case Count"
                 legendRows={getDataLayersFromBounds(dataLayerBounds)}
                 // legendRows={<><p>Oko</p></>}
                 overlays={[

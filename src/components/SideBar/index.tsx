@@ -1,9 +1,9 @@
 import {
     Autocomplete,
     Box,
-    MenuItem,
+    // MenuItem,
     TextField,
-    Select,
+    // Select,
     FormControl,
     Typography,
 } from '@mui/material';
@@ -22,13 +22,13 @@ import {
 import {
     selectFocusedArea,
     selectLastUpdateDate,
-    selectOutbreakName,
+    // selectOutbreakName,
 } from 'src/redux/App/selectors';
 import {
     setFocusedArea,
     setPopup,
-    OutbreakNames,
-    setOutbreakName,
+    // OutbreakNames,
+    // setOutbreakName,
 } from 'src/redux/App/slice';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 import {
@@ -77,7 +77,7 @@ const SideBar = () => {
     );
     const totalRegionalCasesCount = useAppSelector(selectRegionalTotalCases);
     const totalStateCasesCount = useAppSelector(selectStateTotalCases);
-    const outbreakName = useAppSelector(selectOutbreakName);
+    // const outbreakName = useAppSelector(selectOutbreakName);
 
     const resolution = location.pathname.split('/')[1] as Resolution;
 
