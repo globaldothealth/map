@@ -5,13 +5,13 @@ import Checkbox from '@mui/material/Checkbox';
 interface LegendProps {
     title: string;
     legendRows: LegendRow[];
-    overlays?: [{
+    overlays?: {
             color: string;
             label: string;
             open: boolean;
             toggle: () => void;
-        }
-    ]
+        }[]
+
 }
 
 const Legend: React.FC<LegendProps> = ({ title, legendRows, overlays }: LegendProps) => {

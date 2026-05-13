@@ -32,6 +32,7 @@ export const usePathingLayer = (
     },
     pathData: any,
     overlaysOpen: { [key: string]: boolean },
+    statusColors: { [key: string]: string },
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
@@ -58,6 +59,8 @@ export const usePathingLayer = (
         "Tristan de Cunha": { long: -58.4333, lat: -37.1052 },
         "Praia, Cape Verde": { long: -23.5087, lat: 14.9330 },
         "Tenerife, Canary Islands": { long: -16.6291, lat: 28.2916 },
+        "Cape Verde": { long: -24.0, lat: 16.0 },
+        "Tenerife": { long: -16.6291, lat: 28.2916 },
     }
     const shipPath = [
         {location: 'Ushuaia Argentina', date: 'April 1st 2026'},
@@ -79,20 +82,30 @@ export const usePathingLayer = (
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': pathData.filter(pd => pd.travel_from && pd.travel_from != 'NA' && pd.travel_to && pd.travel_to != 'NA').map(pd => {
-                        console.log(pd.status)
+                    'features': pathData.map(pd => {
+
+                        let coordinates = []
+                        if (pd.travel_from && locationNameToLongLat[pd.travel_from]) {
+                            coordinates.push([locationNameToLongLat[pd.travel_from].long, locationNameToLongLat[pd.travel_from].lat])
+                        }
+                        if (pd.left_location && locationNameToLongLat[pd.left_location]) {
+
+                            coordinates.push([locationNameToLongLat[pd.left_location].long, locationNameToLongLat[pd.left_location].lat])
+                        }
+                        if (pd.travel_to && locationNameToLongLat[pd.travel_to]) {
+                            coordinates.push([locationNameToLongLat[pd.travel_to].long, locationNameToLongLat[pd.travel_to].lat])
+                        }
+                        if (coordinates.length < 2) coordinates =  []; // Need at least 2 points for a line
+
                         return {
                             'type': 'Feature',
                             'properties': {status: pd.status},
                             'geometry': {
                             'type': 'LineString',
-                                'coordinates': [
-                                [locationNameToLongLat[pd.travel_from].long, locationNameToLongLat[pd.travel_from].lat],
-                                [locationNameToLongLat[pd.travel_to].long, locationNameToLongLat[pd.travel_to].lat]
-                            ]
+                                'coordinates': coordinates
                         }
                         }
-                    })
+                    }).filter((pd: any[]) => pd.length != 0)
                 }
             });
             map.addLayer({
@@ -105,12 +118,18 @@ export const usePathingLayer = (
                 },
                 'paint': {
                     'line-color': [
-                        'case',
-                        ['==', ['get', 'status'], 'confirmed'],
-                        '#ff0000',
+                        'match',
+                        ['get', 'status'],
+                        ...Object.entries(statusColors).flatMap(([status, color]) => [status, color]),
                         '#888'
                     ],
-                    'line-width': 8
+                    'line-width': 4,
+                    'line-offset': [
+                        'match',
+                        ['get', 'status'],
+                        ...Object.entries(statusColors).flatMap(([status], i) => [status, (i - (Object.keys(statusColors).length - 1) / 2) * 4]),
+                        0
+                    ]
                 }
             });
         }
@@ -424,6 +443,20 @@ export const usePathingLayer = (
             }
         });
     }, [overlaysOpen['ship'], map]);
+
+    // Toggle paths visibility based on status
+    useEffect(() => {
+        if (!map || !map.getSource('paths')) return;
+        const visibleStatuses = Object.entries(overlaysOpen)
+            .filter(([key, value]) => key !== 'ship' && value)
+            .map(([key]) => key);
+
+        if (visibleStatuses.length === 0) {
+            map.setFilter('paths', ['==', ['get', 'status'], '__none__']);
+        } else {
+            map.setFilter('paths', ['in', ['get', 'status'], ['literal', visibleStatuses]]);
+        }
+    }, [overlaysOpen, map]);
 
     // Fly to country
     useEffect(() => {

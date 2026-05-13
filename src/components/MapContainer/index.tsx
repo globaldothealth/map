@@ -1,27 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { FeatureCollection } from 'geojson';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
+import {FeatureCollection} from 'geojson';
 
 import Legend from 'src/components/Legend';
 import Loader from 'src/components/Loader';
 
-import { useMaplibreMap } from 'src/hooks/useMaplibreMap';
+import {useMaplibreMap} from 'src/hooks/useMaplibreMap';
 
-import { CountryData } from 'src/models/CountryData';
-import { FocusedArea } from 'src/models/FocusedArea';
-import { RegionalData } from 'src/models/RegionalData';
-import { StateData } from 'src/models/StateData';
+import {CountryData} from 'src/models/CountryData';
+import {FocusedArea} from 'src/models/FocusedArea';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
 
-import { MapContainer as StyledMapContainer } from 'src/theme/globalStyles';
+import {MapContainer as StyledMapContainer} from 'src/theme/globalStyles';
 
 import CopyStateLinkButton from 'src/components/CopyStateLinkButton';
-import { ChartTypeNames } from 'src/models/ViewParamURLValues';
+import {ChartTypeNames} from 'src/models/ViewParamURLValues';
 
 import {
     convertStateDataToFeatureSet,
     getDataLayersFromBounds,
 } from 'src/utils/helperFunctions';
-import { usePathingLayer } from './PathingLayer';
+import {usePathingLayer} from './PathingLayer';
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
@@ -38,17 +38,23 @@ interface MapContainerProps {
 }
 
 const MapContainer = ({
-    data,
-    focusedArea,
-    setFocusedArea,
-    chartType,
-    adminLevel,
-    dataLayerBounds,
-}: MapContainerProps) => {
+                          data,
+                          focusedArea,
+                          setFocusedArea,
+                          chartType,
+                          adminLevel,
+                          dataLayerBounds,
+                      }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
-    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true});
-    console.log(overlaysOpen)
+    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': true, 'probable': true,'negative': true, 'monitored': true, 'tested': true});
+    const statusColors = {
+        'confirmed': '#ff6756',
+        'probable': '#ff9983',
+        'negative': '#bac0be',
+        'monitored': '#00c5ae',
+        'tested': '#027469'
+    };
 
     // Fetch map data from CSV
     useEffect(() => {
@@ -108,7 +114,7 @@ const MapContainer = ({
 
     const dataFeatureSet: FeatureCollection = useMemo(() => {
         if (!data || data.length === 0)
-            return { type: 'FeatureCollection', features: [] };
+            return {type: 'FeatureCollection', features: []};
 
         return convertStateDataToFeatureSet(data);
     }, [data]);
@@ -125,12 +131,13 @@ const MapContainer = ({
         focusedArea,
         dataLayerBounds,
         pathData,
-        overlaysOpen
+        overlaysOpen,
+        statusColors
     );
 
     return (
         <>
-            {(!mapLoaded || !dataFeatureSet) && <Loader />}
+            {(!mapLoaded || !dataFeatureSet) && <Loader/>}
             <StyledMapContainer
                 ref={mapContainer}
                 $isLoading={!mapLoaded || !dataFeatureSet}
@@ -139,9 +146,46 @@ const MapContainer = ({
                 title="Overlays"
                 legendRows={getDataLayersFromBounds(dataLayerBounds)}
                 // legendRows={<><p>Oko</p></>}
-                overlays={[{ color: '#454545', label: 'Ship Route', open: overlaysOpen['ship'], toggle: () => setOverlaysOpen(prev => ({...prev, ship: !prev['ship']})) }]}
+                overlays={[
+                    {
+                        color: '#454545',
+                        label: 'Ship Route',
+                        open: overlaysOpen['ship'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, ship: !prev['ship']}))
+                    },
+                    {
+                        color: statusColors['confirmed'],
+                        label: 'Confirmed Cases',
+                        open: overlaysOpen['confirmed'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, confirmed: !prev['confirmed']}))
+                    },
+                    {
+                        color: statusColors['probable'],
+                        label: 'Probable Cases',
+                        open: overlaysOpen['probable'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, probable: !prev['probable']}))
+                    },
+                    {
+                        color: statusColors['negative'],
+                        label: 'Negative Cases',
+                        open: overlaysOpen['negative'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, negative: !prev['negative']}))
+                    },
+                    {
+                        color: statusColors['monitored'],
+                        label: 'Monitored Cases',
+                        open: overlaysOpen['monitored'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, monitored: !prev['monitored']}))
+                    },
+                    {
+                        color: statusColors['tested'],
+                        label: 'Tested Cases',
+                        open: overlaysOpen['tested'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, tested: !prev['tested']}))
+                    }
+                    ]}
             />
-            <CopyStateLinkButton map={map} chartType={chartType} />
+            <CopyStateLinkButton map={map} chartType={chartType}/>
         </>
     );
 };
