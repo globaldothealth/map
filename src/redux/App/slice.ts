@@ -11,6 +11,7 @@ export enum OutbreakNames {
     Covid19 = 'COVID-19',
     AvianInfluenza = 'Avian Influenza',
     Ebola = 'Ebola',
+    Hantavirus = 'Hantavirus',
     Marburg = 'Marburg',
     Mpox2022 = 'Mpox 2022',
     Mpox2024 = 'Mpox 2024',
@@ -38,7 +39,7 @@ const initialState: AppState = {
         isOpen: false,
         countryCode: '',
     },
-    outbreakName: 'AvianInfluenza',
+    outbreakName: 'Hantavirus',
 };
 
 export const appSlice = createSlice({

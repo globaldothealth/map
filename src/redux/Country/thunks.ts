@@ -53,7 +53,50 @@ export const fetchCountriesData = createAsyncThunk<
             }
         }
 
-        return { countriesData, totalNumberOfCases, lastUpdateDate };
+        const urlP = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
+        const pathData = await fetch(urlP)
+            .then(response => response.text())
+            .then(csvText => {
+                const parseCsvLine = (line: string): string[] => {
+                    const result: string[] = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    result.push(current.trim());
+                    return result;
+                };
+
+                const lines = csvText.split('\n').filter(l => l.trim());
+                const headers = parseCsvLine(lines[0]);
+                const data = lines.slice(1).map(line => {
+                    const values = parseCsvLine(line.replace(/\r$/, ''));
+                    const entry: { [key: string]: string } = {};
+
+                    headers.forEach((header, index) => {
+                        entry[header] = values[index];
+                    });
+                    return entry;
+                });
+                return data;
+            })
+        const parsedPathData = pathData.filter(l => l.status == 'confirmed')
+
+
+        const totalNumberOfCasesFromPathData = pathData.filter(entry => entry['status'] === 'confirmed').length;
+        console.log("Countries Data", countriesData);
+        console.log("Path Data", parsedPathData);
+
+        return { countriesData, totalNumberOfCases: totalNumberOfCasesFromPathData, lastUpdateDate };
     } catch (err: any) {
         console.log('ERR',err)
         if (err.response) return rejectWithValue(err.response.message);
