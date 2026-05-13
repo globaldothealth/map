@@ -21,7 +21,7 @@ import {
     convertStateDataToFeatureSet,
     getDataLayersFromBounds,
 } from 'src/utils/helperFunctions';
-import { useChoroplethLayer } from './ChoroplethLayer';
+import { usePathingLayer } from './PathingLayer';
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
@@ -46,6 +46,50 @@ const MapContainer = ({
     dataLayerBounds,
 }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
+
+    // Fetch map data from CSV
+    useEffect(() => {
+        const url = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
+        fetch(url)
+            .then(response => response.text())
+            .then(csvText => {
+                const parseCsvLine = (line: string): string[] => {
+                    const result: string[] = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const char = line[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    result.push(current.trim());
+                    return result;
+                };
+
+                const lines = csvText.split('\n').filter(l => l.trim());
+                const headers = parseCsvLine(lines[0]);
+                const data = lines.slice(1).map(line => {
+                    const values = parseCsvLine(line.replace(/\r$/, ''));
+                    const entry: { [key: string]: string } = {};
+
+                    headers.forEach((header, index) => {
+                        entry[header] = values[index];
+                    });
+                    return entry;
+                });
+                setPathData(data);
+            })
+            .catch(error => {
+                console.error('Error fetching map data:', error);
+            });
+    }, []);
 
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useMaplibreMap(mapContainer);
@@ -68,7 +112,7 @@ const MapContainer = ({
     }, [data]);
 
     // Adds a choropleth layer to the map and sets up the interaction (Popup and fly to country on click)
-    useChoroplethLayer(
+    usePathingLayer(
         map.current,
         adminLevel,
         data,
@@ -78,6 +122,7 @@ const MapContainer = ({
         setFocusedArea,
         focusedArea,
         dataLayerBounds,
+        pathData
     );
 
     return (

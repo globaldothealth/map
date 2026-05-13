@@ -5,6 +5,7 @@ import {
     TextField,
     Select,
     FormControl,
+    Typography,
 } from '@mui/material';
 import { useState, useEffect, SyntheticEvent } from 'react';
 import { whereAlpha3 } from 'iso-3166-1';
@@ -281,42 +282,45 @@ const SideBar = () => {
             <SideBarHeader id="sidebar-header">
                 <div id="disease-selector">
                     <FormControl fullWidth>
-                        <Select
-                            labelId="outbreak-select-label"
-                            id="outbreak-select"
-                            value={outbreakName}
-                            label="Selected Outbreak"
-                            onChange={(event) => {
-                                dispatch(
-                                    setOutbreakName(
-                                        event.target
-                                            .value as keyof typeof OutbreakNames,
-                                    ),
-                                );
-                            }}
-                            sx={{
-                                background: 'rgb(25, 118, 210)',
-                                fontSize: '1.8rem',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                '& .MuiSelect-icon': {
-                                    color: 'white',
-                                },
-                                '& .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none',
-                                },
-                            }}
-                        >
-                            {(
-                                Object.keys(OutbreakNames) as Array<
-                                    keyof typeof OutbreakNames
-                                >
-                            ).map((outbreak) => (
-                                <MenuItem key={outbreak} value={outbreak}>
-                                    {OutbreakNames[outbreak]}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                        <Typography variant='h4' sx={{backgroundColor: 'rgb(25, 118, 210)', color: 'white', p:'.5em', borderRadius: '.3em', fontWeight: 'bold'}}>
+                            Hantavirus
+                        </Typography>
+                        {/*<Select*/}
+                        {/*    labelId="outbreak-select-label"*/}
+                        {/*    id="outbreak-select"*/}
+                        {/*    value={outbreakName}*/}
+                        {/*    label="Selected Outbreak"*/}
+                        {/*    onChange={(event) => {*/}
+                        {/*        dispatch(*/}
+                        {/*            setOutbreakName(*/}
+                        {/*                event.target*/}
+                        {/*                    .value as keyof typeof OutbreakNames,*/}
+                        {/*            ),*/}
+                        {/*        );*/}
+                        {/*    }}*/}
+                        {/*    sx={{*/}
+                        {/*        background: 'rgb(25, 118, 210)',*/}
+                        {/*        fontSize: '1.8rem',*/}
+                        {/*        color: 'white',*/}
+                        {/*        fontWeight: 'bold',*/}
+                        {/*        '& .MuiSelect-icon': {*/}
+                        {/*            color: 'white',*/}
+                        {/*        },*/}
+                        {/*        '& .MuiOutlinedInput-notchedOutline': {*/}
+                        {/*            border: 'none',*/}
+                        {/*        },*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    {(*/}
+                        {/*        Object.keys(OutbreakNames) as Array<*/}
+                        {/*            keyof typeof OutbreakNames*/}
+                        {/*        >*/}
+                        {/*    ).map((outbreak) => (*/}
+                        {/*        <MenuItem key={outbreak} value={outbreak}>*/}
+                        {/*            {OutbreakNames[outbreak]}*/}
+                        {/*        </MenuItem>*/}
+                        {/*    ))}*/}
+                        {/*</Select>*/}
                     </FormControl>
                 </div>
             </SideBarHeader>
