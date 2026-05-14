@@ -57,7 +57,7 @@ export const usePathingLayer = (
         "Nebraska": { long: -99.9018, lat: 41.4925 },
         "Rome, Italy": { long: 12.4964, lat: 41.9028 },
         "Ushuaia Argentina": { long: -68.3059, lat: -54.8019 },
-        "Tristan de Cunha": { long: -58.4333, lat: -37.1052 },
+        "Tristan de Cunha": { long: -12.322772, lat: -37.1052 },
         "Praia, Cape Verde": { long: -23.5087, lat: 14.9330 },
         "Tenerife, Canary Islands": { long: -16.6291, lat: 28.2916 },
         "Cape Verde": { long: -24.0, lat: 16.0 },
@@ -69,9 +69,11 @@ export const usePathingLayer = (
         "Canada": { long: -106.3468, lat: 56.1304 },
         "Turkey": { long: 35.2433, lat: 38.9637 },
         "Ireland": { long: -8.2439, lat: 53.1424 },
+        "%ship-04-11": { long: -20.315070, lat: -39.818768}
     }
     const shipPath = [
         {location: 'Ushuaia Argentina', date: 'April 1st 2026'},
+        {location: '%ship-04-11', date: 'April 11th 2026'},
         {location: 'Tristan de Cunha', date: 'April 13th-16th 2026'},
         {location: 'St. Helena', date: 'April 24th 2026'},
         {location: 'Ascension', date: 'April 27th 2026'},
@@ -88,6 +90,16 @@ export const usePathingLayer = (
         {from: 'Tenerife, Canary Islands', to: 'Canada', date: 'May 11th 2026', cases: 4},
         {from: 'Tenerife, Canary Islands', to: 'Turkey', date: 'May 11th 2026', cases: 3},
         {from: 'Tenerife, Canary Islands', to: 'Ireland', date: 'May 11th 2026', cases: 2},
+        ]
+
+    const significantEventsData = [
+        {location: 'Ushuaia Argentina', date: 'April 1st 2026', description: 'MV Hondius sets off with 175 people on board'},
+        {location: '%ship-04-11', date: 'April 11th 2026', description: 'First victim dies'},
+        {location: 'St. Helena', date: 'April 24th 2026', description: '32 people disembark, including body of the first victim and his wife'},
+        {location: 'Johannesburg, South Africa', date: 'April 26th 2026', description: 'Wife of first victim dies'},
+        {location: 'Ascension', date: 'April 27th 2026', description: '2 people are evacuated, one later confirmed with hantavirus'},
+        {location: 'Praia, Cape Verde', date: 'May 6th 2026', description: '3 people are evacuated'},
+        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', description: '122 crew and passengers evacuated and flown home'},
         ]
 
 
@@ -280,7 +292,7 @@ export const usePathingLayer = (
                     'features': shipPath.map(sp => ({
                         'type': 'Feature' as const,
                         'properties': {
-                            'label': `${sp.location}\n${sp.date}`,
+                            'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}\n${sp.date}`,
                         },
                         'geometry': {
                             'type': 'Point' as const,
@@ -351,11 +363,29 @@ export const usePathingLayer = (
                     'line-cap': 'round'
                 },
                 'paint': {
-                    'line-color': statusColors.confirmed,
-                    'line-width': ['*', ['get', 'cases'], 0.15],
+                    'line-color': statusColors.probable,
+                    'line-width': ['+', 2, ['*', ['get', 'cases'], 0.08]],
                     'line-opacity': 1
                 }
             });
+
+            // Create arrow image for transfers
+            if (!map.hasImage('arrow')) {
+                const size = 20;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d')!;
+                ctx.fillStyle = statusColors.probable;
+                ctx.beginPath();
+                ctx.moveTo(2, 4);
+                ctx.lineTo(size - 2, size / 2);
+                ctx.lineTo(2, size - 4);
+                ctx.closePath();
+                ctx.fill();
+                const imageData = ctx.getImageData(0, 0, size, size);
+                map.addImage('arrow', { width: size, height: size, data: new Uint8Array(imageData.data.buffer) });
+            }
 
             // Arrowhead symbols along transfer lines
             map.addLayer({
@@ -364,17 +394,13 @@ export const usePathingLayer = (
                 'source': 'transfers',
                 'layout': {
                     'symbol-placement': 'line',
-                    'symbol-spacing': 100,
-                    'text-field': '▶',
-                    'text-size': ['*', ['get', 'cases'], 0.4],
-                    'text-rotate': 0,
-                    'text-keep-upright': false,
-                    'text-allow-overlap': true,
-                    'text-ignore-placement': true,
+                    'symbol-spacing': 60,
+                    'icon-image': 'arrow',
+                    'icon-size': 1,
+                    'icon-rotation-alignment': 'map',
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true,
                 },
-                'paint': {
-                    'text-color': statusColors.confirmed,
-                }
             });
 
             // Labels showing case count at midpoint
@@ -385,20 +411,69 @@ export const usePathingLayer = (
                 'layout': {
                     'symbol-placement': 'line-center',
                     'text-field': ['concat', ['to-string', ['get', 'cases']], ' cases'],
-                    'text-size': 12,
+                    'text-size': 14,
                     'text-font': ['Open Sans Regular'],
                     'text-allow-overlap': false,
                 },
                 'paint': {
-                    'text-color': statusColors.confirmed,
+                    'text-color': '#454545',
                     'text-halo-color': '#ffffff',
                     'text-halo-width': 1.5
                 }
             });
         }
 
-
-
+        if (!map.getSource('significant-events')) {
+            map.addSource('significant-events', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': significantEventsData
+                        .filter(e => locationNameToLongLat[e.location])
+                        .map(e => ({
+                            'type': 'Feature' as const,
+                            'properties': {
+                                'label': `${e.location.startsWith('%') ? '' : `${e.location}\n`}${e.date}\n${e.description}`,
+                                'description': e.description,
+                                'date': e.date,
+                            },
+                            'geometry': {
+                                'type': 'Point' as const,
+                                'coordinates': [locationNameToLongLat[e.location].long, locationNameToLongLat[e.location].lat]
+                            }
+                        }))
+                }
+            });
+            map.addLayer({
+                'id': 'significant-events-circle',
+                'type': 'circle',
+                'source': 'significant-events',
+                'paint': {
+                    'circle-radius': 8,
+                    'circle-color': statusColors['confirmed'] || '#FFA500',
+                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-width': 2
+                }
+            });
+            map.addLayer({
+                'id': 'significant-events-label',
+                'type': 'symbol',
+                'source': 'significant-events',
+                'layout': {
+                    'text-field': ['get', 'label'],
+                    'text-size': 14,
+                    'text-offset': [0, 1.5],
+                    'text-anchor': 'top',
+                    'text-font': ['Open Sans Regular'],
+                    'text-max-width': 18,
+                },
+                'paint': {
+                    'text-color': statusColors.confirmed,
+                    'text-halo-color': '#ffffff',
+                    'text-halo-width': 2
+                }
+            });
+        }
 
 
         const setupLayer = async () => {
@@ -621,12 +696,34 @@ export const usePathingLayer = (
     useEffect(() => {
         if (!map) return;
         const visibility = overlaysOpen['ship'] ? 'visible' : 'none';
-        ['ship', 'ship-stops-circle', 'ship-stops-label', 'transfers-line', 'transfers-arrow', 'transfers-label'].forEach(layerId => {
+        ['ship', 'ship-stops-circle', 'ship-stops-label'].forEach(layerId => {
             if (map.getLayer(layerId)) {
                 map.setLayoutProperty(layerId, 'visibility', visibility);
             }
         });
     }, [overlaysOpen['ship'], map]);
+
+    // Toggle tenerifeDepartures (transfers) overlay visibility
+    useEffect(() => {
+        if (!map) return;
+        const visibility = overlaysOpen['tenerifeDepartures'] ? 'visible' : 'none';
+        ['transfers-line', 'transfers-arrow', 'transfers-label'].forEach(layerId => {
+            if (map.getLayer(layerId)) {
+                map.setLayoutProperty(layerId, 'visibility', visibility);
+            }
+        });
+    }, [overlaysOpen['tenerifeDepartures'], map]);
+
+    // Toggle significant events overlay visibility
+    useEffect(() => {
+        if (!map) return;
+        const visibility = overlaysOpen['significantEvents'] ? 'visible' : 'none';
+        ['significant-events-circle', 'significant-events-label'].forEach(layerId => {
+            if (map.getLayer(layerId)) {
+                map.setLayoutProperty(layerId, 'visibility', visibility);
+            }
+        });
+    }, [overlaysOpen['significantEvents'], map]);
 
     // Toggle paths and trace-destinations visibility based on status
     useEffect(() => {

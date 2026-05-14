@@ -47,7 +47,7 @@ const MapContainer = ({
                       }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
-    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': false, 'probable': false,'negative': false, 'monitored': false, 'tested': false});
+    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': false, 'probable': false,'negative': false, 'monitored': false, 'tested': false, 'tenerifeDepartures': true, "significantEvents": true});
     const statusColors = {
         'confirmed': '#ff6756',
         'probable': '#ff9983',
@@ -154,35 +154,47 @@ const MapContainer = ({
                         toggle: () => setOverlaysOpen(prev => ({...prev, ship: !prev['ship']}))
                     },
                     {
-                        color: statusColors['confirmed'],
-                        label: 'Confirmed Cases',
-                        open: overlaysOpen['confirmed'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, confirmed: !prev['confirmed']}))
+                        color: statusColors.probable,
+                        label: 'Tenerife Departures',
+                        open: overlaysOpen['tenerifeDepartures'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, tenerifeDepartures: !prev['tenerifeDepartures']}))
                     },
                     {
-                        color: statusColors['probable'],
-                        label: 'Probable Cases',
-                        open: overlaysOpen['probable'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, probable: !prev['probable']}))
+                        color: statusColors.confirmed,
+                        label: 'Significant Events',
+                        open: overlaysOpen['significantEvents'],
+                        toggle: () => setOverlaysOpen(prev => ({...prev, significantEvents: !prev['significantEvents']}))
                     },
-                    {
-                        color: statusColors['negative'],
-                        label: 'Negative Cases',
-                        open: overlaysOpen['negative'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, negative: !prev['negative']}))
-                    },
-                    {
-                        color: statusColors['monitored'],
-                        label: 'Monitored Cases',
-                        open: overlaysOpen['monitored'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, monitored: !prev['monitored']}))
-                    },
-                    {
-                        color: statusColors['tested'],
-                        label: 'Tested Cases',
-                        open: overlaysOpen['tested'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, tested: !prev['tested']}))
-                    }
+                    // {
+                    //     color: statusColors['confirmed'],
+                    //     label: 'Confirmed Cases',
+                    //     open: overlaysOpen['confirmed'],
+                    //     toggle: () => setOverlaysOpen(prev => ({...prev, confirmed: !prev['confirmed']}))
+                    // },
+                    // {
+                    //     color: statusColors['probable'],
+                    //     label: 'Probable Cases',
+                    //     open: overlaysOpen['probable'],
+                    //     toggle: () => setOverlaysOpen(prev => ({...prev, probable: !prev['probable']}))
+                    // },
+                    // {
+                    //     color: statusColors['negative'],
+                    //     label: 'Negative Cases',
+                    //     open: overlaysOpen['negative'],
+                    //     toggle: () => setOverlaysOpen(prev => ({...prev, negative: !prev['negative']}))
+                    // },
+                    // {
+                    //     color: statusColors['monitored'],
+                    //     label: 'Monitored Cases',
+                    //     open: overlaysOpen['monitored'],
+                    //     toggle: () => setOverlaysOpen(prev => ({...prev, monitored: !prev['monitored']}))
+                    // },
+                    // {
+                    //     color: statusColors['tested'],
+                    //     label: 'Tested Cases',
+                    //     open: overlaysOpen['tested'],
+                    //     toggle: () => setOverlaysOpen(prev => ({...prev, tested: !prev['tested']}))
+                    // }
                     ]}
             />
             <CopyStateLinkButton map={map} chartType={chartType}/>
