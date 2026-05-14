@@ -62,6 +62,13 @@ export const usePathingLayer = (
         "Tenerife, Canary Islands": { long: -16.6291, lat: 28.2916 },
         "Cape Verde": { long: -24.0, lat: 16.0 },
         "Tenerife": { long: -16.6291, lat: 28.2916 },
+        "United Kingdom": { long: -3.4360, lat: 55.3781 },
+        "United States": { long: -95.7129, lat: 37.0902 },
+        "Spain": { long: -3.7492, lat: 40.4637 },
+        "France": { long: 2.2137, lat: 46.2276 },
+        "Canada": { long: -106.3468, lat: 56.1304 },
+        "Turkey": { long: 35.2433, lat: 38.9637 },
+        "Ireland": { long: -8.2439, lat: 53.1424 },
     }
     const shipPath = [
         {location: 'Ushuaia Argentina', date: 'April 1st 2026'},
@@ -70,6 +77,17 @@ export const usePathingLayer = (
         {location: 'Ascension', date: 'April 27th 2026'},
         {location: 'Praia, Cape Verde', date: 'May 6th 2026'},
         {location: 'Tenerife, Canary Islands', date: 'May 10th 2026'},
+        ]
+
+    const transfers = [
+        {from: 'Tenerife, Canary Islands', to: 'Netherlands', date: 'May 11th 2026', cases: 54},
+        {from: 'Tenerife, Canary Islands', to: 'United Kingdom', date: 'May 11th 2026', cases: 22},
+        {from: 'Tenerife, Canary Islands', to: 'United States', date: 'May 11th 2026', cases: 18},
+        {from: 'Tenerife, Canary Islands', to: 'Spain', date: 'May 11th 2026', cases: 14},
+        {from: 'Tenerife, Canary Islands', to: 'France', date: 'May 11th 2026', cases: 5},
+        {from: 'Tenerife, Canary Islands', to: 'Canada', date: 'May 11th 2026', cases: 4},
+        {from: 'Tenerife, Canary Islands', to: 'Turkey', date: 'May 11th 2026', cases: 3},
+        {from: 'Tenerife, Canary Islands', to: 'Ireland', date: 'May 11th 2026', cases: 2},
         ]
 
 
@@ -301,6 +319,86 @@ export const usePathingLayer = (
             });
         }
 
+        if (!map.getSource('transfers')) {
+            map.addSource('transfers', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': transfers
+                        .filter(t => locationNameToLongLat[t.from] && locationNameToLongLat[t.to])
+                        .map(t => ({
+                            'type': 'Feature' as const,
+                            'properties': {
+                                'cases': t.cases,
+                                'label': `${t.cases} cases`,
+                            },
+                            'geometry': {
+                                'type': 'LineString' as const,
+                                'coordinates': [
+                                    [locationNameToLongLat[t.from].long, locationNameToLongLat[t.from].lat],
+                                    [locationNameToLongLat[t.to].long, locationNameToLongLat[t.to].lat],
+                                ]
+                            }
+                        }))
+                }
+            });
+            map.addLayer({
+                'id': 'transfers-line',
+                'type': 'line',
+                'source': 'transfers',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': statusColors.confirmed,
+                    'line-width': ['*', ['get', 'cases'], 0.15],
+                    'line-opacity': 1
+                }
+            });
+
+            // Arrowhead symbols along transfer lines
+            map.addLayer({
+                'id': 'transfers-arrow',
+                'type': 'symbol',
+                'source': 'transfers',
+                'layout': {
+                    'symbol-placement': 'line',
+                    'symbol-spacing': 100,
+                    'text-field': '▶',
+                    'text-size': ['*', ['get', 'cases'], 0.4],
+                    'text-rotate': 0,
+                    'text-keep-upright': false,
+                    'text-allow-overlap': true,
+                    'text-ignore-placement': true,
+                },
+                'paint': {
+                    'text-color': statusColors.confirmed,
+                }
+            });
+
+            // Labels showing case count at midpoint
+            map.addLayer({
+                'id': 'transfers-label',
+                'type': 'symbol',
+                'source': 'transfers',
+                'layout': {
+                    'symbol-placement': 'line-center',
+                    'text-field': ['concat', ['to-string', ['get', 'cases']], ' cases'],
+                    'text-size': 12,
+                    'text-font': ['Open Sans Regular'],
+                    'text-allow-overlap': false,
+                },
+                'paint': {
+                    'text-color': statusColors.confirmed,
+                    'text-halo-color': '#ffffff',
+                    'text-halo-width': 1.5
+                }
+            });
+        }
+
+
+
 
 
         const setupLayer = async () => {
@@ -523,7 +621,7 @@ export const usePathingLayer = (
     useEffect(() => {
         if (!map) return;
         const visibility = overlaysOpen['ship'] ? 'visible' : 'none';
-        ['ship', 'ship-stops-circle', 'ship-stops-label'].forEach(layerId => {
+        ['ship', 'ship-stops-circle', 'ship-stops-label', 'transfers-line', 'transfers-arrow', 'transfers-label'].forEach(layerId => {
             if (map.getLayer(layerId)) {
                 map.setLayoutProperty(layerId, 'visibility', visibility);
             }

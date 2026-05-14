@@ -47,7 +47,7 @@ const MapContainer = ({
                       }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
-    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': true, 'probable': false,'negative': false, 'monitored': false, 'tested': false});
+    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': false, 'probable': false,'negative': false, 'monitored': false, 'tested': false});
     const statusColors = {
         'confirmed': '#ff6756',
         'probable': '#ff9983',
