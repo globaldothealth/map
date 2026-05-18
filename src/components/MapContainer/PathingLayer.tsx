@@ -84,12 +84,9 @@ export const usePathingLayer = (
             location: 'Tristan da Cunha, Inaccesible Island & Nightingale Island',
             date: 'April 13th-16th 2026',
             description: "The ship's itinerary listed visits to Inaccessible Island, Nightingale, and Gough Island\n" +
-                "\n" +
-                "A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha. \n" +
-                "\n" +
-                "Nightingale Island is part of the Nightingale Islands, which also includes islets Middle Island and Stoltenhoff Island. All three of these islands are uninhabited, but are regularly visited for scientific purposes and research. It is one of the only stops for birds in the Atlantic and millions of them visit it annually.\n" +
-                "\n" +
-                "Tristan da Cunha is described as the most remote inhabited island on earth."
+                "\tA British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha. \n" +
+                "\tNightingale Island is part of the Nightingale Islands, which also includes islets Middle Island and Stoltenhoff Island. All three of these islands are uninhabited, but are regularly visited for scientific purposes and research. It is one of the only stops for birds in the Atlantic and millions of them visit it annually.\n" +
+                "\tTristan da Cunha is described as the most remote inhabited island on earth."
         },
         {location: 'Gough Island', date: 'April 17th 2026', description: 'A British Overseas Territory. It is a dependency of Tristan da Cunha and part of the British overseas territory of Saint Helena, Ascension and Tristan da Cunha.'},
         {location: 'St. Helena', date: 'April 24th 2026', description: 'A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '},
@@ -325,7 +322,10 @@ export const usePathingLayer = (
                     'features': shipPath.map(sp => ({
                         'type': 'Feature' as const,
                         'properties': {
-                            'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}${sp.date}\n${sp.description}`,
+                            'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}${sp.date}`,
+                            'location': sp.location,
+                            'date': sp.date,
+                            'description': sp.description,
                         },
                         'geometry': {
                             'type': 'Point' as const,
@@ -360,6 +360,39 @@ export const usePathingLayer = (
                     'text-color': '#454545',
                     'text-halo-color': '#ffffff',
                     'text-halo-width': 2.5
+                }
+            });
+
+            // Ship stops hover popup
+            map.on('mouseenter', 'ship-stops-circle', (e) => {
+                map.getCanvas().style.cursor = 'pointer';
+                if (!e.features || !e.features[0]) return;
+
+                const coordinates = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number];
+                const location = e.features[0].properties?.location || '';
+                const date = e.features[0].properties?.date || '';
+                const description = e.features[0].properties?.description || '';
+                console.log(e.features[0].properties)
+
+                const popup = new Popup({
+                    closeButton: false,
+                    closeOnClick: false,
+                    anchor: 'bottom',
+                    offset: 10,
+                })
+                    .setLngLat(coordinates)
+                    // .setDOMContent(<p>oko</p>)
+                    .setHTML(`<div style="min-width:250px;max-height:340px;font-size:14px;white-space:pre-wrap;padding:10px;"><p style="font-size:18px;font-weight:bold;margin-bottom:6px;">${location}</p><p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${date}</p><p style="color:#454545">${description}</p></div>`)
+                    .addTo(map);
+
+                (map as any)._shipStopPopup = popup;
+            });
+
+            map.on('mouseleave', 'ship-stops-circle', () => {
+                map.getCanvas().style.cursor = '';
+                if ((map as any)._shipStopPopup) {
+                    (map as any)._shipStopPopup.remove();
+                    (map as any)._shipStopPopup = null;
                 }
             });
         }
