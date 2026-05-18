@@ -1,19 +1,19 @@
 import ReactDOM from 'react-dom';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { Feature, FeatureCollection } from 'geojson';
-import { DataDrivenPropertyValueSpecification, Map, Popup } from 'maplibre-gl';
+import React, {useEffect, useRef, useState} from 'react';
+import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
+import {Feature, FeatureCollection} from 'geojson';
+import {DataDrivenPropertyValueSpecification, Map, Popup} from 'maplibre-gl';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
-import { PopupContentText } from 'src/components/MapPopup/styled';
-import { ChoroplethMapColors } from 'src/models/Colors';
-import { CountryData } from 'src/models/CountryData';
-import { FocusedArea } from 'src/models/FocusedArea';
-import { RegionalData } from 'src/models/RegionalData';
-import { StateData } from 'src/models/StateData';
-import { useAppDispatch } from 'src/redux/hooks';
-import { convertStringDateToDate } from 'src/utils/helperFunctions';
+import {PopupContentText} from 'src/components/MapPopup/styled';
+import {ChoroplethMapColors} from 'src/models/Colors';
+import {CountryData} from 'src/models/CountryData';
+import {FocusedArea} from 'src/models/FocusedArea';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
+import {useAppDispatch} from 'src/redux/hooks';
+import {convertStringDateToDate} from 'src/utils/helperFunctions';
 
 export const usePathingLayer = (
     map: Map | null,
@@ -41,45 +41,62 @@ export const usePathingLayer = (
 
     // Constants
     const locationNameToLongLat: Record<string, { long: number; lat: number }> = {
-        "St. Helena": { long: -5.70, lat: -15.95 },
-        "Ascension": { long: -14.25, lat: -7.95 },
-        "Canary Islands": { long: -15.50, lat: 28.25 },
-        "Buenos Aires, Argentina": { long: -58.3816, lat: -34.6037 },
-        "Johannesburg, South Africa": { long: 28.0473, lat: -26.2041 },
-        "South Africa": { long: 22.9375, lat: -30.5595 },
-        "Zurich, Switzerland": { long: 8.5417, lat: 47.3769 },
-        "Amsterdam, Netherlands": { long: 4.9041, lat: 52.3676 },
-        "Netherlands": { long: 5.2913, lat: 52.1326 },
-        "Netherlands (arrived 2026-05-07)": { long: 5.2913, lat: 52.1326 },
-        "Netherlands, then Dusseldorf, Germany": { long: 6.7735, lat: 51.2277 },
-        "Singapore": { long: 103.8198, lat: 1.3521 },
-        "Paris, France": { long: 2.3522, lat: 48.8566 },
-        "Nebraska": { long: -99.9018, lat: 41.4925 },
-        "Rome, Italy": { long: 12.4964, lat: 41.9028 },
-        "Ushuaia Argentina": { long: -68.3059, lat: -54.8019 },
-        "Tristan de Cunha": { long: -12.322772, lat: -37.1052 },
-        "Praia, Cape Verde": { long: -23.5087, lat: 14.9330 },
-        "Tenerife, Canary Islands": { long: -16.6291, lat: 28.2916 },
-        "Cape Verde": { long: -24.0, lat: 16.0 },
-        "Tenerife": { long: -16.6291, lat: 28.2916 },
-        "United Kingdom": { long: -3.4360, lat: 55.3781 },
-        "United States": { long: -95.7129, lat: 37.0902 },
-        "Spain": { long: -3.7492, lat: 40.4637 },
-        "France": { long: 2.2137, lat: 46.2276 },
-        "Canada": { long: -106.3468, lat: 56.1304 },
-        "Turkey": { long: 35.2433, lat: 38.9637 },
-        "Ireland": { long: -8.2439, lat: 53.1424 },
-        "%ship-04-11": { long: -20.315070, lat: -39.818768}
+        "St. Helena": {long: -5.70, lat: -15.95},
+        "Ascension": {long: -14.25, lat: -7.95},
+        "Canary Islands": {long: -15.50, lat: 28.25},
+        "Buenos Aires, Argentina": {long: -58.3816, lat: -34.6037},
+        "Johannesburg, South Africa": {long: 28.0473, lat: -26.2041},
+        "South Africa": {long: 22.9375, lat: -30.5595},
+        "Zurich, Switzerland": {long: 8.5417, lat: 47.3769},
+        "Amsterdam, Netherlands": {long: 4.9041, lat: 52.3676},
+        "Netherlands": {long: 5.2913, lat: 52.1326},
+        "Netherlands (arrived 2026-05-07)": {long: 5.2913, lat: 52.1326},
+        "Netherlands, then Dusseldorf, Germany": {long: 6.7735, lat: 51.2277},
+        "Singapore": {long: 103.8198, lat: 1.3521},
+        "Paris, France": {long: 2.3522, lat: 48.8566},
+        "Nebraska": {long: -99.9018, lat: 41.4925},
+        "Rome, Italy": {long: 12.4964, lat: 41.9028},
+        "Ushuaia Argentina": {long: -68.3059, lat: -54.8019},
+        "Tristan de Cunha": {long: -12.322772, lat: -37.1052},
+        "Praia, Cape Verde": {long: -23.5087, lat: 14.9330},
+        "Tenerife, Canary Islands": {long: -16.6291, lat: 28.2916},
+        "Cape Verde": {long: -24.0, lat: 16.0},
+        "Tenerife": {long: -16.6291, lat: 28.2916},
+        "United Kingdom": {long: -3.4360, lat: 55.3781},
+        "United States": {long: -95.7129, lat: 37.0902},
+        "Spain": {long: -3.7492, lat: 40.4637},
+        "France": {long: 2.2137, lat: 46.2276},
+        "Canada": {long: -106.3468, lat: 56.1304},
+        "Turkey": {long: 35.2433, lat: 38.9637},
+        "Ireland": {long: -8.2439, lat: 53.1424},
+        "South Georgia": {long: -36.4939, lat: -54.4296},
+        "Tristan da Cunha, Inaccesible Island & Nightingale Island": {long: -12.322772, lat: -37.1052},
+        "Gough Island": {long: -5.3167, lat: -40.3333},
     }
     const shipPath = [
-        {location: 'Ushuaia Argentina', date: 'April 1st 2026'},
-        {location: '%ship-04-11', date: 'April 11th 2026'},
-        {location: 'Tristan de Cunha', date: 'April 13th-16th 2026'},
-        {location: 'St. Helena', date: 'April 24th 2026'},
-        {location: 'Ascension', date: 'April 27th 2026'},
-        {location: 'Praia, Cape Verde', date: 'May 6th 2026'},
-        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026'},
-        ]
+        {location: 'Ushuaia Argentina', date: 'April 1st 2026', description: 'The southernmost city in the world'},
+        {
+            location: 'South Georgia',
+            date: 'April 4th-7th 2026',
+            description: 'South Georgia and the South Sandwich Islands (SGSSI) is A British Overseas Territory. Described as the Serengeti of the Southern Ocean.'
+        },
+        {
+            location: 'Tristan da Cunha, Inaccesible Island & Nightingale Island',
+            date: 'April 13th-16th 2026',
+            description: "The ship's itinerary listed visits to Inaccessible Island, Nightingale, and Gough Island\n" +
+                "\n" +
+                "A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha. \n" +
+                "\n" +
+                "Nightingale Island is part of the Nightingale Islands, which also includes islets Middle Island and Stoltenhoff Island. All three of these islands are uninhabited, but are regularly visited for scientific purposes and research. It is one of the only stops for birds in the Atlantic and millions of them visit it annually.\n" +
+                "\n" +
+                "Tristan da Cunha is described as the most remote inhabited island on earth."
+        },
+        {location: 'Gough Island', date: 'April 17th 2026', description: 'A British Overseas Territory. It is a dependency of Tristan da Cunha and part of the British overseas territory of Saint Helena, Ascension and Tristan da Cunha.'},
+        {location: 'St. Helena', date: 'April 24th 2026', description: 'A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '},
+        {location: 'Ascension', date: 'April 27th 2026', description: 'A British Oversease Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '},
+        {location: 'Cape Verde', date: 'May 3rd-6th 2026', description: '(Cabo Verde) The ship was originally scheduled to end in Praia, Cape Verde, on 4 May. '},
+        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', description: 'Port of Granadilla'},
+    ]
 
     const transfers = [
         {from: 'Tenerife, Canary Islands', to: 'Netherlands', date: 'May 11th 2026', cases: 54},
@@ -90,24 +107,40 @@ export const usePathingLayer = (
         {from: 'Tenerife, Canary Islands', to: 'Canada', date: 'May 11th 2026', cases: 4},
         {from: 'Tenerife, Canary Islands', to: 'Turkey', date: 'May 11th 2026', cases: 3},
         {from: 'Tenerife, Canary Islands', to: 'Ireland', date: 'May 11th 2026', cases: 2},
-        ]
+    ]
 
     const significantEventsData = [
-        {location: 'Ushuaia Argentina', date: 'April 1st 2026', description: 'MV Hondius sets off with 175 people on board'},
+        {
+            location: 'Ushuaia Argentina',
+            date: 'April 1st 2026',
+            description: 'MV Hondius sets off with 175 people on board'
+        },
         {location: '%ship-04-11', date: 'April 11th 2026', description: 'First victim dies'},
-        {location: 'St. Helena', date: 'April 24th 2026', description: '32 people disembark, including body of the first victim and his wife'},
+        {
+            location: 'St. Helena',
+            date: 'April 24th 2026',
+            description: '32 people disembark, including body of the first victim and his wife'
+        },
         {location: 'Johannesburg, South Africa', date: 'April 26th 2026', description: 'Wife of first victim dies'},
-        {location: 'Ascension', date: 'April 27th 2026', description: '2 people are evacuated, one later confirmed with hantavirus'},
+        {
+            location: 'Ascension',
+            date: 'April 27th 2026',
+            description: '2 people are evacuated, one later confirmed with hantavirus'
+        },
         {location: 'Praia, Cape Verde', date: 'May 6th 2026', description: '3 people are evacuated'},
-        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', description: '122 crew and passengers evacuated and flown home'},
-        ]
+        {
+            location: 'Tenerife, Canary Islands',
+            date: 'May 10th 2026',
+            description: '122 crew and passengers evacuated and flown home'
+        },
+    ]
 
 
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
         // Check if source route already exists (in case of re-render), if not add it and the layer
-        if(!map.getSource('paths')) {
+        if (!map.getSource('paths')) {
 
             const traceDataDestinations: any = {}
             for (const entry of pathData) {
@@ -140,15 +173,15 @@ export const usePathingLayer = (
                         if (pd.travel_to && locationNameToLongLat[pd.travel_to]) {
                             coordinates.push([locationNameToLongLat[pd.travel_to].long, locationNameToLongLat[pd.travel_to].lat])
                         }
-                        if (coordinates.length < 2) coordinates =  []; // Need at least 2 points for a line
+                        if (coordinates.length < 2) coordinates = []; // Need at least 2 points for a line
 
                         return {
                             'type': 'Feature',
                             'properties': {status: pd.status},
                             'geometry': {
-                            'type': 'LineString',
+                                'type': 'LineString',
                                 'coordinates': coordinates
-                        }
+                            }
                         }
                     }).filter((pd: any[]) => pd.length != 0)
                 }
@@ -249,7 +282,7 @@ export const usePathingLayer = (
             };
             (map.getSource('trace-destinations') as any).setData(initialFiltered);
         }
-        if(!map.getSource('ship')) {
+        if (!map.getSource('ship')) {
 
             map.addSource('ship', {
                 'type': 'geojson',
@@ -292,7 +325,7 @@ export const usePathingLayer = (
                     'features': shipPath.map(sp => ({
                         'type': 'Feature' as const,
                         'properties': {
-                            'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}\n${sp.date}`,
+                            'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}${sp.date}\n${sp.description}`,
                         },
                         'geometry': {
                             'type': 'Point' as const,
@@ -384,7 +417,7 @@ export const usePathingLayer = (
                 ctx.closePath();
                 ctx.fill();
                 const imageData = ctx.getImageData(0, 0, size, size);
-                map.addImage('arrow', { width: size, height: size, data: new Uint8Array(imageData.data.buffer) });
+                map.addImage('arrow', {width: size, height: size, data: new Uint8Array(imageData.data.buffer)});
             }
 
             // Arrowhead symbols along transfer lines
@@ -518,9 +551,9 @@ export const usePathingLayer = (
                                 // For sub-national, match by name within the same country
                                 return (
                                     d.name?.toLowerCase() ===
-                                        shapeName?.toLowerCase() &&
+                                    shapeName?.toLowerCase() &&
                                     d.countryCode?.toUpperCase() ===
-                                        shapeGroup?.toUpperCase()
+                                    shapeGroup?.toUpperCase()
                                 );
                             },
                         );
@@ -669,7 +702,7 @@ export const usePathingLayer = (
                     const areaId = e.features[0].properties.areaId || '';
                     const countryCode = e.features[0].properties.countryCode;
 
-                    dispatch(setFocusedArea({ name, areaId, countryCode }));
+                    dispatch(setFocusedArea({name, areaId, countryCode}));
                 });
 
                 // Cursor pointer on hover
@@ -782,7 +815,7 @@ export const usePathingLayer = (
             );
             const popupTitle = foundArea.name;
 
-            map?.fitBounds(bounds, { padding: 250 });
+            map?.fitBounds(bounds, {padding: 250});
 
             const popupContent = (
                 <PopupContentText>
