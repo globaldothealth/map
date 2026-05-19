@@ -634,16 +634,23 @@ export const usePathingLayer = (
                 if (!e.features || !e.features[0]) return;
 
                 const coordinates = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number];
-                const location = e.features[0].properties?.location || '';
-                const date = e.features[0].properties?.date || '';
-                const description = e.features[0].properties?.description || '';
-                const popupAnchor = e.features[0].properties?.popupAnchor || '';
+                const popupAnchor = e.features[0].properties?.popupAnchor || 'bottom';
 
-                let html = '<div style="min-width:250px;max-height:340px;font-size:14px;white-space:pre-wrap;padding:10px;">';
+                // Query all features at this point to show multiple events at the same location
+                const allFeatures = map.queryRenderedFeatures(e.point, { layers: ['significant-events-circle'] });
+
+                let html = '<div style="min-width:250px;max-height:400px;overflow-y:auto;font-size:14px;white-space:pre-wrap;padding:10px;">';
+                const location = allFeatures[0]?.properties?.location || '';
                 if (!location.startsWith('%')) {
                     html += `<p style="font-size:18px;font-weight:bold;margin-bottom:6px;">${location}</p>`;
                 }
-                html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${date}</p><p style="color:#454545">${description}</p></div>`;
+                allFeatures.forEach((f, i) => {
+                    const date = f.properties?.date || '';
+                    const description = f.properties?.description || '';
+                    if (i > 0) html += '<hr style="border:none;border-top:1px solid #ddd;margin:10px 0;">';
+                    html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${date}</p><p style="color:#454545">${description}</p>`;
+                });
+                html += '</div>';
 
                 const popup = new Popup({
                     closeButton: false,
