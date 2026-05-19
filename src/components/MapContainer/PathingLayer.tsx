@@ -136,14 +136,14 @@ export const usePathingLayer = (
     ]
 
     const transfers = [
-        {from: 'Tenerife, Canary Islands', to: 'Netherlands', date: 'May 11th 2026', cases: 54},
-        {from: 'Tenerife, Canary Islands', to: 'United Kingdom', date: 'May 11th 2026', cases: 22},
-        {from: 'Tenerife, Canary Islands', to: 'United States', date: 'May 11th 2026', cases: 18},
-        {from: 'Tenerife, Canary Islands', to: 'Spain', date: 'May 11th 2026', cases: 14},
-        {from: 'Tenerife, Canary Islands', to: 'France', date: 'May 11th 2026', cases: 5},
-        {from: 'Tenerife, Canary Islands', to: 'Canada', date: 'May 11th 2026', cases: 4},
-        {from: 'Tenerife, Canary Islands', to: 'Turkey', date: 'May 11th 2026', cases: 3},
-        {from: 'Tenerife, Canary Islands', to: 'Ireland', date: 'May 11th 2026', cases: 2},
+        {from: 'Tenerife, Canary Islands', to: 'Netherlands', date: '2026-05-11', cases: 54},
+        {from: 'Tenerife, Canary Islands', to: 'United Kingdom', date: '2026-05-11', cases: 22},
+        {from: 'Tenerife, Canary Islands', to: 'United States', date: '2026-05-11', cases: 18},
+        {from: 'Tenerife, Canary Islands', to: 'Spain', date: '2026-05-11', cases: 14},
+        {from: 'Tenerife, Canary Islands', to: 'France', date: '2026-05-11', cases: 5},
+        {from: 'Tenerife, Canary Islands', to: 'Canada', date: '2026-05-11', cases: 4},
+        {from: 'Tenerife, Canary Islands', to: 'Turkey', date: '2026-05-11', cases: 3},
+        {from: 'Tenerife, Canary Islands', to: 'Ireland', date: '2026-05-11', cases: 2},
     ]
 
     const significantEventsData = [
@@ -525,11 +525,12 @@ export const usePathingLayer = (
         }
 
         if (!map.getSource('transfers')) {
+            const filteredTransfers = transfers.filter(t => t.date <= dateUpTo);
             map.addSource('transfers', {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': transfers
+                    'features': filteredTransfers
                         .filter(t => locationNameToLongLat[t.from] && locationNameToLongLat[t.to])
                         .map(t => ({
                             'type': 'Feature' as const,
@@ -971,6 +972,30 @@ export const usePathingLayer = (
                 }
             }))
         });
+
+        // Update transfers
+        if (map.getSource('transfers')) {
+            const filteredTransfers = transfers.filter(t => t.date <= dateUpTo);
+            (map.getSource('transfers') as any).setData({
+                type: 'FeatureCollection',
+                features: filteredTransfers
+                    .filter(t => locationNameToLongLat[t.from] && locationNameToLongLat[t.to])
+                    .map(t => ({
+                        type: 'Feature' as const,
+                        properties: {
+                            passengers: t.cases,
+                            label: `${t.cases} passengers`,
+                        },
+                        geometry: {
+                            type: 'LineString' as const,
+                            coordinates: [
+                                [locationNameToLongLat[t.from].long, locationNameToLongLat[t.from].lat],
+                                [locationNameToLongLat[t.to].long, locationNameToLongLat[t.to].lat],
+                            ]
+                        }
+                    }))
+            });
+        }
 
         // Update significant events
         if (map.getSource('significant-events')) {
