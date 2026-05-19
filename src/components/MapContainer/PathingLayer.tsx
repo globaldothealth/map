@@ -33,6 +33,7 @@ export const usePathingLayer = (
     pathData: any,
     overlaysOpen: { [key: string]: boolean },
     statusColors: { [key: string]: string },
+    dateUpTo: string,
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
@@ -78,27 +79,60 @@ export const usePathingLayer = (
         '%ship-05-02': {long: -22.7, lat: 12.9330},
         "Madrid, Spain": {long: -3.7038, lat: 40.4168},
         "Vancouver Island, British Columbia, Canada": {long: -126.0, lat: 49.0},
+        "Nebraska, US": {long: -99.9018, lat: 41.4925},
     }
     const shipPath = [
-        {location: 'Ushuaia Argentina', date: 'April 1st 2026', description: 'The southernmost city in the world'},
+        {
+            location: 'Ushuaia Argentina',
+            date: '2026-04-01',
+            dateStart: '2026-04-01',
+            dateEnd: '2026-04-01',
+        },
         {
             location: 'South Georgia',
             date: 'April 4th-7th 2026',
-            description: 'South Georgia and the South Sandwich Islands (SGSSI) is A British Overseas Territory. Described as the Serengeti of the Southern Ocean.'
+            dateStart: '2026-04-04',
+            dateEnd: '2026-04-04',
         },
         {
             location: 'Tristan da Cunha, Inaccesible Island & Nightingale Island',
             date: 'April 13th-16th 2026',
+            dateStart: '2026-04-13',
+            dateEnd: '2026-04-16',
             description: "The ship's itinerary listed visits to Inaccessible Island, Nightingale, and Gough Island\n" +
                 "\tA British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha. \n" +
                 "\tNightingale Island is part of the Nightingale Islands, which also includes islets Middle Island and Stoltenhoff Island. All three of these islands are uninhabited, but are regularly visited for scientific purposes and research. It is one of the only stops for birds in the Atlantic and millions of them visit it annually.\n" +
                 "\tTristan da Cunha is described as the most remote inhabited island on earth."
         },
-        {location: 'Gough Island', date: 'April 17th 2026', description: 'A British Overseas Territory. It is a dependency of Tristan da Cunha and part of the British overseas territory of Saint Helena, Ascension and Tristan da Cunha.'},
-        {location: 'St. Helena', date: 'April 24th 2026', description: 'A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '},
-        {location: 'Ascension', date: 'April 27th 2026', description: 'A British Oversease Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '},
-        {location: 'Cape Verde', date: 'May 3rd-6th 2026', description: '(Cabo Verde) The ship was originally scheduled to end in Praia, Cape Verde, on 4 May. '},
-        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', description: 'Port of Granadilla'},
+        {
+            location: 'Gough Island',
+            date: 'April 17th 2026',
+            dateStart: '2026-04-17',
+            dateEnd: '2026-04-17',
+            description: 'A British Overseas Territory. It is a dependency of Tristan da Cunha and part of the British overseas territory of Saint Helena, Ascension and Tristan da Cunha.'
+        },
+        {
+            location: 'St. Helena',
+            date: 'April 21st-24th 2026',
+            dateStart: '2026-04-21',
+            dateEnd: '2026-04-24',
+            description: 'A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '
+        },
+        {
+            location: 'Ascension',
+            date: 'April 27th 2026',
+            dateStart: '2026-04-27',
+            dateEnd: '2026-04-27',
+            description: 'A British Oversease Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '
+        },
+        {
+            location: 'Cape Verde',
+            date: 'May 3rd-6th 2026',
+            dateStart: '2026-05-03',
+            dateEnd: '2026-05-06',
+            description: '(Cabo Verde) The ship was originally scheduled to end in Praia, Cape Verde, on 4 May. '
+        },
+        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', dateStart: '2026-05-10', dateEnd: '2026-05-10', description: 'Port of Granadilla'},
     ]
 
     const transfers = [
@@ -114,31 +148,104 @@ export const usePathingLayer = (
 
     const significantEventsData = [
         {
+            marker: 1,
             location: 'Ushuaia Argentina',
             date: 'April 1st 2026',
+            dateStart: '2026-04-01',
             description: 'The MV Hondius, a Dutch cruise vessel, departed from Ushuaia, Argentina and followed an itinerary across the South Atlantic, with multiple stops in remote and ecologically diverse regions. The extent of passenger contact with local wildlife during the voyage, or prior to boarding remains undetermined. The vessel carried a total of 175 individuals, including 114 passengers and 61 crew members.'
         },
-        {location: '%ship-04-11', date: 'April 11th 2026', description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and diarrhea on April 6. His condition worsened and he developed respiratory distress and died on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'},
         {
+            marker: 2,
+            location: '%ship-04-11',
+            date: 'April 11th 2026',
+            dateStart: '2026-04-11',
+            description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and diarrhea on April 6. His condition worsened and he developed respiratory distress and died on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'
+        },
+        {
+            marker: 3,
+            location: 'Tristan da Cunha',
+            date: 'April 14th 2026',
+            dateStart: '2026-04-14',
+            description: 'Case 8 (Gh_ID12), an adult male, disembarked the ship in Tristan da Cunha on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever later on. He is considered a probable case until laboratory confirmation. '
+        },
+        {
+            marker: 4,
             location: 'St. Helena',
             date: 'April 24th 2026',
-            description: '32 people disembark, including body of the first victim and his wife'
+            dateStart: '2026-04-24',
+            description: 'Thirty-two passengers disembarked the ship in Saint Helena, including the following known nationalities: United Kingdom (7), United States (6), Netherlands (3), Canada (2), Switzerland (2), Turkey (2), Germany (1), Denmark (1), St. Kitts and Nevis (1), New Zealand (1), Singapore (1), Sweden (1), Unknown (4).'
         },
-        {location: 'Tristan da Cunha', date: 'April 14th 2026', description: 'Case 8 (Gh_ID12), an adult male, disembarked the ship in Tristan da Cunha on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever later on. He is considered a probable case until laboratory confirmation. '},
-        {location: 'St. Helena', date: 'April 24th 2026', description: 'Thirty-two passengers disembarked the ship in Saint Helena, including the following known nationalities: United Kingdom (7), United States (6), Netherlands (3), Canada (2), Switzerland (2), Turkey (2), Germany (1), Denmark (1), St. Kitts and Nevis (1), New Zealand (1), Singapore (1), Sweden (1), Unknown (4).'},
-        {location: 'Johannesburg, South Africa', date: 'April 26th 2026', description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.'},
-        {location: '%ship-05-02', date: 'May 2nd 2026', description: 'Case 4 (Gh_ID4) an adult female of German nationality, presented with fever and general malaise on April 28. Her condition worsened. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'},
-        {location: 'Zurich, Switzerland', date: 'May 5th 2026', description: 'Case 7 (Gh_ID5), an adult male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'},
-        {location: 'Praia, Cape Verde', date: 'May 6th 2026', description: 'The ship anchored off the coast of Cape Verde on May 3.  Medical staff embarked the vessel. Three suspected cases were taken off the ship and transferred to the Netherlands for care on May 6.  The ship was given permission to proceed to Tenerife, Canary Islands, Spain, for all passengers to disembark and be repatriated to their home countries.'},
         {
+            marker: 5,
+            location: 'Johannesburg, South Africa',
+            date: 'April 25th 2026',
+            dateStart: '2026-04-25',
+            description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.'
+        },
+        {
+            marker: 6,
+            location: 'Johannesburg, South Africa',
+            date: 'May 2nd 2026',
+            dateStart: '2026-05-02',
+            description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.',
+            popupAnchor: 'top'
+        },
+        {
+            marker: 7,
+            location: '%ship-05-02',
+            date: 'May 2nd 2026',
+            dateStart: '2026-05-02',
+            description: 'Case 4 (Gh_ID4) an adult female of German nationality, presented with fever and general malaise on April 28. Her condition worsened. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'
+        },
+        {
+            marker: 8,
+            location: 'Zurich, Switzerland',
+            date: 'May 5th 2026',
+            dateStart: '2026-05-05',
+            description: 'Case 7 (Gh_ID5), an adult male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'
+        },
+        {
+            marker: 9,
+            location: 'Praia, Cape Verde',
+            date: 'May 6th 2026',
+            dateStart: '2026-05-06',
+            description: 'The ship anchored off the coast of Cape Verde on May 3.  Medical staff embarked the vessel. Three suspected cases were taken off the ship and transferred to the Netherlands for care on May 6.  The ship was given permission to proceed to Tenerife, Canary Islands, Spain, for all passengers to disembark and be repatriated to their home countries.'
+        },
+        {
+            marker: 10,
             location: 'Tenerife, Canary Islands',
             date: 'May 10th 2026',
+            dateStart: '2026-05-10',
             description: 'The MV Hondius arrived in the Canary Islands and was anchored off the coast at the Port of Granadilla in Tenerife. A total of 122 people (87 guests, 35 crew) disembarked and were repatriated to their home countries. Twenty-seven people (25 crew, 2 medical staff) remained onboard to return the vessel to Rotterdam, the Netherlands. The ship departed from Tenerife on May 11 with a provisional date of arrival in Rotterdam on May 18.'
         },
-        {location: 'Nebraska, US', date: 'May 10th 2026', description: 'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and is quarantined with other American passengers from the ship in Nebraska. This case has been removed as a confirmed case from official counts.'},
-        {location: 'Paris, France', date: 'May 11th 2026', description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'},
-        {location: 'Madrid, Spain', date: 'May 12th 2026', description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'},
-        {location: 'Vancouver Island, British Columbia, Canada', date: 'May 17th 2026', description: 'Gh_ID20 is a Canadian citizen who was confirmed positive for Andes hantavirus on May 17 following a presumptive positive test result the day prior. The patient was transported to hospital in Vancouver for care on May 14, along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius.'},
+        {
+            marker: 11,
+            location: 'Nebraska, US',
+            date: 'May 10th 2026',
+            dateStart: '2026-05-10',
+            description: 'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and is quarantined with other American passengers from the ship in Nebraska. This case has been removed as a confirmed case from official counts.'
+        },
+        {
+            marker: 12,
+            location: 'Paris, France',
+            date: 'May 11th 2026',
+            dateStart: '2026-05-11',
+            description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'
+        },
+        {
+            marker: 13,
+            location: 'Madrid, Spain',
+            date: 'May 12th 2026',
+            dateStart: '2026-05-12',
+            description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
+        },
+        {
+            marker: 14,
+            location: 'Vancouver Island, British Columbia, Canada',
+            date: 'May 17th 2026',
+            dateStart: '2026-05-17',
+            description: 'Gh_ID20 is a Canadian citizen who was confirmed positive for Andes hantavirus on May 17 following a presumptive positive test result the day prior. The patient was transported to hospital in Vancouver for care on May 14, along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius.'
+        },
     ]
 
 
@@ -290,6 +397,8 @@ export const usePathingLayer = (
         }
         if (!map.getSource('ship')) {
 
+            const filteredShipPath = shipPath.filter(sp => sp.dateStart <= dateUpTo);
+
             map.addSource('ship', {
                 'type': 'geojson',
                 'data': {
@@ -300,7 +409,7 @@ export const usePathingLayer = (
                             'properties': {},
                             'geometry': {
                                 'type': 'LineString',
-                                'coordinates': shipPath.map(sp =>
+                                'coordinates': filteredShipPath.map(sp =>
                                     [locationNameToLongLat[sp.location].long, locationNameToLongLat[sp.location].lat],
                                 )
                             }
@@ -328,7 +437,7 @@ export const usePathingLayer = (
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': shipPath.map(sp => ({
+                    'features': filteredShipPath.map(sp => ({
                         'type': 'Feature' as const,
                         'properties': {
                             'label': `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}${sp.date}`,
@@ -371,38 +480,6 @@ export const usePathingLayer = (
                     'text-halo-width': 2.5
                 }
             });
-
-            // Ship stops hover popup
-            map.on('mouseenter', 'ship-stops-circle', (e) => {
-                map.getCanvas().style.cursor = 'pointer';
-                if (!e.features || !e.features[0]) return;
-
-                const coordinates = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number];
-                const location = e.features[0].properties?.location || '';
-                const date = e.features[0].properties?.date || '';
-                const description = e.features[0].properties?.description || '';
-
-                const popup = new Popup({
-                    closeButton: false,
-                    closeOnClick: false,
-                    anchor: 'bottom',
-                    offset: 10,
-                })
-                    .setLngLat(coordinates)
-                    // .setDOMContent(<p>oko</p>)
-                    .setHTML(`<div style="min-width:250px;max-height:340px;font-size:14px;white-space:pre-wrap;padding:10px;"><p style="font-size:18px;font-weight:bold;margin-bottom:6px;">${location}</p><p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${date}</p><p style="color:#454545">${description}</p></div>`)
-                    .addTo(map);
-
-                (map as any)._shipStopPopup = popup;
-            });
-
-            map.on('mouseleave', 'ship-stops-circle', () => {
-                map.getCanvas().style.cursor = '';
-                if ((map as any)._shipStopPopup) {
-                    (map as any)._shipStopPopup.remove();
-                    (map as any)._shipStopPopup = null;
-                }
-            });
         }
 
         if (!map.getSource('transfers')) {
@@ -415,8 +492,8 @@ export const usePathingLayer = (
                         .map(t => ({
                             'type': 'Feature' as const,
                             'properties': {
-                                'cases': t.cases,
-                                'label': `${t.cases} cases`,
+                                'passengers': t.cases,
+                                'label': `${t.cases} passengers`,
                             },
                             'geometry': {
                                 'type': 'LineString' as const,
@@ -438,7 +515,7 @@ export const usePathingLayer = (
                 },
                 'paint': {
                     'line-color': statusColors.probable,
-                    'line-width': ['+', 2, ['*', ['get', 'cases'], 0.08]],
+                    'line-width': ['+', 2, ['*', ['get', 'passengers'], 0.08]],
                     'line-opacity': 1
                 }
             });
@@ -484,7 +561,7 @@ export const usePathingLayer = (
                 'source': 'transfers',
                 'layout': {
                     'symbol-placement': 'line-center',
-                    'text-field': ['concat', ['to-string', ['get', 'cases']], ' cases'],
+                    'text-field': ['concat', ['to-string', ['get', 'passengers']], ' passengers'],
                     'text-size': 14,
                     'text-font': ['Open Sans Regular'],
                     'text-allow-overlap': false,
@@ -498,12 +575,13 @@ export const usePathingLayer = (
         }
 
         if (!map.getSource('significant-events')) {
+            const filteredEvents = significantEventsData
+                .filter(e => locationNameToLongLat[e.location] && e.dateStart <= dateUpTo);
             map.addSource('significant-events', {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': significantEventsData
-                        .filter(e => locationNameToLongLat[e.location])
+                    'features': filteredEvents
                         .map(e => ({
                             'type': 'Feature' as const,
                             'properties': {
@@ -511,6 +589,7 @@ export const usePathingLayer = (
                                 'description': e.description,
                                 'date': e.date,
                                 'location': e.location,
+                                'popupAnchor': e.popupAnchor || 'bottom',
                             },
                             'geometry': {
                                 'type': 'Point' as const,
@@ -558,6 +637,7 @@ export const usePathingLayer = (
                 const location = e.features[0].properties?.location || '';
                 const date = e.features[0].properties?.date || '';
                 const description = e.features[0].properties?.description || '';
+                const popupAnchor = e.features[0].properties?.popupAnchor || '';
 
                 let html = '<div style="min-width:250px;max-height:340px;font-size:14px;white-space:pre-wrap;padding:10px;">';
                 if (!location.startsWith('%')) {
@@ -568,7 +648,7 @@ export const usePathingLayer = (
                 const popup = new Popup({
                     closeButton: false,
                     closeOnClick: false,
-                    anchor: 'bottom',
+                    anchor: popupAnchor,
                     offset: 10,
                 })
                     .setLngLat(coordinates)
@@ -803,6 +883,68 @@ export const usePathingLayer = (
 
         setupLayer();
     }, [mapLoaded, dataFeatureSet]);
+
+    // Update ship path when dateUpTo changes
+    useEffect(() => {
+        if (!map || !map.getSource('ship') || !map.getSource('ship-stops')) return;
+
+        const filteredShipPath = shipPath.filter(sp => sp.dateStart <= dateUpTo);
+
+        (map.getSource('ship') as any).setData({
+            type: 'FeatureCollection',
+            features: [
+                {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: filteredShipPath.map(sp =>
+                            [locationNameToLongLat[sp.location].long, locationNameToLongLat[sp.location].lat],
+                        )
+                    }
+                }
+            ]
+        });
+
+        (map.getSource('ship-stops') as any).setData({
+            type: 'FeatureCollection',
+            features: filteredShipPath.map(sp => ({
+                type: 'Feature' as const,
+                properties: {
+                    label: `${sp.location.startsWith('%') ? '' : `${sp.location}\n`}${sp.date}`,
+                    location: sp.location,
+                    date: sp.date,
+                    description: sp.description,
+                },
+                geometry: {
+                    type: 'Point' as const,
+                    coordinates: [locationNameToLongLat[sp.location].long, locationNameToLongLat[sp.location].lat]
+                }
+            }))
+        });
+
+        // Update significant events
+        if (map.getSource('significant-events')) {
+            const filteredEvents = significantEventsData
+                .filter(e => locationNameToLongLat[e.location] && e.dateStart <= dateUpTo);
+            (map.getSource('significant-events') as any).setData({
+                type: 'FeatureCollection',
+                features: filteredEvents.map(e => ({
+                    type: 'Feature' as const,
+                    properties: {
+                        label: `${e.location.startsWith('%') ? '' : `${e.location}\n`}${e.date}`,
+                        description: e.description,
+                        date: e.date,
+                        location: e.location,
+                    },
+                    geometry: {
+                        type: 'Point' as const,
+                        coordinates: [locationNameToLongLat[e.location].long, locationNameToLongLat[e.location].lat]
+                    }
+                }))
+            });
+        }
+    }, [dateUpTo, map]);
 
     // Toggle ship overlay visibility
     useEffect(() => {
