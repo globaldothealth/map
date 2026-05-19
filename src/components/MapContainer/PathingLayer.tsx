@@ -213,34 +213,48 @@ export const usePathingLayer = (
         },
         {
             marker: 10,
+            location: 'Praia, Cape Verde',
+            date: 'May 6th 2026',
+            dateStart: '2026-05-06',
+            description: 'Case 5 (Gh_ID7), an adult male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 6 and he was medically evacuated to the Netherlands.'
+        },
+        {
+            marker: 11,
+            location: 'Praia, Cape Verde',
+            date: 'May 6th 2026',
+            dateStart: '2026-05-06',
+            description: 'Case 6 (Gh_ID8) is an adult male working as the ship expedition guide, and presented symptoms on April 27 including mild respiratory and gastrointestinal symptoms. PCR testing confirmed Andes virus on May 6. He was one of three suspected cases removed from the ship in Cape Verde. He was medically evacuated to the Netherlands on May 7.'
+        },
+        {
+            marker: 12,
             location: 'Tenerife, Canary Islands',
             date: 'May 10th 2026',
             dateStart: '2026-05-10',
             description: 'The MV Hondius arrived in the Canary Islands and was anchored off the coast at the Port of Granadilla in Tenerife. A total of 122 people (87 guests, 35 crew) disembarked and were repatriated to their home countries. Twenty-seven people (25 crew, 2 medical staff) remained onboard to return the vessel to Rotterdam, the Netherlands. The ship departed from Tenerife on May 11 with a provisional date of arrival in Rotterdam on May 18.'
         },
         {
-            marker: 11,
+            marker: 13,
             location: 'Nebraska, US',
             date: 'May 10th 2026',
             dateStart: '2026-05-10',
             description: 'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and is quarantined with other American passengers from the ship in Nebraska. This case has been removed as a confirmed case from official counts.'
         },
         {
-            marker: 12,
+            marker: 14,
             location: 'Paris, France',
             date: 'May 11th 2026',
             dateStart: '2026-05-11',
             description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'
         },
         {
-            marker: 13,
+            marker: 15,
             location: 'Madrid, Spain',
             date: 'May 12th 2026',
             dateStart: '2026-05-12',
             description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
         },
         {
-            marker: 14,
+            marker: 16,
             location: 'Vancouver Island, British Columbia, Canada',
             date: 'May 17th 2026',
             dateStart: '2026-05-17',
