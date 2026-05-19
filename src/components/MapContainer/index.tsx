@@ -47,58 +47,55 @@ const MapContainer = ({
                       }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [dateUpTo, setDateUpTo] = useState('2026-05-01');
-    const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
-    const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': false, 'probable': false,'negative': false, 'monitored': false, 'tested': false, 'tenerifeDepartures': true, "significantEvents": true});
-    const statusColors = {
-        'confirmed': '#ff6756',
-        'probable': '#ff9983',
-        'negative': '#bac0be',
-        'monitored': '#00c5ae',
-        'tested': '#027469'
-    };
+    const [overlaysOpen, setOverlaysOpen] = useState({
+        'ship': true,
+        'tenerifeDepartures': true,
+        "significantEvents": true
+    });
+    const statusColors = {'events': '#ff6756', 'departures': '#ff9983'};
 
-    // Fetch map data from CSV
-    useEffect(() => {
-        const url = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
-        fetch(url)
-            .then(response => response.text())
-            .then(csvText => {
-                const parseCsvLine = (line: string): string[] => {
-                    const result: string[] = [];
-                    let current = '';
-                    let inQuotes = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            result.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    result.push(current.trim());
-                    return result;
-                };
-
-                const lines = csvText.split('\n').filter(l => l.trim());
-                const headers = parseCsvLine(lines[0]);
-                const data = lines.slice(1).map(line => {
-                    const values = parseCsvLine(line.replace(/\r$/, ''));
-                    const entry: { [key: string]: string } = {};
-
-                    headers.forEach((header, index) => {
-                        entry[header] = values[index];
-                    });
-                    return entry;
-                });
-                setPathData(data);
-            })
-            .catch(error => {
-                console.error('Error fetching map data:', error);
-            });
-    }, []);
+    // // Fetch map data from CSV
+    // useEffect(() => {
+    //     const url = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
+    //     fetch(url)
+    //         .then(response => response.text())
+    //         .then(csvText => {
+    //             const parseCsvLine = (line: string): string[] => {
+    //                 const result: string[] = [];
+    //                 let current = '';
+    //                 let inQuotes = false;
+    //                 for (let i = 0; i < line.length; i++) {
+    //                     const char = line[i];
+    //                     if (char === '"') {
+    //                         inQuotes = !inQuotes;
+    //                     } else if (char === ',' && !inQuotes) {
+    //                         result.push(current.trim());
+    //                         current = '';
+    //                     } else {
+    //                         current += char;
+    //                     }
+    //                 }
+    //                 result.push(current.trim());
+    //                 return result;
+    //             };
+    //
+    //             const lines = csvText.split('\n').filter(l => l.trim());
+    //             const headers = parseCsvLine(lines[0]);
+    //             const data = lines.slice(1).map(line => {
+    //                 const values = parseCsvLine(line.replace(/\r$/, ''));
+    //                 const entry: { [key: string]: string } = {};
+    //
+    //                 headers.forEach((header, index) => {
+    //                     entry[header] = values[index];
+    //                 });
+    //                 return entry;
+    //             });
+    //             setPathData(data);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching map data:', error);
+    //         });
+    // }, []);
 
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useMaplibreMap(mapContainer);
@@ -131,7 +128,6 @@ const MapContainer = ({
         setFocusedArea,
         focusedArea,
         dataLayerBounds,
-        pathData,
         overlaysOpen,
         statusColors,
         dateUpTo
@@ -157,48 +153,24 @@ const MapContainer = ({
                         toggle: () => setOverlaysOpen(prev => ({...prev, ship: !prev['ship']}))
                     },
                     {
-                        color: statusColors.probable,
+                        color: statusColors.departures,
                         label: 'Tenerife Departures',
                         open: overlaysOpen['tenerifeDepartures'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, tenerifeDepartures: !prev['tenerifeDepartures']}))
+                        toggle: () => setOverlaysOpen(prev => ({
+                            ...prev,
+                            tenerifeDepartures: !prev['tenerifeDepartures']
+                        }))
                     },
                     {
-                        color: statusColors.confirmed,
+                        color: statusColors.events,
                         label: 'Significant Events',
                         open: overlaysOpen['significantEvents'],
-                        toggle: () => setOverlaysOpen(prev => ({...prev, significantEvents: !prev['significantEvents']}))
+                        toggle: () => setOverlaysOpen(prev => ({
+                            ...prev,
+                            significantEvents: !prev['significantEvents']
+                        }))
                     },
-                    // {
-                    //     color: statusColors['confirmed'],
-                    //     label: 'Confirmed Cases',
-                    //     open: overlaysOpen['confirmed'],
-                    //     toggle: () => setOverlaysOpen(prev => ({...prev, confirmed: !prev['confirmed']}))
-                    // },
-                    // {
-                    //     color: statusColors['probable'],
-                    //     label: 'Probable Cases',
-                    //     open: overlaysOpen['probable'],
-                    //     toggle: () => setOverlaysOpen(prev => ({...prev, probable: !prev['probable']}))
-                    // },
-                    // {
-                    //     color: statusColors['negative'],
-                    //     label: 'Negative Cases',
-                    //     open: overlaysOpen['negative'],
-                    //     toggle: () => setOverlaysOpen(prev => ({...prev, negative: !prev['negative']}))
-                    // },
-                    // {
-                    //     color: statusColors['monitored'],
-                    //     label: 'Monitored Cases',
-                    //     open: overlaysOpen['monitored'],
-                    //     toggle: () => setOverlaysOpen(prev => ({...prev, monitored: !prev['monitored']}))
-                    // },
-                    // {
-                    //     color: statusColors['tested'],
-                    //     label: 'Tested Cases',
-                    //     open: overlaysOpen['tested'],
-                    //     toggle: () => setOverlaysOpen(prev => ({...prev, tested: !prev['tested']}))
-                    // }
-                    ]}
+                ]}
             />
             {/*<CopyStateLinkButton map={map} chartType={chartType}/>*/}
         </>

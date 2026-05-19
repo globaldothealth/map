@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
 import {Feature, FeatureCollection} from 'geojson';
 import {DataDrivenPropertyValueSpecification, Map, Popup} from 'maplibre-gl';
@@ -14,6 +14,12 @@ import {RegionalData} from 'src/models/RegionalData';
 import {StateData} from 'src/models/StateData';
 import {useAppDispatch} from 'src/redux/hooks';
 import {convertStringDateToDate} from 'src/utils/helperFunctions';
+import {
+    locationNameToLongLat,
+    shipPath,
+    significantEventsData,
+    transfers
+} from "src/components/MapContainer/staticData.ts";
 
 export const usePathingLayer = (
     map: Map | null,
@@ -30,7 +36,6 @@ export const usePathingLayer = (
             upper: { number: number; text: string };
         };
     },
-    pathData: any,
     overlaysOpen: { [key: string]: boolean },
     statusColors: { [key: string]: string },
     dateUpTo: string,
@@ -38,251 +43,21 @@ export const usePathingLayer = (
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const [currentPopup, setCurrentPopup] = useState<Popup | null>();
-    const traceDestinationsFeaturesRef = useRef<any[]>([]);
-
-    // Constants
-    const locationNameToLongLat: Record<string, { long: number; lat: number }> = {
-        "St. Helena": {long: -5.70, lat: -15.95},
-        "Ascension": {long: -14.25, lat: -7.95},
-        "Canary Islands": {long: -15.50, lat: 28.25},
-        "Buenos Aires, Argentina": {long: -58.3816, lat: -34.6037},
-        "Johannesburg, South Africa": {long: 28.0473, lat: -26.2041},
-        "South Africa": {long: 22.9375, lat: -30.5595},
-        "Zurich, Switzerland": {long: 8.5417, lat: 47.3769},
-        "Amsterdam, Netherlands": {long: 4.9041, lat: 52.3676},
-        "Netherlands": {long: 5.2913, lat: 52.1326},
-        "Netherlands (arrived 2026-05-07)": {long: 5.2913, lat: 52.1326},
-        "Netherlands, then Dusseldorf, Germany": {long: 6.7735, lat: 51.2277},
-        "Singapore": {long: 103.8198, lat: 1.3521},
-        "Paris, France": {long: 2.3522, lat: 48.8566},
-        "Nebraska": {long: -99.9018, lat: 41.4925},
-        "Rome, Italy": {long: 12.4964, lat: 41.9028},
-        "Ushuaia Argentina": {long: -68.3059, lat: -54.8019},
-        "Tristan de Cunha": {long: -12.322772, lat: -37.1052},
-        "Praia, Cape Verde": {long: -23.5087, lat: 14.9330},
-        "Tenerife, Canary Islands": {long: -16.6291, lat: 28.2916},
-        "Cape Verde": {long: -24.0, lat: 16.0},
-        "Tenerife": {long: -16.6291, lat: 28.2916},
-        "United Kingdom": {long: -3.4360, lat: 55.3781},
-        "United States": {long: -95.7129, lat: 37.0902},
-        "Spain": {long: -3.7492, lat: 40.4637},
-        "France": {long: 2.2137, lat: 46.2276},
-        "Canada": {long: -106.3468, lat: 56.1304},
-        "Turkey": {long: 35.2433, lat: 38.9637},
-        "Ireland": {long: -8.2439, lat: 53.1424},
-        "South Georgia": {long: -36.4939, lat: -54.4296},
-        "Tristan da Cunha, Inaccesible Island & Nightingale Island": {long: -12.322772, lat: -37.1052},
-        "Tristan da Cunha": {long: -12.322772, lat: -37.1052},
-        "Gough Island": {long: -5.3167, lat: -40.3333},
-        // Using the location between south georgia and tristan de cunha for the stop
-        '%ship-04-11': {long: -24.408, lat: -45.7674},
-        '%ship-05-02': {long: -22.7, lat: 12.9330},
-        "Madrid, Spain": {long: -3.7038, lat: 40.4168},
-        "Vancouver Island, British Columbia, Canada": {long: -126.0, lat: 49.0},
-        "Nebraska, US": {long: -99.9018, lat: 41.4925},
-    }
-    const shipPath = [
-        {
-            location: 'Ushuaia Argentina',
-            date: '2026-04-01',
-            dateStart: '2026-04-01',
-            dateEnd: '2026-04-01',
-        },
-        {
-            location: 'South Georgia',
-            date: 'April 4th-7th 2026',
-            dateStart: '2026-04-04',
-            dateEnd: '2026-04-04',
-        },
-        {
-            location: 'Tristan da Cunha, Inaccesible Island & Nightingale Island',
-            date: 'April 13th-16th 2026',
-            dateStart: '2026-04-13',
-            dateEnd: '2026-04-16',
-            description: "The ship's itinerary listed visits to Inaccessible Island, Nightingale, and Gough Island\n" +
-                "\tA British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha. \n" +
-                "\tNightingale Island is part of the Nightingale Islands, which also includes islets Middle Island and Stoltenhoff Island. All three of these islands are uninhabited, but are regularly visited for scientific purposes and research. It is one of the only stops for birds in the Atlantic and millions of them visit it annually.\n" +
-                "\tTristan da Cunha is described as the most remote inhabited island on earth."
-        },
-        {
-            location: 'Gough Island',
-            date: 'April 17th 2026',
-            dateStart: '2026-04-17',
-            dateEnd: '2026-04-17',
-            description: 'A British Overseas Territory. It is a dependency of Tristan da Cunha and part of the British overseas territory of Saint Helena, Ascension and Tristan da Cunha.'
-        },
-        {
-            location: 'St. Helena',
-            date: 'April 21st-24th 2026',
-            dateStart: '2026-04-21',
-            dateEnd: '2026-04-24',
-            description: 'A British Overseas Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '
-        },
-        {
-            location: 'Ascension',
-            date: 'April 27th 2026',
-            dateStart: '2026-04-27',
-            dateEnd: '2026-04-27',
-            description: 'A British Oversease Territory. Saint Helena, Ascension and Tristan da Cunha is a British Overseas Territory located in the South Atlantic and consisting of the island of Saint Helena, Ascension Island, and the archipelago of Tristan da Cunha '
-        },
-        {
-            location: 'Cape Verde',
-            date: 'May 3rd-6th 2026',
-            dateStart: '2026-05-03',
-            dateEnd: '2026-05-06',
-            description: '(Cabo Verde) The ship was originally scheduled to end in Praia, Cape Verde, on 4 May. '
-        },
-        {location: 'Tenerife, Canary Islands', date: 'May 10th 2026', dateStart: '2026-05-10', dateEnd: '2026-05-10', description: 'Port of Granadilla'},
-    ]
-
-    const transfers = [
-        {from: 'Tenerife, Canary Islands', to: 'Netherlands', date: '2026-05-11', cases: 54},
-        {from: 'Tenerife, Canary Islands', to: 'United Kingdom', date: '2026-05-11', cases: 22},
-        {from: 'Tenerife, Canary Islands', to: 'United States', date: '2026-05-11', cases: 18},
-        {from: 'Tenerife, Canary Islands', to: 'Spain', date: '2026-05-11', cases: 14},
-        {from: 'Tenerife, Canary Islands', to: 'France', date: '2026-05-11', cases: 5},
-        {from: 'Tenerife, Canary Islands', to: 'Canada', date: '2026-05-11', cases: 4},
-        {from: 'Tenerife, Canary Islands', to: 'Turkey', date: '2026-05-11', cases: 3},
-        {from: 'Tenerife, Canary Islands', to: 'Ireland', date: '2026-05-11', cases: 2},
-    ]
-
-    const significantEventsData = [
-        {
-            marker: 1,
-            location: 'Ushuaia Argentina',
-            date: 'April 1st 2026',
-            dateStart: '2026-04-01',
-            relatedCaseStatus: '',
-            description: 'The MV Hondius, a Dutch cruise vessel, departed from Ushuaia, Argentina and followed an itinerary across the South Atlantic, with multiple stops in remote and ecologically diverse regions. The extent of passenger contact with local wildlife during the voyage, or prior to boarding remains undetermined. The vessel carried a total of 175 individuals, including 114 passengers and 61 crew members.'
-        },
-        {
-            marker: 2,
-            location: '%ship-04-11',
-            date: 'April 11th 2026',
-            dateStart: '2026-04-11',
-            relatedCaseStatus: 'Probable',
-            description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and diarrhea on April 6. His condition worsened and he developed respiratory distress and died on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'
-        },
-        {
-            marker: 3,
-            location: 'Tristan da Cunha',
-            date: 'April 14th 2026',
-            dateStart: '2026-04-14',
-            relatedCaseStatus: 'Probable',
-            description: 'Case 8 (Gh_ID12), an adult male, disembarked the ship in Tristan da Cunha on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever later on. He is considered a probable case until laboratory confirmation. '
-        },
-        {
-            marker: 4,
-            location: 'St. Helena',
-            date: 'April 24th 2026',
-            dateStart: '2026-04-24',
-            relatedCaseStatus: '',
-            description: 'Thirty-two passengers disembarked the ship in Saint Helena, including the following known nationalities: United Kingdom (7), United States (6), Netherlands (3), Canada (2), Switzerland (2), Turkey (2), Germany (1), Denmark (1), St. Kitts and Nevis (1), New Zealand (1), Singapore (1), Sweden (1), Unknown (4).'
-        },
-        {
-            marker: 5,
-            location: 'Johannesburg, South Africa',
-            date: 'April 25th 2026',
-            dateStart: '2026-04-25',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.'
-        },
-        {
-            marker: 6,
-            location: 'Johannesburg, South Africa',
-            date: 'May 2nd 2026',
-            dateStart: '2026-05-02',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.',
-        },
-        {
-            marker: 7,
-            location: '%ship-05-02',
-            date: 'May 2nd 2026',
-            dateStart: '2026-05-02',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 4 (Gh_ID4) an adult female of German nationality, presented with fever and general malaise on April 28. Her condition worsened. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'
-        },
-        {
-            marker: 8,
-            location: 'Zurich, Switzerland',
-            date: 'May 5th 2026',
-            dateStart: '2026-05-05',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 7 (Gh_ID5), an adult male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'
-        },
-        {
-            marker: 9,
-            location: 'Praia, Cape Verde',
-            date: 'May 6th 2026',
-            dateStart: '2026-05-06',
-            relatedCaseStatus: '',
-            description: 'The ship anchored off the coast of Cape Verde on May 3.  Medical staff embarked the vessel. Three suspected cases were taken off the ship and transferred to the Netherlands for care on May 6.  The ship was given permission to proceed to Tenerife, Canary Islands, Spain, for all passengers to disembark and be repatriated to their home countries.'
-        },
-        {
-            marker: 10,
-            location: 'Praia, Cape Verde',
-            date: 'May 6th 2026',
-            dateStart: '2026-05-06',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 5 (Gh_ID7), an adult male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 6 and he was medically evacuated to the Netherlands.'
-        },
-        {
-            marker: 11,
-            location: 'Praia, Cape Verde',
-            date: 'May 6th 2026',
-            dateStart: '2026-05-06',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Case 6 (Gh_ID8) is an adult male working as the ship expedition guide, and presented symptoms on April 27 including mild respiratory and gastrointestinal symptoms. PCR testing confirmed Andes virus on May 6. He was one of three suspected cases removed from the ship in Cape Verde. He was medically evacuated to the Netherlands on May 7.'
-        },
-        {
-            marker: 12,
-            location: 'Tenerife, Canary Islands',
-            date: 'May 10th 2026',
-            dateStart: '2026-05-10',
-            relatedCaseStatus: '',
-            description: 'The MV Hondius arrived in the Canary Islands and was anchored off the coast at the Port of Granadilla in Tenerife. A total of 122 people (87 guests, 35 crew) disembarked and were repatriated to their home countries. Twenty-seven people (25 crew, 2 medical staff) remained onboard to return the vessel to Rotterdam, the Netherlands. The ship departed from Tenerife on May 11 with a provisional date of arrival in Rotterdam on May 18.'
-        },
-        {
-            marker: 13,
-            location: 'Nebraska, US',
-            date: 'May 10th 2026',
-            dateStart: '2026-05-10',
-            relatedCaseStatus: '',
-            description: 'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and is quarantined with other American passengers from the ship in Nebraska. This case has been removed as a confirmed case from official counts.'
-        },
-        {
-            marker: 14,
-            location: 'Paris, France',
-            date: 'May 11th 2026',
-            dateStart: '2026-05-11',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'
-        },
-        {
-            marker: 15,
-            location: 'Madrid, Spain',
-            date: 'May 12th 2026',
-            dateStart: '2026-05-12',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
-        },
-        {
-            marker: 16,
-            location: 'Vancouver Island, British Columbia, Canada',
-            date: 'May 17th 2026',
-            dateStart: '2026-05-17',
-            relatedCaseStatus: 'Confirmed',
-            description: 'Gh_ID20 is a Canadian citizen who was confirmed positive for Andes hantavirus on May 17 following a presumptive positive test result the day prior. The patient was transported to hospital in Vancouver for care on May 14, along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius.'
-        },
-    ]
 
 
     const buildSignificantEventsGeoJSON = (events: typeof significantEventsData) => {
-        const grouped: Record<string, { markers: number[]; entries: typeof significantEventsData; popupAnchor: string }> = {};
+        const grouped: Record<string, {
+            markers: number[];
+            entries: typeof significantEventsData;
+            popupAnchor: string
+        }> = {};
         for (const e of events) {
             if (!grouped[e.location]) {
-                grouped[e.location] = { markers: [], entries: [], popupAnchor: (e as typeof e & { popupAnchor?: string }).popupAnchor || 'bottom' };
+                grouped[e.location] = {
+                    markers: [],
+                    entries: [],
+                    popupAnchor: (e as typeof e & { popupAnchor?: string }).popupAnchor || 'bottom'
+                };
             }
             grouped[e.location].markers.push(e.marker);
             grouped[e.location].entries.push(e);
@@ -296,7 +71,11 @@ export const usePathingLayer = (
                     label: location.startsWith('%') ? '' : location,
                     location,
                     popupAnchor: group.popupAnchor,
-                    events: JSON.stringify(group.entries.map(e => ({ date: e.date, description: e.description, relatedCaseStatus: e.relatedCaseStatus }))),
+                    events: JSON.stringify(group.entries.map(e => ({
+                        date: e.date,
+                        description: e.description,
+                        relatedCaseStatus: e.relatedCaseStatus
+                    }))),
                 },
                 geometry: {
                     type: 'Point' as const,
@@ -309,153 +88,8 @@ export const usePathingLayer = (
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
-        // Check if source route already exists (in case of re-render), if not add it and the layer
-        if (!map.getSource('paths')) {
-
-            const traceDataDestinations: any = {}
-            for (const entry of pathData) {
-                if (entry.travel_to && entry.travel_to != 'NA' && ((entry.travel_from && entry.travel_from != 'NA') || (entry.left_location && entry.left_location != 'NA'))) {
-                    if (!traceDataDestinations[entry.travel_to]) {
-                        traceDataDestinations[entry.travel_to] = [entry.status];
-                    } else if (!traceDataDestinations[entry.travel_to].includes(entry.status)) {
-                        traceDataDestinations[entry.travel_to].push(entry.status);
-                    }
-                }
-            }
-
-            // Add destination markers
-
-
-            map.addSource('paths', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': pathData.map((pd: any) => {
-
-                        let coordinates = []
-                        if (pd.travel_from && locationNameToLongLat[pd.travel_from]) {
-                            coordinates.push([locationNameToLongLat[pd.travel_from].long, locationNameToLongLat[pd.travel_from].lat])
-                        }
-                        if (pd.left_location && locationNameToLongLat[pd.left_location]) {
-
-                            coordinates.push([locationNameToLongLat[pd.left_location].long, locationNameToLongLat[pd.left_location].lat])
-                        }
-                        if (pd.travel_to && locationNameToLongLat[pd.travel_to]) {
-                            coordinates.push([locationNameToLongLat[pd.travel_to].long, locationNameToLongLat[pd.travel_to].lat])
-                        }
-                        if (coordinates.length < 2) coordinates = []; // Need at least 2 points for a line
-
-                        return {
-                            'type': 'Feature',
-                            'properties': {status: pd.status},
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': coordinates
-                            }
-                        }
-                    }).filter((pd: any[]) => pd.length != 0)
-                }
-            });
-            map.addLayer({
-                'id': 'paths',
-                'type': 'line',
-                'source': 'paths',
-                'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                'paint': {
-                    'line-color': [
-                        'match',
-                        ['get', 'status'],
-                        ...Object.entries(statusColors).flatMap(([status, color]) => [status, color]),
-                        '#888'
-                    ] as unknown as DataDrivenPropertyValueSpecification<string>,
-                    'line-width': 4,
-                    // 'line-offset': [
-                    //     'match',
-                    //     ['get', 'status'],
-                    //     ...Object.entries(statusColors).flatMap(([status], i) => [status, (i - (Object.keys(statusColors).length - 1) / 2) * 4]),
-                    //     0
-                    // ]
-                }
-            });
-
-            const traceDestinationsFeatures = Object.entries(traceDataDestinations)
-                .filter(([dest]) => locationNameToLongLat[dest])
-                .map(([dest, statuses]) => ({
-                    'type': 'Feature' as const,
-                    'properties': {
-                        'label': dest,
-                        'statuses': (statuses as string[]).join(', '),
-                    },
-                    'geometry': {
-                        'type': 'Point' as const,
-                        'coordinates': [locationNameToLongLat[dest].long, locationNameToLongLat[dest].lat]
-                    }
-                }));
-            traceDestinationsFeaturesRef.current = traceDestinationsFeatures;
-
-            map.addSource('trace-destinations', {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': traceDestinationsFeatures
-                }
-            });
-            map.addLayer({
-                'id': 'trace-destinations-circle',
-                'type': 'circle',
-                'source': 'trace-destinations',
-                'paint': {
-                    'circle-radius': 6,
-                    'circle-color': '#454545',
-                    'circle-stroke-color': '#ffffff',
-                    'circle-stroke-width': 2
-                }
-            });
-            map.addLayer({
-                'id': 'trace-destinations-label',
-                'type': 'symbol',
-                'source': 'trace-destinations',
-                'layout': {
-                    'text-field': ['get', 'label'],
-                    'text-size': 12,
-                    'text-offset': [0, 1],
-                    'text-anchor': 'top',
-                    'text-font': ['Open Sans Regular'],
-                },
-                'paint': {
-                    'text-color': '#454545',
-                    'text-halo-color': '#ffffff',
-                    'text-halo-width': 2.5
-                }
-            });
-
-            // Apply initial visibility filter based on overlaysOpen
-            const initialVisibleStatuses = Object.entries(overlaysOpen)
-                .filter(([key, value]) => key !== 'ship' && value)
-                .map(([key]) => key);
-
-            if (initialVisibleStatuses.length === 0) {
-                map.setFilter('paths', ['==', ['get', 'status'], '__none__']);
-            } else {
-                map.setFilter('paths', ['in', ['get', 'status'], ['literal', initialVisibleStatuses]]);
-            }
-
-            const initialFiltered = {
-                type: 'FeatureCollection' as const,
-                features: traceDestinationsFeatures.filter((f) => {
-                    const statuses = (f.properties?.statuses || '').split(', ');
-                    return statuses.some((s: string) => initialVisibleStatuses.includes(s));
-                }),
-            };
-            (map.getSource('trace-destinations') as any).setData(initialFiltered);
-        }
         if (!map.getSource('ship')) {
-
             const filteredShipPath = shipPath.filter(sp => sp.dateStart <= dateUpTo);
-
             map.addSource('ship', {
                 'type': 'geojson',
                 'data': {
@@ -572,7 +206,7 @@ export const usePathingLayer = (
                     'line-cap': 'round'
                 },
                 'paint': {
-                    'line-color': statusColors.probable,
+                    'line-color': statusColors.departures,
                     'line-width': ['+', 2, ['*', ['get', 'passengers'], 0.08]],
                     'line-opacity': 1
                 }
@@ -585,7 +219,7 @@ export const usePathingLayer = (
                 canvas.width = size;
                 canvas.height = size;
                 const ctx = canvas.getContext('2d')!;
-                ctx.fillStyle = statusColors.probable;
+                ctx.fillStyle = statusColors.departures;
                 ctx.beginPath();
                 ctx.moveTo(2, 4);
                 ctx.lineTo(size - 2, size / 2);
@@ -650,7 +284,7 @@ export const usePathingLayer = (
                         ['>', ['length', ['string', ['get', 'markers']]], 2], 16,
                         12
                     ] as unknown as DataDrivenPropertyValueSpecification<number>,
-                    'circle-color': statusColors['confirmed'] || '#FFA500',
+                    'circle-color': statusColors.events || '#FFA500',
                     'circle-stroke-color': '#ffffff',
                     'circle-stroke-width': 2
                 }
@@ -683,7 +317,7 @@ export const usePathingLayer = (
                     'text-max-width': 18,
                 },
                 'paint': {
-                    'text-color': statusColors.confirmed,
+                    'text-color': statusColors.events,
                     'text-halo-color': '#ffffff',
                     'text-halo-width': 2
                 }
@@ -698,7 +332,11 @@ export const usePathingLayer = (
                 const popupAnchor = e.features[0].properties?.popupAnchor || 'bottom';
                 const location = e.features[0].properties?.location || '';
                 const eventsRaw = e.features[0].properties?.events || '[]';
-                const events: { date: string; description: string, relatedCaseStatus: string }[] = JSON.parse(eventsRaw);
+                const events: {
+                    date: string;
+                    description: string,
+                    relatedCaseStatus: string
+                }[] = JSON.parse(eventsRaw);
 
                 let html = '<div style="min-width:250px;max-height:400px;overflow-y:auto;font-size:14px;white-space:pre-wrap;padding:10px;">';
                 if (!location.startsWith('%')) {
@@ -1052,32 +690,6 @@ export const usePathingLayer = (
             }
         });
     }, [overlaysOpen['significantEvents'], map]);
-
-    // Toggle paths and trace-destinations visibility based on status
-    useEffect(() => {
-        if (!map || !map.getSource('paths')) return;
-        const visibleStatuses = Object.entries(overlaysOpen)
-            .filter(([key, value]) => key !== 'ship' && value)
-            .map(([key]) => key);
-
-        if (visibleStatuses.length === 0) {
-            map.setFilter('paths', ['==', ['get', 'status'], '__none__']);
-        } else {
-            map.setFilter('paths', ['in', ['get', 'status'], ['literal', visibleStatuses]]);
-        }
-
-        // Filter trace-destination markers: show only if at least one of their statuses is visible
-        if (map.getSource('trace-destinations')) {
-            const filtered = {
-                type: 'FeatureCollection' as const,
-                features: traceDestinationsFeaturesRef.current.filter((f) => {
-                    const statuses = (f.properties?.statuses || '').split(', ');
-                    return statuses.some((s: string) => visibleStatuses.includes(s));
-                }),
-            };
-            (map.getSource('trace-destinations') as any).setData(filtered);
-        }
-    }, [overlaysOpen, map]);
 
     // Fly to country
     useEffect(() => {
