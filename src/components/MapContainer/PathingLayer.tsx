@@ -161,8 +161,8 @@ export const usePathingLayer = (
                 'layout': {
                     'text-field': ['get', 'label'],
                     'text-size': 14,
-                    'text-offset': [0, 1],
-                    'text-anchor': 'top',
+                    'text-offset': [0, -1],
+                    'text-anchor': 'bottom',
                     'text-font': ['Open Sans Regular'],
                 },
                 'paint': {
