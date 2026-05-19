@@ -10,4 +10,5 @@ export interface RegionalData {
     long: number;
     bounds: [number, number, number, number];
     geometry: Polygon | MultiPolygon;
+    status: string;
 }

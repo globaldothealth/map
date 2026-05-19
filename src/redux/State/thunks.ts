@@ -17,6 +17,7 @@ const mapToStateData = (cases: FetchedCaseData[]): StateData[] => {
             long: fetchedCase.long,
             bounds: fetchedCase.bounds,
             geometry: fetchedCase.geometry,
+            status: fetchedCase.status,
         };
     });
 };

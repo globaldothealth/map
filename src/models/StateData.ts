@@ -10,4 +10,5 @@ export interface StateData {
     long: number;
     bounds: [number, number, number, number];
     geometry: Polygon | MultiPolygon;
+    status: string;
 }

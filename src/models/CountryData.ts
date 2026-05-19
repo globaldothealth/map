@@ -10,4 +10,5 @@ export interface CountryData {
     name: string;
     bounds: [number, number, number, number];
     geometry: Polygon | MultiPolygon;
+    status: string;
 }

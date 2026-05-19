@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from 'redux/hooks';
+import {useState, useEffect, Dispatch, SetStateAction} from 'react';
+// import { useAppDispatch, useAppSelector } from 'redux/hooks';
 
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import { format } from 'date-fns';
+import {format} from 'date-fns';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 
@@ -25,7 +25,7 @@ import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 // } from 'redux/App/slice';
 // import { getCountryDataFromTimeseriesData } from 'utils/helperFunctions';
 // import { URLToFilters } from 'utils/helperFunctions';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 function getLabel(dates: Date[], selectedDate: number | undefined) {
     if (selectedDate === undefined || !dates || dates.length === 0) return '';
@@ -38,11 +38,10 @@ const animationSpeed = .25;
 
 interface TimeseriesProps {
     isHidden: boolean;
-    selectedDate: string;
-    setDateUpTo: any;
+    setDateUpTo: Dispatch<SetStateAction<string>>;
 }
 
-export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
+export default function Timeseries({isHidden, setDateUpTo}: TimeseriesProps) {
     // const dispatch = useAppDispatch();
     //
     // const timeseriesData = useAppSelector(selectTimeseriesCountryData);
@@ -66,7 +65,7 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
         }
     }
     const timeseriesDates = timeseriesData.map(date => new Date(date));
-    const [selectedDate, setSelectedDate] = useState<number>(timeseriesData.length-1);
+    const [selectedDate, setSelectedDate] = useState<number>(timeseriesData.length - 1);
     const [animationInterval, setAnimationInterval] = useState<
         NodeJS.Timeout | undefined
     >(undefined);
@@ -172,8 +171,7 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
 
         const interval = setInterval(() => {
             setSelectedDate((state) => {
-                if (state === undefined) return;
-                return state < timeseriesDates.length - 1 ? (state += 1) : 0;
+                return state < timeseriesDates.length - 1 ? state + 1 : 0;
             });
         }, animationSpeed * 1000);
 
@@ -189,7 +187,7 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
 
 
     useEffect(() => {
-        if(selectedDate) setDateUpTo(timeseriesData[selectedDate]);
+        if (selectedDate) setDateUpTo(timeseriesData[selectedDate]);
     }, [selectedDate]);
     return (
         <>
@@ -215,7 +213,7 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
                     >
                         <Typography
                             variant="body1"
-                            sx={{ marginBottom: '2rem' }}
+                            sx={{marginBottom: '2rem'}}
                         >
                             Showing data for:{' '}
                             <strong>
@@ -224,12 +222,11 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
                         </Typography>
 
                         <Box
-                            sx={(theme) => ({
+                            sx={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                // color: theme.palette.gray.main,
-                            })}
+                            }}
                         >
                             <IconButton
                                 sx={(theme) => ({
@@ -243,9 +240,9 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
                                 }
                             >
                                 {animationInterval ? (
-                                    <PauseCircleIcon />
+                                    <PauseCircleIcon/>
                                 ) : (
-                                    <PlayCircleIcon />
+                                    <PlayCircleIcon/>
                                 )}
                             </IconButton>
 
@@ -256,7 +253,7 @@ export default function Timeseries({ isHidden, setDateUpTo}: TimeseriesProps) {
                                 aria-label="timeseries marks"
                                 defaultValue={selectedDate || 0}
                                 value={selectedDate || 0}
-                                onChange={(e, value) => handleChange(value)}
+                                onChange={(_e, value) => handleChange(value)}
                                 getAriaValueText={(value) =>
                                     getLabel(timeseriesDates, value)
                                 }

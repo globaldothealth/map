@@ -18,6 +18,7 @@ const mapToRegionalData = (cases: FetchedCaseData[]): RegionalData[]  => {
             long: fetchedCase.long,
             bounds: fetchedCase.bounds,
             geometry: fetchedCase.geometry,
+            status: fetchedCase.status,
         };
     })
 }

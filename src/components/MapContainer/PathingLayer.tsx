@@ -152,6 +152,7 @@ export const usePathingLayer = (
             location: 'Ushuaia Argentina',
             date: 'April 1st 2026',
             dateStart: '2026-04-01',
+            relatedCaseStatus: '',
             description: 'The MV Hondius, a Dutch cruise vessel, departed from Ushuaia, Argentina and followed an itinerary across the South Atlantic, with multiple stops in remote and ecologically diverse regions. The extent of passenger contact with local wildlife during the voyage, or prior to boarding remains undetermined. The vessel carried a total of 175 individuals, including 114 passengers and 61 crew members.'
         },
         {
@@ -159,6 +160,7 @@ export const usePathingLayer = (
             location: '%ship-04-11',
             date: 'April 11th 2026',
             dateStart: '2026-04-11',
+            relatedCaseStatus: 'Probable',
             description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and diarrhea on April 6. His condition worsened and he developed respiratory distress and died on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'
         },
         {
@@ -166,6 +168,7 @@ export const usePathingLayer = (
             location: 'Tristan da Cunha',
             date: 'April 14th 2026',
             dateStart: '2026-04-14',
+            relatedCaseStatus: 'Probable',
             description: 'Case 8 (Gh_ID12), an adult male, disembarked the ship in Tristan da Cunha on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever later on. He is considered a probable case until laboratory confirmation. '
         },
         {
@@ -173,6 +176,7 @@ export const usePathingLayer = (
             location: 'St. Helena',
             date: 'April 24th 2026',
             dateStart: '2026-04-24',
+            relatedCaseStatus: '',
             description: 'Thirty-two passengers disembarked the ship in Saint Helena, including the following known nationalities: United Kingdom (7), United States (6), Netherlands (3), Canada (2), Switzerland (2), Turkey (2), Germany (1), Denmark (1), St. Kitts and Nevis (1), New Zealand (1), Singapore (1), Sweden (1), Unknown (4).'
         },
         {
@@ -180,6 +184,7 @@ export const usePathingLayer = (
             location: 'Johannesburg, South Africa',
             date: 'April 25th 2026',
             dateStart: '2026-04-25',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.'
         },
         {
@@ -187,14 +192,15 @@ export const usePathingLayer = (
             location: 'Johannesburg, South Africa',
             date: 'May 2nd 2026',
             dateStart: '2026-05-02',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.',
-            popupAnchor: 'top'
         },
         {
             marker: 7,
             location: '%ship-05-02',
             date: 'May 2nd 2026',
             dateStart: '2026-05-02',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 4 (Gh_ID4) an adult female of German nationality, presented with fever and general malaise on April 28. Her condition worsened. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'
         },
         {
@@ -202,6 +208,7 @@ export const usePathingLayer = (
             location: 'Zurich, Switzerland',
             date: 'May 5th 2026',
             dateStart: '2026-05-05',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 7 (Gh_ID5), an adult male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'
         },
         {
@@ -209,6 +216,7 @@ export const usePathingLayer = (
             location: 'Praia, Cape Verde',
             date: 'May 6th 2026',
             dateStart: '2026-05-06',
+            relatedCaseStatus: '',
             description: 'The ship anchored off the coast of Cape Verde on May 3.  Medical staff embarked the vessel. Three suspected cases were taken off the ship and transferred to the Netherlands for care on May 6.  The ship was given permission to proceed to Tenerife, Canary Islands, Spain, for all passengers to disembark and be repatriated to their home countries.'
         },
         {
@@ -216,6 +224,7 @@ export const usePathingLayer = (
             location: 'Praia, Cape Verde',
             date: 'May 6th 2026',
             dateStart: '2026-05-06',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 5 (Gh_ID7), an adult male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 6 and he was medically evacuated to the Netherlands.'
         },
         {
@@ -223,6 +232,7 @@ export const usePathingLayer = (
             location: 'Praia, Cape Verde',
             date: 'May 6th 2026',
             dateStart: '2026-05-06',
+            relatedCaseStatus: 'Confirmed',
             description: 'Case 6 (Gh_ID8) is an adult male working as the ship expedition guide, and presented symptoms on April 27 including mild respiratory and gastrointestinal symptoms. PCR testing confirmed Andes virus on May 6. He was one of three suspected cases removed from the ship in Cape Verde. He was medically evacuated to the Netherlands on May 7.'
         },
         {
@@ -230,6 +240,7 @@ export const usePathingLayer = (
             location: 'Tenerife, Canary Islands',
             date: 'May 10th 2026',
             dateStart: '2026-05-10',
+            relatedCaseStatus: '',
             description: 'The MV Hondius arrived in the Canary Islands and was anchored off the coast at the Port of Granadilla in Tenerife. A total of 122 people (87 guests, 35 crew) disembarked and were repatriated to their home countries. Twenty-seven people (25 crew, 2 medical staff) remained onboard to return the vessel to Rotterdam, the Netherlands. The ship departed from Tenerife on May 11 with a provisional date of arrival in Rotterdam on May 18.'
         },
         {
@@ -237,6 +248,7 @@ export const usePathingLayer = (
             location: 'Nebraska, US',
             date: 'May 10th 2026',
             dateStart: '2026-05-10',
+            relatedCaseStatus: '',
             description: 'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and is quarantined with other American passengers from the ship in Nebraska. This case has been removed as a confirmed case from official counts.'
         },
         {
@@ -244,6 +256,7 @@ export const usePathingLayer = (
             location: 'Paris, France',
             date: 'May 11th 2026',
             dateStart: '2026-05-11',
+            relatedCaseStatus: 'Confirmed',
             description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'
         },
         {
@@ -251,6 +264,7 @@ export const usePathingLayer = (
             location: 'Madrid, Spain',
             date: 'May 12th 2026',
             dateStart: '2026-05-12',
+            relatedCaseStatus: 'Confirmed',
             description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
         },
         {
@@ -258,6 +272,7 @@ export const usePathingLayer = (
             location: 'Vancouver Island, British Columbia, Canada',
             date: 'May 17th 2026',
             dateStart: '2026-05-17',
+            relatedCaseStatus: 'Confirmed',
             description: 'Gh_ID20 is a Canadian citizen who was confirmed positive for Andes hantavirus on May 17 following a presumptive positive test result the day prior. The patient was transported to hospital in Vancouver for care on May 14, along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius.'
         },
     ]
@@ -281,7 +296,7 @@ export const usePathingLayer = (
                     label: location.startsWith('%') ? '' : location,
                     location,
                     popupAnchor: group.popupAnchor,
-                    events: JSON.stringify(group.entries.map(e => ({ date: e.date, description: e.description }))),
+                    events: JSON.stringify(group.entries.map(e => ({ date: e.date, description: e.description, relatedCaseStatus: e.relatedCaseStatus }))),
                 },
                 geometry: {
                     type: 'Point' as const,
@@ -683,7 +698,7 @@ export const usePathingLayer = (
                 const popupAnchor = e.features[0].properties?.popupAnchor || 'bottom';
                 const location = e.features[0].properties?.location || '';
                 const eventsRaw = e.features[0].properties?.events || '[]';
-                const events: { date: string; description: string }[] = JSON.parse(eventsRaw);
+                const events: { date: string; description: string, relatedCaseStatus: string }[] = JSON.parse(eventsRaw);
 
                 let html = '<div style="min-width:250px;max-height:400px;overflow-y:auto;font-size:14px;white-space:pre-wrap;padding:10px;">';
                 if (!location.startsWith('%')) {
@@ -691,7 +706,7 @@ export const usePathingLayer = (
                 }
                 events.forEach((ev, i) => {
                     if (i > 0) html += '<hr style="border:none;border-top:1px solid #ddd;margin:10px 0;">';
-                    html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${ev.date}</p><p style="color:#454545">${ev.description}</p>`;
+                    html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${ev.date}${ev.relatedCaseStatus ? ' - ' + ev.relatedCaseStatus + ' Case' : ""}</p><p style="color:#454545">${ev.description}</p>`;
                 });
                 html += '</div>';
 
@@ -1099,7 +1114,7 @@ export const usePathingLayer = (
 
             const popupContent = (
                 <PopupContentText>
-                    {foundAreaData.caseCount.toLocaleString()} confirmed case
+                    {foundAreaData.caseCount.toLocaleString()} {foundAreaData.status} case
                     {foundAreaData.caseCount > 1 ? 's' : ''}
                 </PopupContentText>
             );

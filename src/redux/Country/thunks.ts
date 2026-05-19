@@ -18,6 +18,7 @@ const mapToCountryData = (cases: FetchedCaseData[]): CountryData[] => {
             long: fetchedCase.long,
             bounds: fetchedCase.bounds,
             geometry: fetchedCase.geometry,
+            status: fetchedCase.status,
         };
     });
 };
@@ -41,7 +42,8 @@ export const fetchCountriesData = createAsyncThunk<
         if (countriesData.length === 0) {
             return {
                 countriesData: [],
-                totalNumberOfCases: 0,
+                confirmedCaseCount: 0,
+                probableCaseCount: 0,
                 lastUpdateDate: '',
             };
         }
@@ -54,49 +56,48 @@ export const fetchCountriesData = createAsyncThunk<
             }
         }
 
-        const urlP = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
-        const pathData = await fetch(urlP)
-            .then(response => response.text())
-            .then(csvText => {
-                const parseCsvLine = (line: string): string[] => {
-                    const result: string[] = [];
-                    let current = '';
-                    let inQuotes = false;
-                    for (let i = 0; i < line.length; i++) {
-                        const char = line[i];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            result.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    result.push(current.trim());
-                    return result;
-                };
+        // const urlP = 'https://raw.githubusercontent.com/kraemer-lab/Hondius_hantavirus_h2026/refs/heads/main/data/linelist/2026_hantavirus.csv';
+        // const pathData = await fetch(urlP)
+        //     .then(response => response.text())
+        //     .then(csvText => {
+        //         const parseCsvLine = (line: string): string[] => {
+        //             const result: string[] = [];
+        //             let current = '';
+        //             let inQuotes = false;
+        //             for (let i = 0; i < line.length; i++) {
+        //                 const char = line[i];
+        //                 if (char === '"') {
+        //                     inQuotes = !inQuotes;
+        //                 } else if (char === ',' && !inQuotes) {
+        //                     result.push(current.trim());
+        //                     current = '';
+        //                 } else {
+        //                     current += char;
+        //                 }
+        //             }
+        //             result.push(current.trim());
+        //             return result;
+        //         };
+        //
+        //         const lines = csvText.split('\n').filter(l => l.trim());
+        //         const headers = parseCsvLine(lines[0]);
+        //         const data = lines.slice(1).map(line => {
+        //             const values = parseCsvLine(line.replace(/\r$/, ''));
+        //             const entry: { [key: string]: string } = {};
+        //
+        //             headers.forEach((header, index) => {
+        //                 entry[header] = values[index];
+        //             });
+        //             return entry;
+        //         });
+        //         return data;
+        //     })
+        // const parsedPathData = pathData.filter(l => l.status == 'confirmed')
 
-                const lines = csvText.split('\n').filter(l => l.trim());
-                const headers = parseCsvLine(lines[0]);
-                const data = lines.slice(1).map(line => {
-                    const values = parseCsvLine(line.replace(/\r$/, ''));
-                    const entry: { [key: string]: string } = {};
 
-                    headers.forEach((header, index) => {
-                        entry[header] = values[index];
-                    });
-                    return entry;
-                });
-                return data;
-            })
-        const parsedPathData = pathData.filter(l => l.status == 'confirmed')
-
-
-        const confirmedCaseCount = pathData.filter(entry => entry['status'] === 'confirmed').length;
-        const probableCaseCount = pathData.filter(entry => entry['status'] === 'probable').length;
-        console.log("Countries Data", countriesData);
-        console.log("Path Data", parsedPathData);
+        // Filter the countries by status and then reduce to get the total count for each status
+        const confirmedCaseCount = countriesData.filter(entry => entry['status'] === 'confirmed').reduce((total, entry) => total + entry.caseCount, 0);
+        const probableCaseCount = countriesData.filter(entry => entry['status'] === 'probable').reduce((total, entry) => total + entry.caseCount, 0);
 
         return { countriesData, confirmedCaseCount, probableCaseCount, lastUpdateDate };
     } catch (err: any) {

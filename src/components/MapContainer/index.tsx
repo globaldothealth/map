@@ -14,7 +14,7 @@ import {StateData} from 'src/models/StateData';
 
 import {MapContainer as StyledMapContainer} from 'src/theme/globalStyles';
 
-import CopyStateLinkButton from 'src/components/CopyStateLinkButton';
+// import CopyStateLinkButton from 'src/components/CopyStateLinkButton';
 import {ChartTypeNames} from 'src/models/ViewParamURLValues';
 
 import {
@@ -42,7 +42,6 @@ const MapContainer = ({
                           data,
                           focusedArea,
                           setFocusedArea,
-                          chartType,
                           adminLevel,
                           dataLayerBounds,
                       }: MapContainerProps) => {
