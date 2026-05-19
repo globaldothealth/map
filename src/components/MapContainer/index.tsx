@@ -22,6 +22,7 @@ import {
     getDataLayersFromBounds,
 } from 'src/utils/helperFunctions';
 import {usePathingLayer} from './PathingLayer';
+import Timeseries from "src/components/Timeseries";
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
@@ -46,6 +47,7 @@ const MapContainer = ({
                           dataLayerBounds,
                       }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [dateUpTo, setDateUpTo] = useState('2026-05-01');
     const [pathData, setPathData] = useState<{ [key: string]: string }[]>([]);
     const [overlaysOpen, setOverlaysOpen] = useState({'ship': true, 'confirmed': false, 'probable': false,'negative': false, 'monitored': false, 'tested': false, 'tenerifeDepartures': true, "significantEvents": true});
     const statusColors = {
@@ -132,7 +134,8 @@ const MapContainer = ({
         dataLayerBounds,
         pathData,
         overlaysOpen,
-        statusColors
+        statusColors,
+        dateUpTo
     );
 
     return (
@@ -142,6 +145,7 @@ const MapContainer = ({
                 ref={mapContainer}
                 $isLoading={!mapLoaded || !dataFeatureSet}
             />
+            <Timeseries isHidden={false} setDateUpTo={setDateUpTo}></Timeseries>
             <Legend
                 title="Case Count"
                 legendRows={getDataLayersFromBounds(dataLayerBounds)}
@@ -197,7 +201,7 @@ const MapContainer = ({
                     // }
                     ]}
             />
-            <CopyStateLinkButton map={map} chartType={chartType}/>
+            {/*<CopyStateLinkButton map={map} chartType={chartType}/>*/}
         </>
     );
 };
