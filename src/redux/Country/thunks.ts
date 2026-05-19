@@ -25,7 +25,8 @@ const mapToCountryData = (cases: FetchedCaseData[]): CountryData[] => {
 export const fetchCountriesData = createAsyncThunk<
     {
         countriesData: CountryData[];
-        totalNumberOfCases: number;
+        confirmedCaseCount: number;
+        probableCaseCount: number;
         lastUpdateDate: string;
     },
     void,
@@ -92,11 +93,12 @@ export const fetchCountriesData = createAsyncThunk<
         const parsedPathData = pathData.filter(l => l.status == 'confirmed')
 
 
-        const totalNumberOfCasesFromPathData = pathData.filter(entry => entry['status'] === 'confirmed').length;
+        const confirmedCaseCount = pathData.filter(entry => entry['status'] === 'confirmed').length;
+        const probableCaseCount = pathData.filter(entry => entry['status'] === 'probable').length;
         console.log("Countries Data", countriesData);
         console.log("Path Data", parsedPathData);
 
-        return { countriesData, totalNumberOfCases: totalNumberOfCasesFromPathData, lastUpdateDate };
+        return { countriesData, confirmedCaseCount, probableCaseCount, lastUpdateDate };
     } catch (err: any) {
         console.log('ERR',err)
         if (err.response) return rejectWithValue(err.response.message);

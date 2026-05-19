@@ -11,23 +11,23 @@ import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 const dataLayerBounds = {
     level1: {
         lower: { number: 1, text: '1' },
-        upper: { number: 10, text: '10' },
+        upper: { number: 1, text: '1' },
     },
     level2: {
-        lower: { number: 11, text: '11' },
-        upper: { number: 100, text: '100' },
+        lower: { number: 2, text: '2' },
+        upper: { number: 2, text: '2' },
     },
     level3: {
-        lower: { number: 101, text: '101' },
-        upper: { number: 500, text: '500' },
+        lower: { number: 3, text: '3' },
+        upper: { number: 5, text: '5' },
     },
     level4: {
-        lower: { number: 501, text: '501' },
-        upper: { number: 2000, text: '2k' },
+        lower: { number: 6, text: '6' },
+        upper: { number: 10, text: '10' },
     },
     level5: {
-        lower: { number: 2001, text: '2001' },
-        upper: { number: 10000, text: '10k' },
+        lower: { number: 11, text: '11' },
+        upper: { number: 15, text: '25' },
     },
 }
 

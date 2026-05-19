@@ -3,8 +3,10 @@ import type { RootState } from 'src/redux/store';
 export const selectIsCountryViewLoading = (state: RootState) => state.country.isLoading;
 export const selectCountriesData = (state: RootState) =>
     state.country.countriesData;
-export const selectCountryTotalCases = (state: RootState) =>
-    state.country.totalNumberOfCases;
+export const selectConfirmedCaseCount = (state: RootState) =>
+    state.country.confirmedCaseCount;
+export const selectProbableCaseCount = (state: RootState) =>
+    state.country.probableCaseCount;
 export const selectCountryTotalCasesIsLoading = (state: RootState) =>
     state.country.isLoading;
 export const selectCountryLastUpdateDate = (state: RootState) =>

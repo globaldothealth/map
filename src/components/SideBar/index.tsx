@@ -16,7 +16,8 @@ import { RegionalData } from 'src/models/RegionalData';
 import { StateData } from 'src/models/StateData';
 import {
     selectCountriesData,
-    selectCountryTotalCases,
+    selectConfirmedCaseCount,
+    selectProbableCaseCount,
     selectCountryTotalCasesIsLoading,
 } from 'src/redux/Country/selectors';
 import {
@@ -71,7 +72,8 @@ const SideBar = () => {
     const regionalData = useAppSelector(selectRegionalData);
     const stateData = useAppSelector(selectStateData);
     const focusedArea = useAppSelector(selectFocusedArea);
-    const totalCountryCasesCount = useAppSelector(selectCountryTotalCases);
+    const confirmedCaseCount = useAppSelector(selectConfirmedCaseCount);
+    const probableCaseCount = useAppSelector(selectProbableCaseCount);
     const totalCountryCasesCountIsLoading = useAppSelector(
         selectCountryTotalCasesIsLoading,
     );
@@ -174,7 +176,7 @@ const SideBar = () => {
                         administrativeAreaEntry;
                     const isActive = focusedArea?.areaId === areaId;
                     const casesPercentage =
-                        (caseCount / totalCountryCasesCount) * 100;
+                        (caseCount / (confirmedCaseCount + probableCaseCount)) * 100;
 
                     return (
                         <LocationListItem
@@ -265,13 +267,24 @@ const SideBar = () => {
             default:
                 return (
                     <>
+                        <div>
                         <span id="total-cases" className="active">
-                            {totalCountryCasesCount.toLocaleString()}
+                            {confirmedCaseCount.toLocaleString()}
                         </span>
                         <span className="reported-cases-label">
                             {' '}
                             confirmed cases
                         </span>
+                        </div>
+                        <div>
+                        <span id="total-cases" className="active">
+                            {probableCaseCount.toLocaleString()}
+                        </span>
+                        <span className="reported-cases-label">
+                            {' '}
+                            probable cases
+                        </span>
+                        </div>
                     </>
                 );
         }

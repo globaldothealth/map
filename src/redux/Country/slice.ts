@@ -5,14 +5,16 @@ import {CountryData} from 'src/models/CountryData';
 interface AppState {
     isLoading: boolean;
     countriesData: CountryData[];
-    totalNumberOfCases: number;
+    confirmedCaseCount: number;
+    probableCaseCount: number;
     lastUpdateDate: string;
 }
 
 const initialState: AppState = {
     isLoading: false,
     countriesData: [],
-    totalNumberOfCases: 0,
+    confirmedCaseCount: 8,
+    probableCaseCount: 2,
     lastUpdateDate: '',
 };
 
@@ -27,7 +29,8 @@ export const countrySlice = createSlice({
         builder.addCase(fetchCountriesData.fulfilled, (state, {payload }) => {
             state.isLoading = false;
             state.countriesData = payload.countriesData;
-            state.totalNumberOfCases = payload.totalNumberOfCases;
+            state.confirmedCaseCount = payload.confirmedCaseCount;
+            state.probableCaseCount = payload.probableCaseCount;
             state.lastUpdateDate = payload.lastUpdateDate;
         });
         builder.addCase(fetchCountriesData.rejected, (state) => {

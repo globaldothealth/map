@@ -189,23 +189,23 @@ export const getDataLayersFromBounds = (bounds: {
             color: ChoroplethMapColors.empty,
         },
         {
-            label: `${bounds.level1.lower.text}-${bounds.level1.upper.text}`,
+            label: bounds.level1.lower.text == bounds.level1.upper.text ? bounds.level1.lower.text :`${bounds.level1.lower.text}-${bounds.level1.upper.text}`,
             color: ChoroplethMapColors.level1,
         },
         {
-            label: `${bounds.level2.lower.text}-${bounds.level2.upper.text}`,
+            label: bounds.level2.lower.text == bounds.level2.upper.text ? bounds.level2.lower.text : `${bounds.level2.lower.text}-${bounds.level2.upper.text}`,
             color: ChoroplethMapColors.level2,
         },
         {
-            label: `${bounds.level3.lower.text}-${bounds.level3.upper.text}`,
+            label: bounds.level3.lower.text == bounds.level3.upper.text ? bounds.level3.lower.text : `${bounds.level3.lower.text}-${bounds.level3.upper.text}`,
             color: ChoroplethMapColors.level3,
         },
         {
-            label: `${bounds.level4.lower.text}-${bounds.level4.upper.text}`,
+            label: bounds.level4.lower.text == bounds.level4.upper.text ? bounds.level4.lower.text : `${bounds.level4.lower.text}-${bounds.level4.upper.text}`,
             color: ChoroplethMapColors.level4,
         },
         {
-            label: `${bounds.level5.lower.text}-${bounds.level5.upper.text}`,
+            label: bounds.level5.lower.text == bounds.level5.upper.text ? bounds.level5.lower.text : `${bounds.level5.lower.text}-${bounds.level5.upper.text}`,
             color: ChoroplethMapColors.level5,
         },
         {
