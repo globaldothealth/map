@@ -263,6 +263,34 @@ export const usePathingLayer = (
     ]
 
 
+    const buildSignificantEventsGeoJSON = (events: typeof significantEventsData) => {
+        const grouped: Record<string, { markers: number[]; entries: typeof significantEventsData; popupAnchor: string }> = {};
+        for (const e of events) {
+            if (!grouped[e.location]) {
+                grouped[e.location] = { markers: [], entries: [], popupAnchor: (e as typeof e & { popupAnchor?: string }).popupAnchor || 'bottom' };
+            }
+            grouped[e.location].markers.push(e.marker);
+            grouped[e.location].entries.push(e);
+        }
+        return {
+            type: 'FeatureCollection' as const,
+            features: Object.entries(grouped).map(([location, group]) => ({
+                type: 'Feature' as const,
+                properties: {
+                    markers: group.markers.join(', '),
+                    label: location.startsWith('%') ? '' : location,
+                    location,
+                    popupAnchor: group.popupAnchor,
+                    events: JSON.stringify(group.entries.map(e => ({ date: e.date, description: e.description }))),
+                },
+                geometry: {
+                    type: 'Point' as const,
+                    coordinates: [locationNameToLongLat[location].long, locationNameToLongLat[location].lat]
+                }
+            }))
+        };
+    };
+
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
@@ -593,34 +621,37 @@ export const usePathingLayer = (
                 .filter(e => locationNameToLongLat[e.location] && e.dateStart <= dateUpTo);
             map.addSource('significant-events', {
                 'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': filteredEvents
-                        .map(e => ({
-                            'type': 'Feature' as const,
-                            'properties': {
-                                'label': `${e.location.startsWith('%') ? '' : `${e.location}\n`}${e.date}`,
-                                'description': e.description,
-                                'date': e.date,
-                                'location': e.location,
-                                'popupAnchor': e.popupAnchor || 'bottom',
-                            },
-                            'geometry': {
-                                'type': 'Point' as const,
-                                'coordinates': [locationNameToLongLat[e.location].long, locationNameToLongLat[e.location].lat]
-                            }
-                        }))
-                }
+                'data': buildSignificantEventsGeoJSON(filteredEvents)
             });
             map.addLayer({
                 'id': 'significant-events-circle',
                 'type': 'circle',
                 'source': 'significant-events',
                 'paint': {
-                    'circle-radius': 8,
+                    'circle-radius': [
+                        'case',
+                        ['>', ['length', ['string', ['get', 'markers']]], 3], 20,
+                        ['>', ['length', ['string', ['get', 'markers']]], 2], 16,
+                        12
+                    ] as unknown as DataDrivenPropertyValueSpecification<number>,
                     'circle-color': statusColors['confirmed'] || '#FFA500',
                     'circle-stroke-color': '#ffffff',
                     'circle-stroke-width': 2
+                }
+            });
+            map.addLayer({
+                'id': 'significant-events-marker-text',
+                'type': 'symbol',
+                'source': 'significant-events',
+                'layout': {
+                    'text-field': ['get', 'markers'],
+                    'text-size': 10,
+                    'text-font': ['Open Sans Bold'],
+                    'text-allow-overlap': true,
+                    'text-ignore-placement': true,
+                },
+                'paint': {
+                    'text-color': '#ffffff',
                 }
             });
             map.addLayer({
@@ -649,20 +680,17 @@ export const usePathingLayer = (
 
                 const coordinates = (e.features[0].geometry as GeoJSON.Point).coordinates.slice() as [number, number];
                 const popupAnchor = e.features[0].properties?.popupAnchor || 'bottom';
-
-                // Query all features at this point to show multiple events at the same location
-                const allFeatures = map.queryRenderedFeatures(e.point, { layers: ['significant-events-circle'] });
+                const location = e.features[0].properties?.location || '';
+                const eventsRaw = e.features[0].properties?.events || '[]';
+                const events: { date: string; description: string }[] = JSON.parse(eventsRaw);
 
                 let html = '<div style="min-width:250px;max-height:400px;overflow-y:auto;font-size:14px;white-space:pre-wrap;padding:10px;">';
-                const location = allFeatures[0]?.properties?.location || '';
                 if (!location.startsWith('%')) {
                     html += `<p style="font-size:18px;font-weight:bold;margin-bottom:6px;">${location}</p>`;
                 }
-                allFeatures.forEach((f, i) => {
-                    const date = f.properties?.date || '';
-                    const description = f.properties?.description || '';
+                events.forEach((ev, i) => {
                     if (i > 0) html += '<hr style="border:none;border-top:1px solid #ddd;margin:10px 0;">';
-                    html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${date}</p><p style="color:#454545">${description}</p>`;
+                    html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${ev.date}</p><p style="color:#454545">${ev.description}</p>`;
                 });
                 html += '</div>';
 
@@ -948,22 +976,7 @@ export const usePathingLayer = (
         if (map.getSource('significant-events')) {
             const filteredEvents = significantEventsData
                 .filter(e => locationNameToLongLat[e.location] && e.dateStart <= dateUpTo);
-            (map.getSource('significant-events') as any).setData({
-                type: 'FeatureCollection',
-                features: filteredEvents.map(e => ({
-                    type: 'Feature' as const,
-                    properties: {
-                        label: `${e.location.startsWith('%') ? '' : `${e.location}\n`}${e.date}`,
-                        description: e.description,
-                        date: e.date,
-                        location: e.location,
-                    },
-                    geometry: {
-                        type: 'Point' as const,
-                        coordinates: [locationNameToLongLat[e.location].long, locationNameToLongLat[e.location].lat]
-                    }
-                }))
-            });
+            (map.getSource('significant-events') as any).setData(buildSignificantEventsGeoJSON(filteredEvents));
         }
     }, [dateUpTo, map]);
 
@@ -993,7 +1006,7 @@ export const usePathingLayer = (
     useEffect(() => {
         if (!map) return;
         const visibility = overlaysOpen['significantEvents'] ? 'visible' : 'none';
-        ['significant-events-circle', 'significant-events-label'].forEach(layerId => {
+        ['significant-events-circle', 'significant-events-marker-text', 'significant-events-label'].forEach(layerId => {
             if (map.getLayer(layerId)) {
                 map.setLayoutProperty(layerId, 'visibility', visibility);
             }
