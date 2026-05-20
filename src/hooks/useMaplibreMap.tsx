@@ -17,8 +17,8 @@ export function useMaplibreMap(
                 import.meta.env.VITE_MAP_THEME_URL ||
                 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
             renderWorldCopies: false,
-            center: [0, 40],
-            zoom: 2.5,
+            center: [-40, 10],
+            zoom: 1,
             minZoom: 2,
         }).addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
