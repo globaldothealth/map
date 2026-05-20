@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React, {useEffect, useState} from 'react';
 import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
 import {Feature, FeatureCollection} from 'geojson';
-import {DataDrivenPropertyValueSpecification, Map, Popup} from 'maplibre-gl';
+import {Map, Popup} from 'maplibre-gl';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
