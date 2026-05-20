@@ -7,13 +7,13 @@ import {
     FormControl,
     Typography,
 } from '@mui/material';
-import { useState, useEffect, SyntheticEvent } from 'react';
-import { whereAlpha3 } from 'iso-3166-1';
+import {useState, useEffect, SyntheticEvent} from 'react';
+import {whereAlpha3} from 'iso-3166-1';
 
-import { CountryData } from 'src/models/CountryData';
-import { FocusedArea } from 'src/models/FocusedArea';
-import { RegionalData } from 'src/models/RegionalData';
-import { StateData } from 'src/models/StateData';
+import {CountryData} from 'src/models/CountryData';
+import {FocusedArea} from 'src/models/FocusedArea';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
 import {
     selectCountriesData,
     selectConfirmedCaseCount,
@@ -31,13 +31,13 @@ import {
     // OutbreakNames,
     // setOutbreakName,
 } from 'src/redux/App/slice';
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
+import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {
     selectRegionalData,
     selectRegionalTotalCases,
 } from 'src/redux/Regional/selectors';
-import { selectStateData, selectStateTotalCases } from 'src/redux/State/selectors';
-import { convertStringDateToDate, getCountryISO2 } from 'src/utils/helperFunctions';
+import {selectStateData, selectStateTotalCases} from 'src/redux/State/selectors';
+import {convertStringDateToDate, getCountryISO2} from 'src/utils/helperFunctions';
 
 import {
     CaseCountsBar,
@@ -94,10 +94,10 @@ const SideBar = () => {
     ) => {
         if (focusedArea?.areaId === areaId) {
             dispatch(setFocusedArea(null));
-            dispatch(setPopup({ isOpen: false, countryCode: 'worldwide' }));
+            dispatch(setPopup({isOpen: false, countryCode: 'worldwide'}));
         } else {
-            dispatch(setFocusedArea({ name, areaId, countryCode }));
-            dispatch(setPopup({ isOpen: true, countryCode }));
+            dispatch(setFocusedArea({name, areaId, countryCode}));
+            dispatch(setPopup({isOpen: true, countryCode}));
         }
     };
 
@@ -108,7 +108,7 @@ const SideBar = () => {
         if (value === null) return;
 
         dispatch(setFocusedArea(value));
-        dispatch(setPopup({ isOpen: true, countryCode: value.countryCode }));
+        dispatch(setPopup({isOpen: true, countryCode: value.countryCode}));
     };
 
     const mapDataToAutocomplete = (
@@ -172,7 +172,7 @@ const SideBar = () => {
         return (
             <>
                 {administrativeAreaData.map((administrativeAreaEntry) => {
-                    const { caseCount, countryCode, areaId, name } =
+                    const {caseCount, countryCode, areaId, name} =
                         administrativeAreaEntry;
                     const isActive = focusedArea?.areaId === areaId;
                     const casesPercentage =
@@ -188,7 +188,7 @@ const SideBar = () => {
                             isActive={isActive}
                         >
                             <>
-                                <FlagIcon
+                            {!countryCode.startsWith("Other") ? <FlagIcon
                                     loading="lazy"
                                     src={`https://flagcdn.com/w20/${getCountryISO2(
                                         countryCode,
@@ -197,7 +197,7 @@ const SideBar = () => {
                                         countryCode,
                                     ).toLowerCase()}.png 2x`}
                                     alt={`${countryCode} flag`}
-                                />
+                            /> : <span style={{marginLeft: '40px'}}></span>}
                                 <CountryLabel
                                     isActive={isActive}
                                     variant="body2"
@@ -211,7 +211,7 @@ const SideBar = () => {
                             >
                                 {caseCount.toLocaleString()}
                             </CountryCaseCount>
-                            <CaseCountsBar barWidth={casesPercentage} />
+                            <CaseCountsBar barWidth={casesPercentage}/>
                         </LocationListItem>
                     );
                 })}{' '}
@@ -269,21 +269,17 @@ const SideBar = () => {
                     <>
                         <div>
                         <span id="total-cases" className="active">
-                            {confirmedCaseCount.toLocaleString()}
+                            {confirmedCaseCount + probableCaseCount}
                         </span>
-                        <span className="reported-cases-label">
-                            {' '}
-                            confirmed cases
+                            <span className="reported-cases-label">
+                                total cases
                         </span>
                         </div>
                         <div>
-                        <span id="total-cases" className="active">
-                            {probableCaseCount.toLocaleString()}
-                        </span>
-                        <span className="reported-cases-label">
-                            {' '}
-                            probable cases
-                        </span>
+                            <span className="reported-cases-label">
+                                <span style={{fontWeight: 'bold', color: 'black'}}>{confirmedCaseCount}</span> confirmed and <span
+                                style={{fontWeight: 'bold', color: 'black'}}>{probableCaseCount}</span> probable
+                            </span>
                         </div>
                     </>
                 );
@@ -295,8 +291,15 @@ const SideBar = () => {
             <SideBarHeader id="sidebar-header">
                 <div id="disease-selector">
                     <FormControl fullWidth>
-                        <Typography variant='h5' sx={{backgroundColor: 'rgb(25, 118, 210)', color: 'white', p:'.5em', borderRadius: '.3em', fontWeight: 'bold', fontSize: '26px'}}>
-                            Hantavirus  <span style={{fontWeight: 400}}>h2026</span>
+                        <Typography variant='h5' sx={{
+                            backgroundColor: 'rgb(25, 118, 210)',
+                            color: 'white',
+                            p: '.5em',
+                            borderRadius: '.3em',
+                            fontWeight: 'bold',
+                            fontSize: '26px'
+                        }}>
+                            Hantavirus <span style={{fontWeight: 400}}>h2026</span>
                         </Typography>
                         {/*<Select*/}
                         {/*    labelId="outbreak-select-label"*/}
@@ -387,7 +390,7 @@ const SideBar = () => {
                             className="autocompleteBox"
                             {...props}
                         >
-                            {option.name === 'worldwide' ||
+                            {option.name === 'worldwide' || option.name === 'Netherlands' ||
                             !option.countryCode ? (
                                 <EmptyFlag>-</EmptyFlag>
                             ) : (
@@ -400,17 +403,19 @@ const SideBar = () => {
                                 />
                             )}
 
-                            {option.name}
+                            {option.name} ddd
                         </Box>
                     )}
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             label={`Choose a ${resolution}`}
-                            slotProps={{htmlInput: {
-                                ...params.slotProps.htmlInput,
-                                'data-cy': 'autocomplete-input',
-                            }}}
+                            slotProps={{
+                                htmlInput: {
+                                    ...params.slotProps.htmlInput,
+                                    'data-cy': 'autocomplete-input',
+                                }
+                            }}
                         />
                     )}
                 />
@@ -423,7 +428,7 @@ const SideBar = () => {
                         data-cy="loading-skeleton"
                     />
                 ) : (
-                    <Countries />
+                    <Countries/>
                 )}
             </LocationList>
 
