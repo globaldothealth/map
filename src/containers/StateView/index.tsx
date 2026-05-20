@@ -7,6 +7,7 @@ import { setFocusedArea } from 'src/redux/App/slice';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 import { selectStateData } from 'src/redux/State/selectors';
 import { fetchStateData } from 'src/redux/State/thunks';
+import {selectDataType} from "src/redux/Country/selectors.ts";
 
 const dataLayerBounds = {
     level1: {
@@ -37,6 +38,8 @@ export const StateView: React.FC = () => {
     const stateData = useAppSelector(selectStateData);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
+    const dataType = useAppSelector(selectDataType);
+
 
     // Fetch state storage
     useEffect(() => {
@@ -55,6 +58,7 @@ export const StateView: React.FC = () => {
             chartType={ChartTypeNames.State}
             adminLevel={1}
             dataLayerBounds={dataLayerBounds}
+            dataType={dataType}
         />
     );
 };

@@ -11,3 +11,4 @@ export const selectCountryTotalCasesIsLoading = (state: RootState) =>
     state.country.isLoading;
 export const selectCountryLastUpdateDate = (state: RootState) =>
     state.country.lastUpdateDate;
+export const selectDataType = (state: RootState) => state.country.dataType;

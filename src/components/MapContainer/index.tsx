@@ -23,6 +23,7 @@ import {
 } from 'src/utils/helperFunctions';
 import {usePathingLayer} from './PathingLayer';
 import Timeseries from "src/components/Timeseries";
+import {DataType} from "src/redux/Country/slice.ts";
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
@@ -36,6 +37,7 @@ interface MapContainerProps {
             upper: { number: number; text: string };
         };
     };
+    dataType: DataType;
 }
 
 const MapContainer = ({
@@ -44,6 +46,7 @@ const MapContainer = ({
                           setFocusedArea,
                           adminLevel,
                           dataLayerBounds,
+    dataType,
                       }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [dateUpTo, setDateUpTo] = useState('2026-05-01');
@@ -130,7 +133,8 @@ const MapContainer = ({
         dataLayerBounds,
         overlaysOpen,
         statusColors,
-        dateUpTo
+        dateUpTo,
+        dataType
     );
 
     return (

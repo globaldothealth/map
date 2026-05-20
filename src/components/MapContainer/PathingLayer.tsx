@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
 import {Feature, FeatureCollection} from 'geojson';
 import {Map, Popup} from 'maplibre-gl';
+import maplibregl from 'maplibre-gl';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
@@ -20,6 +21,7 @@ import {
     significantEventsData,
     transfers
 } from "src/components/MapContainer/staticData.ts";
+import { DataType } from "src/redux/Country/slice";
 
 export const usePathingLayer = (
     map: Map | null,
@@ -39,6 +41,7 @@ export const usePathingLayer = (
     overlaysOpen: { [key: string]: boolean },
     statusColors: { [key: string]: string },
     dateUpTo: string,
+    dataType: DataType
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
@@ -415,6 +418,7 @@ export const usePathingLayer = (
                             newProps.caseCount = matchedData.caseCount;
                             newProps.lat = matchedData.lat;
                             newProps.long = matchedData.long;
+                            newProps.status = (matchedData as CountryData).status || '';
                         }
 
                         return {
@@ -639,6 +643,27 @@ export const usePathingLayer = (
             (map.getSource('significant-events') as any).setData(buildSignificantEventsGeoJSON(filteredEvents));
         }
     }, [dateUpTo, map]);
+
+    // Close popup when dataType changes
+    useEffect(() => {
+        if (currentPopup) {
+            currentPopup.remove();
+            dispatch(setFocusedArea(null));
+        }
+    }, [dataType]);
+
+    // Hide probable cases when dataType is Confirmed
+    useEffect(() => {
+        if (!map) return;
+        const filter = dataType === DataType.Confirmed
+            ? ['!=', ['get', 'status'], 'probable'] as maplibregl.FilterSpecification
+            : undefined;
+        [`admin${adminLevel}Join`, `admin${adminLevel}JoinBorder`].forEach(layerId => {
+            if (map.getLayer(layerId)) {
+                map.setFilter(layerId, filter);
+            }
+        });
+    }, [dataType, map, mapLoaded]);
 
     // Toggle ship overlay visibility
     useEffect(() => {

@@ -1,6 +1,11 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {fetchCountriesData} from 'src/redux/Country/thunks';
 import {CountryData} from 'src/models/CountryData';
+
+export enum DataType {
+    Confirmed,
+    Combined,
+}
 
 interface AppState {
     isLoading: boolean;
@@ -8,6 +13,8 @@ interface AppState {
     confirmedCaseCount: number;
     probableCaseCount: number;
     lastUpdateDate: string;
+    dataType: DataType;
+
 }
 
 const initialState: AppState = {
@@ -16,12 +23,17 @@ const initialState: AppState = {
     confirmedCaseCount: 8,
     probableCaseCount: 2,
     lastUpdateDate: '',
+    dataType: DataType.Confirmed,
 };
+
+
 
 export const countrySlice = createSlice({
     name: 'country',
     initialState,
-    reducers: {},
+    reducers: {        setDataType: (state, action: PayloadAction<DataType>) => {
+            state.dataType = action.payload;
+        },},
     extraReducers: (builder) => {
         builder.addCase(fetchCountriesData.pending, (state) => {
             state.isLoading = true;
@@ -38,5 +50,7 @@ export const countrySlice = createSlice({
         });
     },
 });
+
+export const {setDataType} = countrySlice.actions;
 
 export default countrySlice.reducer;

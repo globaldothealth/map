@@ -1,12 +1,13 @@
-import { useEffect } from 'react';
+import {useEffect} from 'react';
 
 import MapContainer from 'src/components/MapContainer';
-import { ChartTypeNames } from 'src/models/ViewParamURLValues';
-import { selectFocusedArea, selectOutbreakName } from 'src/redux/App/selectors';
-import { setFocusedArea } from 'src/redux/App/slice';
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
-import { selectRegionalData } from 'src/redux/Regional/selectors';
-import { fetchRegionalData } from 'src/redux/Regional/thunks';
+import {ChartTypeNames} from 'src/models/ViewParamURLValues';
+import {selectFocusedArea, selectOutbreakName} from 'src/redux/App/selectors';
+import {setFocusedArea} from 'src/redux/App/slice';
+import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
+import {selectRegionalData} from 'src/redux/Regional/selectors';
+import {fetchRegionalData} from 'src/redux/Regional/thunks';
+import {selectDataType} from "src/redux/Country/selectors.ts";
 
 const dataLayerBounds = {
     level1: {
@@ -37,6 +38,8 @@ export const RegionalView: React.FC = () => {
     const regionalData = useAppSelector(selectRegionalData);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
+    const dataType = useAppSelector(selectDataType);
+
 
     // Fetch regional storage
     useEffect(() => {
@@ -55,6 +58,7 @@ export const RegionalView: React.FC = () => {
             chartType={ChartTypeNames.Regional}
             adminLevel={2}
             dataLayerBounds={dataLayerBounds}
+            dataType={dataType}
         />
     );
 };

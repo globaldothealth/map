@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 
@@ -126,7 +127,7 @@ export const LatestGlobal = styled('aside')<{ $sidebaropen: boolean }>`
     .last-updated-date {
         font-size: 1.2rem;
         color: #999;
-        margin-top: 2rem;
+        margin-top: 1rem;
     }
 `;
 
@@ -232,4 +233,29 @@ export const VersionNumber = styled('a')(() => ({
     '&:hover': {
         textDecoration: 'underline',
     },
+}));
+
+
+interface DataTypeButtonProps {
+    selected: boolean;
+}
+
+export const DataTypeButton = styled(Button, {
+    shouldForwardProp: (prop) => prop !== 'selected',
+})<DataTypeButtonProps>(({ selected, theme }) => ({
+    width: '100%',
+
+    '&:hover': {
+        backgroundColor: theme.palette.primary.main,
+    },
+
+    ...(!selected && {
+        // color: theme.palette.gray.main,
+        // borderColor: theme.palette.gray.dark,
+
+        '&:hover': {
+            // borderColor: theme.palette.gray.dark,
+            // backgroundColor: theme.palette.gray.light,
+        },
+    }),
 }));

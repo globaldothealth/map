@@ -1,13 +1,5 @@
-import {
-    Autocomplete,
-    Box,
-    // MenuItem,
-    TextField,
-    // Select,
-    FormControl,
-    Typography,
-} from '@mui/material';
-import {useState, useEffect, SyntheticEvent} from 'react';
+import {Autocomplete, Box, FormControl, TextField, Typography,} from '@mui/material';
+import {SyntheticEvent, useEffect, useState} from 'react';
 import {whereAlpha3} from 'iso-3166-1';
 
 import {CountryData} from 'src/models/CountryData';
@@ -15,30 +7,21 @@ import {FocusedArea} from 'src/models/FocusedArea';
 import {RegionalData} from 'src/models/RegionalData';
 import {StateData} from 'src/models/StateData';
 import {
-    selectCountriesData,
     selectConfirmedCaseCount,
-    selectProbableCaseCount,
+    selectCountriesData,
     selectCountryTotalCasesIsLoading,
+    selectDataType,
+    selectProbableCaseCount,
 } from 'src/redux/Country/selectors';
-import {
-    selectFocusedArea,
-    selectLastUpdateDate,
-    // selectOutbreakName,
-} from 'src/redux/App/selectors';
-import {
-    setFocusedArea,
-    setPopup,
-    // OutbreakNames,
-    // setOutbreakName,
-} from 'src/redux/App/slice';
+import {selectFocusedArea, selectLastUpdateDate,} from 'src/redux/App/selectors';
+import {setFocusedArea, setPopup,} from 'src/redux/App/slice';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
-import {
-    selectRegionalData,
-    selectRegionalTotalCases,
-} from 'src/redux/Regional/selectors';
+import {selectRegionalData, selectRegionalTotalCases,} from 'src/redux/Regional/selectors';
 import {selectStateData, selectStateTotalCases} from 'src/redux/State/selectors';
 import {convertStringDateToDate, getCountryISO2} from 'src/utils/helperFunctions';
+import {DataType} from "src/redux/Country/slice";
 
+import {DataTypeButtons} from './DataTypeButtons';
 import {
     CaseCountsBar,
     CountriesListSkeleton,
@@ -79,6 +62,7 @@ const SideBar = () => {
     );
     const totalRegionalCasesCount = useAppSelector(selectRegionalTotalCases);
     const totalStateCasesCount = useAppSelector(selectStateTotalCases);
+    const dataType: DataType = useAppSelector(selectDataType);
     // const outbreakName = useAppSelector(selectOutbreakName);
 
     const resolution = location.pathname.split('/')[1] as Resolution;
@@ -145,13 +129,14 @@ const SideBar = () => {
     const getDataForAdministrativeAreaList = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
     ) => {
-        return administrativeAreaData
+        return administrativeAreaData.filter((administrativeAreaEntry) => dataType == DataType.Combined || dataType == DataType.Confirmed && administrativeAreaEntry.status === 'confirmed')
             .map((administrativeAreaEntry) => {
                 return {
                     caseCount: administrativeAreaEntry.caseCount,
                     countryCode: administrativeAreaEntry.countryCode,
                     areaId: administrativeAreaEntry.areaId,
                     name: administrativeAreaEntry.name,
+                    status: administrativeAreaEntry.status,
                 };
             })
             .sort(
@@ -167,12 +152,13 @@ const SideBar = () => {
             countryCode: string;
             areaId: string;
             name: string;
+            status?: string;
         }[],
     ) => {
         return (
             <>
                 {administrativeAreaData.map((administrativeAreaEntry) => {
-                    const {caseCount, countryCode, areaId, name} =
+                    const {caseCount, countryCode, areaId, name, status} =
                         administrativeAreaEntry;
                     const isActive = focusedArea?.areaId === areaId;
                     const casesPercentage =
@@ -188,7 +174,7 @@ const SideBar = () => {
                             isActive={isActive}
                         >
                             <>
-                            {!countryCode.startsWith("Other") ? <FlagIcon
+                                {!countryCode.startsWith("Other") ? <FlagIcon
                                     loading="lazy"
                                     src={`https://flagcdn.com/w20/${getCountryISO2(
                                         countryCode,
@@ -197,12 +183,12 @@ const SideBar = () => {
                                         countryCode,
                                     ).toLowerCase()}.png 2x`}
                                     alt={`${countryCode} flag`}
-                            /> : <span style={{marginLeft: '40px'}}></span>}
+                                /> : <span style={{marginLeft: '40px'}}></span>}
                                 <CountryLabel
                                     isActive={isActive}
                                     variant="body2"
                                 >
-                                    {name}
+                                    {name} {status === 'probable' && <span style={{color: '#bac0be'}}>{status}</span>}
                                 </CountryLabel>
                             </>
                             <CountryCaseCount
@@ -365,6 +351,7 @@ const SideBar = () => {
                     )}
                 </div>
             </LatestGlobal>
+            <DataTypeButtons/>
 
             <SearchBar className="searchbar">
                 <Autocomplete

@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import MapContainer from 'src/components/MapContainer';
 import { ChartTypeNames } from 'src/models/ViewParamURLValues';
 import { selectFocusedArea, selectOutbreakName } from 'src/redux/App/selectors';
-import { selectCountriesData } from 'src/redux/Country/selectors';
+import {selectCountriesData, selectDataType} from 'src/redux/Country/selectors';
 import { setFocusedArea } from 'src/redux/App/slice';
 import { fetchCountriesData } from 'src/redux/Country/thunks';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
@@ -37,6 +37,7 @@ export const CountryView: React.FC = () => {
     const countryData = useAppSelector(selectCountriesData);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
+    const dataType = useAppSelector(selectDataType);
 
     // Fetch country storage
     useEffect(() => {
@@ -55,6 +56,7 @@ export const CountryView: React.FC = () => {
             chartType={ChartTypeNames.Country}
             adminLevel={0}
             dataLayerBounds={dataLayerBounds}
+            dataType={dataType}
         />
     );
 };
