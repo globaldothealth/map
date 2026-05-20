@@ -295,8 +295,8 @@ const SideBar = () => {
             <SideBarHeader id="sidebar-header">
                 <div id="disease-selector">
                     <FormControl fullWidth>
-                        <Typography variant='h4' sx={{backgroundColor: 'rgb(25, 118, 210)', color: 'white', p:'.5em', borderRadius: '.3em', fontWeight: 'bold'}}>
-                            Hantavirus
+                        <Typography variant='h5' sx={{backgroundColor: 'rgb(25, 118, 210)', color: 'white', p:'.5em', borderRadius: '.3em', fontWeight: 'bold', fontSize: '26px'}}>
+                            Hantavirus  <span style={{fontWeight: 400}}>h2026</span>
                         </Typography>
                         {/*<Select*/}
                         {/*    labelId="outbreak-select-label"*/}

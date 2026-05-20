@@ -278,30 +278,10 @@ export const usePathingLayer = (
                 'type': 'circle',
                 'source': 'significant-events',
                 'paint': {
-                    'circle-radius': [
-                        'case',
-                        ['>', ['length', ['string', ['get', 'markers']]], 3], 20,
-                        ['>', ['length', ['string', ['get', 'markers']]], 2], 16,
-                        12
-                    ] as unknown as DataDrivenPropertyValueSpecification<number>,
+                    'circle-radius': 8,
                     'circle-color': statusColors.events || '#FFA500',
                     'circle-stroke-color': '#ffffff',
                     'circle-stroke-width': 2
-                }
-            });
-            map.addLayer({
-                'id': 'significant-events-marker-text',
-                'type': 'symbol',
-                'source': 'significant-events',
-                'layout': {
-                    'text-field': ['get', 'markers'],
-                    'text-size': 10,
-                    'text-font': ['Open Sans Bold'],
-                    'text-allow-overlap': true,
-                    'text-ignore-placement': true,
-                },
-                'paint': {
-                    'text-color': '#ffffff',
                 }
             });
             map.addLayer({
