@@ -25,12 +25,21 @@ const TopBar = () => (
                         </Typography>
                     </NavLink>
                     <a
-                        href={'https://data.global.health/'}
+                        href={'https://github.com/globaldothealth/outbreak-data/blob/main/hantavirus/Gh%20Hantavirus%20Timeline.csv'}
                         rel="noopener noreferrer"
                         target="_blank"
                     >
                         <Typography variant="navbarlink" gutterBottom>
-                            Data Portal
+                            Timeline
+                        </Typography>
+                    </a>
+                    <a
+                        href={'https://github.com/kraemer-lab/Hondius_hantavirus_h2026/blob/main/data/linelist/2026_hantavirus.csv'}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        <Typography variant="navbarlink" gutterBottom>
+                            Linelist
                         </Typography>
                     </a>
                     <a href="mailto:info@global.health?subject=Feedback regarding Global.health map">
