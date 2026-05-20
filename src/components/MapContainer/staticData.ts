@@ -124,9 +124,9 @@ export const shipPath = [
     },
     {
         location: 'Rotterdam, Netherlands',
-        date: 'May 19th 2026',
-        dateStart: '2026-05-19',
-        dateEnd: '2026-05-19'
+        date: 'May 18th 2026',
+        dateStart: '2026-05-18',
+        dateEnd: '2026-05-18'
     }
 ]
 

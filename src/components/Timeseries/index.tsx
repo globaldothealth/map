@@ -54,7 +54,7 @@ export default function Timeseries({isHidden, setDateUpTo}: TimeseriesProps) {
     // const [startDate, setStartDate] = useState<Date>();
     // const [endDate, setEndDate] = useState<Date>();
     const timeseriesStart = '2026-04-01';
-    const timeseriesEnd = '2026-05-19';
+    const timeseriesEnd = '2026-05-18';
 
     const timeseriesData: string[] = [];
     {
