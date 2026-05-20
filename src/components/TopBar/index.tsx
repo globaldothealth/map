@@ -39,7 +39,7 @@ const TopBar = () => (
                         target="_blank"
                     >
                         <Typography variant="navbarlink" gutterBottom>
-                            Linelist
+                            Data
                         </Typography>
                     </a>
                     <a href="mailto:info@global.health?subject=Feedback regarding Global.health map">

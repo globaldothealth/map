@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Backdrop, Button, DialogContent, DialogContentText, Paper} from '@mui/material';
+import {Backdrop, Button, DialogContent, DialogContentText, Paper, Typography} from '@mui/material';
 import {Close as CloseIcon, Help as HelpIcon} from '@mui/icons-material';
 import {PaperProps} from '@mui/material/Paper';
 import Draggable from 'react-draggable';
@@ -61,7 +61,7 @@ export const MapGuide: React.FC = () => {
                 aria-labelledby="map-guide"
             >
                 <StyledDialogTitle id="map-guide" sx={{color: 'white'}}>
-                    Welcome to Global.health Map!
+                    How to Use the Global.health Hantavirus Map
                     <CloseButton aria-label="close" onClick={handleClose}>
                         <CloseIcon/>
                     </CloseButton>
@@ -71,40 +71,50 @@ export const MapGuide: React.FC = () => {
                         ref={descriptionElementRef}
                         tabIndex={-1}
                     >
-                        These geospatial data visualisations allow you to
-                        explore our line-list dataset through a few
-                        different views:
+                        This guide explains the Global.health resources related to the <em>MV Hondius</em> 2026
+                        hantavirus outbreak (Hantavirus h2026) that are accessible through the Map View.
                         <br/>
                         <br/>
-                        <strong>Country View (admin0/country):</strong> Click on a country to see
-                        case count of available line-list data for that country.
-                        You can also use the left-hand navigation to search or
-                        select a country. Darker colours indicate more cases.
-                        Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
+                        <Typography variant='h6'>Data</Typography>
+                        Click <strong>Data</strong> to access the latest downloadable <span
+                        style={{fontFamily: 'monospace'}}>.csv</span> line list containing
+                        epidemiological data for reported human cases. Case data are updated as new public reports
+                        become available and may be revised as additional information is confirmed.
                         <br/>
                         <br/>
-                        <strong>State View (admin1):</strong> Click on a region to see
-                        case count of available line-list data for that state.
-                        Darker colours indicate more available line-list
-                        data. Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
+                        <Typography variant='h6'>Timeline</Typography>
+                        Click <strong>Timeline</strong> to view a chronological overview of major outbreak events and
+                        response milestones.
                         <br/>
                         <br/>
-                        <strong>Regional View (admin2):</strong> Click on a region to see
-                        case count of available line-list data for that region.
-                        Darker colours indicate more available line-list
-                        data. Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
+                        <Typography variant='h6'>Map</Typography>
+                        Click <strong>Map</strong> to explore confirmed and probable human hantavirus cases linked to
+                        the outbreak. The map is powered by the Global.health line-list dataset.
+                        <br/>
+                        <br/>
+                        Cases that cannot be associated with a specific country are grouped under <strong>Other*</strong>.
+                        <br/>
+                        <ul>
+                            <li style={{marginLeft: '2em'}}><strong>Other*</strong> = Case 1 (Gh_ID1) became ill onboard
+                                and died at sea along the ship route between South Georgia and Tristan da Cunha. No
+                                microbiological testing was performed, and the case is classified as probable.
+                            </li>
+                            <li style={{marginLeft: '2em'}}><strong>Other**</strong> = Case 4 (Gh_ID4) became ill
+                                onboard and died at sea along the ship route near Cape Verde (Cabo Verde).
+                            </li>
+                        </ul>
+                        <br/>
+                        <Typography variant='h6'>Data Overlays</Typography>
+                        Optional map overlays are available to provide additional context, including:
+                        <ul>
+                            <li style={{marginLeft: '2em'}}>Significant outbreak events</li>
+                            <li style={{marginLeft: '2em'}}>The <em>MV Hondius</em> cruise ship route</li>
+                            <li style={{marginLeft: '2em'}}>Disembarkation in Tenerife, Canary Islands, Spain, where passengers and some crew departed and returned to their home countries</li>
+                        </ul>
+                        <br/>
+                        <Typography variant='h6'>Feedback</Typography>
+                        Click <strong>Feedback</strong> to send an email to the Global.health team.
+
                     </DialogContentText>
                 </DialogContent>
             </StyledMapGuideDialog>
