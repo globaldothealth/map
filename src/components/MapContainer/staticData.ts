@@ -37,6 +37,11 @@ export const locationNameToLongLat: Record<string, { long: number; lat: number }
     "Madrid, Spain": {long: -3.7038, lat: 40.4168},
     "Vancouver Island, British Columbia, Canada": {long: -126.0, lat: 49.0},
     "Nebraska, US": {long: -99.9018, lat: 41.4925},
+    "Rotterdam, Netherlands": {long: 4.47917, lat: 51.9225},
+    "%ship-spain": {long: -10.153163, lat: 43.741195},
+    "%ship-france": {long: -4.809105, lat: 49.407896},
+    "%ship-london": {long: 1.162191, lat: 50.680670},
+    "%ship-belgium": {long: 2.914143, lat:  51.890459}
 }
 
 export const shipPath = [
@@ -97,6 +102,32 @@ export const shipPath = [
         dateEnd: '2026-05-10',
         description: 'Port of Granadilla'
     },
+    {
+        location: '%ship-spain',
+        date: 'May 19th 2026',
+        dateStart: '2026-05-19',
+    },
+    {
+        location: '%ship-france',
+        date: 'May 19th 2026',
+        dateStart: '2026-05-19',
+    },
+    {
+        location: '%ship-london',
+        date: 'May 19th 2026',
+        dateStart: '2026-05-19',
+    },
+    {
+        location: '%ship-belgium',
+        date: 'May 19th 2026',
+        dateStart: '2026-05-19',
+    },
+    {
+        location: 'Rotterdam, Netherlands',
+        date: 'May 19th 2026',
+        dateStart: '2026-05-19',
+        dateEnd: '2026-05-19'
+    }
 ]
 
 export const significantEventsData = [

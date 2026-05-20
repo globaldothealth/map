@@ -147,6 +147,7 @@ export const usePathingLayer = (
                 'id': 'ship-stops-circle',
                 'type': 'circle',
                 'source': 'ship-stops',
+                'filter': ['!', ['in', '%', ['slice', ['get', 'location'], 0, 1]]],
                 'paint': {
                     'circle-radius': 6,
                     'circle-color': '#454545',
@@ -158,6 +159,7 @@ export const usePathingLayer = (
                 'id': 'ship-stops-label',
                 'type': 'symbol',
                 'source': 'ship-stops',
+                'filter': ['!', ['in', '%', ['slice', ['get', 'location'], 0, 1]]],
                 'layout': {
                     'text-field': ['get', 'label'],
                     'text-size': 14,
