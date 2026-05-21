@@ -45,7 +45,7 @@ export const CountryView: React.FC = () => {
         return () => {
             dispatch(setFocusedArea(null));
         };
-    }, [outbreakName]);
+    }, [outbreakName, dispatch]);
 
     return (
         <MapContainer

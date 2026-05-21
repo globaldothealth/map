@@ -1,3 +1,5 @@
+import {OutbreakNames} from "src/redux/App/slice.ts";
+
 export enum ChartTypeNames {
     Country = 'country',
     State = 'state',
@@ -11,4 +13,5 @@ export interface ViewParamURLValues {
     zoom?: number;
     chartType?: ChartTypeNames;
     focusedArea?: string;
+    outbreakName?: keyof typeof OutbreakNames
 }

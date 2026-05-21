@@ -27,6 +27,14 @@ interface AppState {
     outbreakName: keyof typeof OutbreakNames;
 }
 
+// This function checks the URL for an 'outbreakName' and sets it, this is done to avoid multiple fetching of outbreak data
+const getInitialOutbreakName = (): keyof typeof OutbreakNames => {
+    const params = new URLSearchParams(window.location.search);
+    const urlValue = params.get('outbreakName') as keyof typeof OutbreakNames | null;
+    if (urlValue && urlValue in OutbreakNames) return urlValue;
+    return 'AvianInfluenza';
+};
+
 const initialState: AppState = {
     isLoading: false,
     isMapLoading: false,
@@ -38,7 +46,7 @@ const initialState: AppState = {
         isOpen: false,
         countryCode: '',
     },
-    outbreakName: 'AvianInfluenza',
+    outbreakName: getInitialOutbreakName(),
 };
 
 export const appSlice = createSlice({
