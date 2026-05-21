@@ -97,30 +97,30 @@ export const shipPath = [
     },
     {
         location: 'Tenerife, Canary Islands',
-        date: 'May 10th 2026',
+        date: 'May 10th-11th 2026',
         dateStart: '2026-05-10',
-        dateEnd: '2026-05-10',
+        dateEnd: '2026-05-11',
         description: 'Port of Granadilla'
     },
     {
         location: '%ship-spain',
-        date: 'May 19th 2026',
-        dateStart: '2026-05-19',
+        date: 'May 18th 2026',
+        dateStart: '2026-05-18',
     },
     {
         location: '%ship-france',
-        date: 'May 19th 2026',
-        dateStart: '2026-05-19',
+        date: 'May 18th 2026',
+        dateStart: '2026-05-18',
     },
     {
         location: '%ship-london',
-        date: 'May 19th 2026',
-        dateStart: '2026-05-19',
+        date: 'May 18th 2026',
+        dateStart: '2026-05-18',
     },
     {
         location: '%ship-belgium',
-        date: 'May 19th 2026',
-        dateStart: '2026-05-19',
+        date: 'May 18th 2026',
+        dateStart: '2026-05-18',
     },
     {
         location: 'Rotterdam, Netherlands',
@@ -145,7 +145,7 @@ export const significantEventsData = [
         date: 'April 11th 2026',
         dateStart: '2026-04-11',
         relatedCaseStatus: 'Probable',
-        description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and diarrhea on April 6. His condition worsened and he developed respiratory distress and died on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'
+        description: 'Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and mild diarrhea on April 3. His condition progressed on April 6 to include dizziness, tachychardia, and tachypnoea, with further clinical deterioration. He died on board the vessel on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.'
     },
     {
         marker: 3,
@@ -153,7 +153,7 @@ export const significantEventsData = [
         date: 'April 14th 2026',
         dateStart: '2026-04-14',
         relatedCaseStatus: 'Probable',
-        description: 'Case 8 (Gh_ID12), an adult male, disembarked the ship in Tristan da Cunha on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever later on. He is considered a probable case until laboratory confirmation. '
+        description: 'Case 8 (Gh_ID12), a 65 year old British male, disembarked the ship in Tristan da Cunha, where he is a local resident, on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever on April 30. He was admitted to hospital on May 2 and remains hospitalized. He is considered a probable case as no laboratory testing has been possible.'
     },
     {
         marker: 4,
@@ -177,7 +177,7 @@ export const significantEventsData = [
         date: 'May 2nd 2026',
         dateStart: '2026-05-02',
         relatedCaseStatus: 'Confirmed',
-        description: 'Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department. PCR testing confirmed hantavirus infection.',
+        description: 'Case 3 (Gh_ID3), a 60 year old British male, developed symptoms of febrile illness, shortness of breath, and signs of pneumonia while onbaord the ship on April 21. His condition worsened on April 26 and he was medically evacuated from Ascension to South Africa on April 27 and is hospitalized in the ICU.  PCR testing confirmed hantavirus infection on May 2.',
     },
     {
         marker: 7,
@@ -185,7 +185,7 @@ export const significantEventsData = [
         date: 'May 2nd 2026',
         dateStart: '2026-05-02',
         relatedCaseStatus: 'Confirmed',
-        description: 'Case 4 (Gh_ID4) an adult female of German nationality, presented with fever and general malaise on April 28. Her condition worsened. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'
+        description: 'Case 4 (Gh_ID4), an 80 year old German female, developed fever, malaise, and respiratory symptoms on April 23. She developed pneumonia and died on May 2. Post-morten sampling confirmed Andes virus.'
     },
     {
         marker: 8,
@@ -193,7 +193,7 @@ export const significantEventsData = [
         date: 'May 5th 2026',
         dateStart: '2026-05-05',
         relatedCaseStatus: 'Confirmed',
-        description: 'Case 7 (Gh_ID5), an adult male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'
+        description: 'Case 7 (Gh_ID5), a 64 year old male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms of fever, headache, fatigue, and nausea on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5.'
     },
     {
         marker: 9,
@@ -209,7 +209,7 @@ export const significantEventsData = [
         date: 'May 6th 2026',
         dateStart: '2026-05-06',
         relatedCaseStatus: 'Confirmed',
-        description: 'Case 5 (Gh_ID7), an adult male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 6 and he was medically evacuated to the Netherlands.'
+        description: 'Case 5 (Gh_ID8), a 41 year old Dutch male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 6 and he was medically evacuated to the Netherlands.'
     },
     {
         marker: 11,
@@ -217,7 +217,7 @@ export const significantEventsData = [
         date: 'May 6th 2026',
         dateStart: '2026-05-06',
         relatedCaseStatus: 'Confirmed',
-        description: 'Case 6 (Gh_ID8) is an adult male working as the ship expedition guide, and presented symptoms on April 27 including mild respiratory and gastrointestinal symptoms. PCR testing confirmed Andes virus on May 6. He was one of three suspected cases removed from the ship in Cape Verde. He was medically evacuated to the Netherlands on May 7.'
+        description: 'Case 6 (Gh_ID7), a 56 year old British male working as a ship expedition guide, developed symptoms on May 1, including high fefer, fatigue and diarrhea. PCR testing confirmed Andes virus on May 6. He was one of three suspected cases removed from the ship in Cape Verde and was medically evacuated to the Netherlands on May 7.'
     },
     {
         marker: 12,
@@ -241,7 +241,7 @@ export const significantEventsData = [
         date: 'May 11th 2026',
         dateStart: '2026-05-11',
         relatedCaseStatus: 'Confirmed',
-        description: 'Gh_ID15, a French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11. She was reportedly in critical condition at a Paris hospital on May 13.'
+        description: 'Case 9 (Gh_ID15), a 73 year old French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11 and was admitted to a Paris hospital where she remains in critical condition.'
     },
     {
         marker: 15,
@@ -249,7 +249,7 @@ export const significantEventsData = [
         date: 'May 12th 2026',
         dateStart: '2026-05-12',
         relatedCaseStatus: 'Confirmed',
-        description: 'Gh_ID18 is a Spanish citizen who tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
+        description: 'Case 10 (Gh_ID18), a 70 year old Spanish female, tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and is quarantined at a hospital in Madrid.'
     },
     {
         marker: 16,
