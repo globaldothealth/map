@@ -216,7 +216,7 @@ const SideBar = () => {
         );
     };
 
-    const Countries = () => {
+    const SidebarEntries = () => {
         switch (resolution) {
             case Resolution.Country:
                 return renderAdministrativeAreaList(
@@ -390,10 +390,6 @@ const SideBar = () => {
                         <TextField
                             {...params}
                             label={`Choose a ${resolution}`}
-                            slotProps={{htmlInput: {
-                                ...params.slotProps.htmlInput,
-                                'data-cy': 'autocomplete-input',
-                            }}}
                         />
                     )}
                 />
@@ -406,7 +402,7 @@ const SideBar = () => {
                         data-cy="loading-skeleton"
                     />
                 ) : (
-                    <Countries />
+                    <SidebarEntries />
                 )}
             </LocationList>
 
