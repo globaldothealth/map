@@ -24,6 +24,16 @@ import {ThemeProvider} from '@mui/material/styles';
 import { theme } from 'src/theme/theme';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+// Prevent browser page zoom (trackpad pinch / Ctrl+scroll) while allowing
+// the map to handle its own zoom via its internal event listeners.
+document.addEventListener(
+    'wheel',
+    (e) => {
+        if (e.ctrlKey) e.preventDefault();
+    },
+    { passive: false },
+);
+
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
