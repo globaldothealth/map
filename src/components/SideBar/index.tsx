@@ -6,13 +6,13 @@ import {
     Select,
     FormControl,
 } from '@mui/material';
-import { useState, useEffect, SyntheticEvent } from 'react';
-import { whereAlpha3 } from 'iso-3166-1';
+import {useState, useEffect, SyntheticEvent} from 'react';
+import {whereAlpha3} from 'iso-3166-1';
 
-import { CountryData } from 'src/models/CountryData';
-import { FocusedArea } from 'src/models/FocusedArea';
-import { RegionalData } from 'src/models/RegionalData';
-import { StateData } from 'src/models/StateData';
+import {CountryData} from 'src/models/CountryData';
+import {FocusedArea} from 'src/models/FocusedArea';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
 import {
     selectCountriesData,
     selectCountryTotalCases,
@@ -29,13 +29,13 @@ import {
     OutbreakNames,
     setOutbreakName,
 } from 'src/redux/App/slice';
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
+import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {
     selectRegionalData,
     selectRegionalTotalCases,
 } from 'src/redux/Regional/selectors';
-import { selectStateData, selectStateTotalCases } from 'src/redux/State/selectors';
-import { convertStringDateToDate, getCountryISO2 } from 'src/utils/helperFunctions';
+import {selectStateData, selectStateTotalCases} from 'src/redux/State/selectors';
+import {convertStringDateToDate, getCountryISO2} from 'src/utils/helperFunctions';
 
 import {
     CaseCountsBar,
@@ -91,10 +91,10 @@ const SideBar = () => {
     ) => {
         if (focusedArea?.areaId === areaId) {
             dispatch(setFocusedArea(null));
-            dispatch(setPopup({ isOpen: false, countryCode: 'worldwide' }));
+            dispatch(setPopup({isOpen: false, countryCode: 'worldwide'}));
         } else {
-            dispatch(setFocusedArea({ name, areaId, countryCode }));
-            dispatch(setPopup({ isOpen: true, countryCode }));
+            dispatch(setFocusedArea({name, areaId, countryCode}));
+            dispatch(setPopup({isOpen: true, countryCode}));
         }
     };
 
@@ -105,7 +105,7 @@ const SideBar = () => {
         if (value === null) return;
 
         dispatch(setFocusedArea(value));
-        dispatch(setPopup({ isOpen: true, countryCode: value.countryCode }));
+        dispatch(setPopup({isOpen: true, countryCode: value.countryCode}));
     };
 
     const mapDataToAutocomplete = (
@@ -116,8 +116,9 @@ const SideBar = () => {
                 return {
                     name: administrativeAreaEntry.name || '',
                     areaId: administrativeAreaEntry.areaId,
+                    // Kosovo is not available in the library
                     countryCode:
-                        whereAlpha3(administrativeAreaEntry.countryCode)
+                        administrativeAreaEntry.countryCode === 'XKX' ? "XK" : whereAlpha3(administrativeAreaEntry.countryCode)
                             ?.alpha2 || '',
                 };
             },
@@ -169,7 +170,7 @@ const SideBar = () => {
         return (
             <>
                 {administrativeAreaData.map((administrativeAreaEntry) => {
-                    const { caseCount, countryCode, areaId, name } =
+                    const {caseCount, countryCode, areaId, name} =
                         administrativeAreaEntry;
                     const isActive = focusedArea?.areaId === areaId;
                     const casesPercentage =
@@ -208,7 +209,7 @@ const SideBar = () => {
                             >
                                 {caseCount.toLocaleString()}
                             </CountryCaseCount>
-                            <CaseCountsBar barWidth={casesPercentage} />
+                            <CaseCountsBar barWidth={casesPercentage}/>
                         </LocationListItem>
                     );
                 })}{' '}
@@ -402,7 +403,7 @@ const SideBar = () => {
                         data-cy="loading-skeleton"
                     />
                 ) : (
-                    <SidebarEntries />
+                    <SidebarEntries/>
                 )}
             </LocationList>
 

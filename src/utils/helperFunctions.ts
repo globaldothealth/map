@@ -150,6 +150,8 @@ export const getCountryName = (countryCode: string): string => {
 };
 
 export const getCountryISO2 = (countryCode: string): string => {
+    // Kosovo is not available in the library
+    if (countryCode === 'XKX') return 'XK';
     const countryObj = iso.whereAlpha3(countryCode);
 
     return countryObj?.alpha2 || '';
