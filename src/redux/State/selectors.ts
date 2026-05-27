@@ -5,5 +5,7 @@ export const selectIsStateViewLoading = (state: RootState) =>
 export const selectStateData = (state: RootState) => state.state.stateData;
 export const selectStateTotalCases = (state: RootState) =>
     state.state.totalNumberOfCases;
+export const selectStateTotalCasesIsLoading = (state: RootState) =>
+    state.state.isLoading;
 export const selectStateLastUpdatedDate = (state: RootState) =>
     state.state.lastUpdateDate;

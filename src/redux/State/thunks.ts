@@ -26,6 +26,7 @@ export const fetchStateData = createAsyncThunk<
         stateData: StateData[];
         totalNumberOfCases: number;
         lastUpdateDate: string;
+        outbreakName: string;
     },
     void,
     { rejectValue: string, state: RootState }
@@ -48,7 +49,7 @@ export const fetchStateData = createAsyncThunk<
             }
         }
 
-        return { stateData, totalNumberOfCases, lastUpdateDate };
+        return { stateData, totalNumberOfCases, lastUpdateDate, outbreakName };
     } catch (error: any) {
         console.error(error);
         if (!error.response) throw error;

@@ -51,7 +51,9 @@ export const AreaView: React.FC = () => {
                 }
                 break;
             default:
-                dispatch(fetchStateData());
+                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
+                    dispatch(fetchStateData());
+                }
                 break;
         }
         dispatch(setFocusedArea(null));
@@ -64,7 +66,7 @@ export const AreaView: React.FC = () => {
     const chartType = resolution === Resolutions.Admin0 ? ChartTypeNames.Country : ChartTypeNames.State;
     const data = resolution === Resolutions.Admin0
         ? countryData[OutbreakNames[outbreakName]]
-        : stateData;
+        : stateData[OutbreakNames[outbreakName]];
 
     return (
         <MapContainer

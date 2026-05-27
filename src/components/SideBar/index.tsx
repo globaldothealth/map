@@ -15,14 +15,13 @@ import {FocusedArea} from 'src/models/FocusedArea';
 import {RegionalData} from 'src/models/RegionalData';
 import {StateData} from 'src/models/StateData';
 import {
-    selectCountriesData,
+    selectCountriesData, selectCountryLastUpdateDate,
     selectCountryTotalCases,
     selectCountryTotalCasesIsLoading,
 } from 'src/redux/Country/selectors';
 import {
     selectAvailableResolutionsForOutbreaks,
     selectFocusedArea,
-    selectLastUpdateDate,
     selectOutbreakName, selectResolution,
 } from 'src/redux/App/selectors';
 import {
@@ -33,9 +32,11 @@ import {
 } from 'src/redux/App/slice';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {
-    selectRegionalData,
-} from 'src/redux/Regional/selectors';
-import {selectStateData, selectStateTotalCases} from 'src/redux/State/selectors';
+    selectStateData,
+    selectStateLastUpdatedDate,
+    selectStateTotalCases,
+    selectStateTotalCasesIsLoading
+} from 'src/redux/State/selectors';
 import {convertStringDateToDate, getCountryISO2} from 'src/utils/helperFunctions';
 
 import {
@@ -67,8 +68,8 @@ const SideBar = () => {
     const dispatch = useAppDispatch();
 
     const countriesData = useAppSelector(selectCountriesData);
-    const lastUpdateDate = useAppSelector(selectLastUpdateDate);
-    const regionalData = useAppSelector(selectRegionalData);
+    const lastUpdateCountryDate = useAppSelector(selectCountryLastUpdateDate);
+    const lastUpdateStateDate = useAppSelector(selectStateLastUpdatedDate);
     const stateData = useAppSelector(selectStateData);
     const focusedArea = useAppSelector(selectFocusedArea);
     const totalCountryCasesCount = useAppSelector(selectCountryTotalCases);
@@ -76,6 +77,9 @@ const SideBar = () => {
         selectCountryTotalCasesIsLoading,
     );
     const totalStateCasesCount = useAppSelector(selectStateTotalCases);
+    const totalStateCasesCountIsLoading = useAppSelector(
+        selectStateTotalCasesIsLoading,
+    );
     const outbreakName = useAppSelector(selectOutbreakName);
 
     const resolution = useAppSelector(selectResolution);
@@ -110,7 +114,7 @@ const SideBar = () => {
     };
 
     const mapDataToAutocomplete = (
-        administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
+        administrativeAreaData: CountryData[] | StateData[],
     ) => {
         const mappedData = administrativeAreaData.map(
             (administrativeAreaEntry) => {
@@ -133,10 +137,10 @@ const SideBar = () => {
                 mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin1:
-                mapDataToAutocomplete(stateData);
+                mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
                 break;
         }
-    }, [countriesData, stateData, regionalData]);
+    }, [countriesData, stateData, resolution, outbreakName]);
 
     const getDataForAdministrativeAreaList = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
@@ -223,7 +227,7 @@ const SideBar = () => {
                 );
             case Resolutions.Admin1:
                 return renderAdministrativeAreaList(
-                    getDataForAdministrativeAreaList(stateData),
+                    getDataForAdministrativeAreaList(stateData[OutbreakNames[outbreakName]]),
                 );
             default:
                 return null;
@@ -236,7 +240,7 @@ const SideBar = () => {
                 return (
                     <>
                         <span id="total-cases" className="active">
-                            {totalStateCasesCount.toLocaleString()}
+                            {totalStateCasesCount[OutbreakNames[outbreakName]].toLocaleString()}
                         </span>
                         <span className="reported-cases-label">
                             {' '}
@@ -315,7 +319,10 @@ const SideBar = () => {
                                         <MenuItem key={`${outbreak}|${view}`} value={`${outbreak}|${view}`}
                                                   sx={{pl: 4}}>
                                             {OutbreakNames[outbreak]}<span
-                                            style={{fontWeight: '300', marginLeft: '.3em'}}>({view === 'country' ? 'Countries' : 'States'})</span>
+                                            style={{
+                                                fontWeight: '300',
+                                                marginLeft: '.3em'
+                                            }}>({view === 'country' ? 'Countries' : 'States'})</span>
                                         </MenuItem>
                                     );
                                 });
@@ -332,7 +339,7 @@ const SideBar = () => {
                 </div>
             </SideBarHeader>
             <LatestGlobal id="latest-global" $sidebaropen={openSidebar}>
-                {totalCountryCasesCountIsLoading ? (
+                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
                     <SideBarTitlesSkeleton
                         animation="pulse"
                         variant="rectangular"
@@ -343,7 +350,7 @@ const SideBar = () => {
                 )}
                 <div className="last-updated-date">
                     Last reported case:{' '}
-                    {totalCountryCasesCountIsLoading ? (
+                    {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
                         <SideBarTitlesSkeleton
                             animation="pulse"
                             variant="rectangular"
@@ -351,7 +358,7 @@ const SideBar = () => {
                         />
                     ) : (
                         <span id="last-updated-date">
-                            {convertStringDateToDate(lastUpdateDate)}
+                            {convertStringDateToDate(resolution === Resolutions.Admin0 ? lastUpdateCountryDate[OutbreakNames[outbreakName]] : lastUpdateStateDate[OutbreakNames[outbreakName]]).toLocaleString()}
                         </span>
                     )}
                 </div>
@@ -406,7 +413,7 @@ const SideBar = () => {
                 />
             </SearchBar>
             <LocationList>
-                {totalCountryCasesCountIsLoading ? (
+                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
                     <CountriesListSkeleton
                         animation="pulse"
                         variant="rectangular"

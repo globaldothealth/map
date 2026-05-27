@@ -49,7 +49,7 @@ export const CountryView: React.FC = () => {
 
     return (
         <MapContainer
-            data={countryData}
+            data={countryData[outbreakName as keyof typeof countryData]}
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={ChartTypeNames.Country}
