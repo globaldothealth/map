@@ -68,7 +68,7 @@ export const AreaView: React.FC = () => {
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={chartType}
-            adminLevel={1}
+            adminLevel={adminLevel}
             dataLayerBounds={dataLayerBounds}
         />
     );
