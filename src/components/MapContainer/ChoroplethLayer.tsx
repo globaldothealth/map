@@ -49,7 +49,7 @@ export const useChoroplethLayer = (
                         properties: {
                             shapeGroup: d.countryCode,
                             shapeName: d.name,
-                            shapeType: `ADM${adminLevel}`,
+                            shapeType: `ADMIN`,
                         },
                     })),
                 };
@@ -114,7 +114,7 @@ export const useChoroplethLayer = (
                     features: joinedFeatures,
                 };
 
-                const sourceId = `admin${adminLevel}Source`;
+                const sourceId = `adminSource`;
 
                 if (map.getSource(sourceId)) {
                     (map.getSource(sourceId) as any).setData(joinedGeoJSON);
@@ -134,10 +134,10 @@ export const useChoroplethLayer = (
                     .getStyle()
                     .layers?.find((layer) => layer.type === 'symbol')?.id;
 
-                if (!map.getLayer(`admin${adminLevel}Join`)) {
+                if (!map.getLayer(`adminJoin`)) {
                     map.addLayer(
                         {
-                            id: `admin${adminLevel}Join`,
+                            id: `adminJoin`,
                             type: 'fill',
                             source: sourceId,
                             paint: {
@@ -194,10 +194,10 @@ export const useChoroplethLayer = (
                     );
                 }
 
-                if (!map.getLayer(`admin${adminLevel}JoinBorder`)) {
+                if (!map.getLayer(`adminJoinBorder`)) {
                     map.addLayer(
                         {
-                            id: `admin${adminLevel}JoinBorder`,
+                            id: `adminJoinBorder`,
                             type: 'line',
                             source: sourceId,
                             paint: {
@@ -221,7 +221,7 @@ export const useChoroplethLayer = (
                 }
 
                 // Click handler
-                map.on('click', `admin${adminLevel}Join`, (e) => {
+                map.on('click', `adminJoin`, (e) => {
                     if (!e.features || !e.features[0].properties?.areaName) {
                         dispatch(setFocusedArea(null));
                         return;
@@ -235,13 +235,13 @@ export const useChoroplethLayer = (
                 });
 
                 // Cursor pointer on hover
-                map.on('mousemove', `admin${adminLevel}Join`, (e) => {
+                map.on('mousemove', `adminJoin`, (e) => {
                     if (e.features?.[0]?.properties?.caseCount != null)
                         map.getCanvas().style.cursor = 'pointer';
                     else map.getCanvas().style.cursor = '';
                 });
 
-                map.on('mouseleave', `admin${adminLevel}Join`, () => {
+                map.on('mouseleave', `adminJoin`, () => {
                     map.getCanvas().style.cursor = '';
                 });
 

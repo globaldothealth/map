@@ -11,6 +11,7 @@ import SideBar from 'src/components/SideBar';
 import TopBar from 'src/components/TopBar';
 import { CountryView } from 'src/containers/CountryView';
 import { RegionalView } from 'src/containers/RegionalView';
+import { AreaView } from 'src/containers/AreaView';
 import { StateView } from 'src/containers/StateView';
 import { useCookieBanner } from 'src/hooks/useCookieBanner';
 import { selectIsLoading, selectError } from 'src/redux/App/selectors';
@@ -73,10 +74,11 @@ const App = () => {
             >
                 <SideBar />
                 <Routes>
-                    <Route
-                        path="/"
-                        element={<Navigate replace to="/country" />}
-                    />
+                    {/*<Route*/}
+                    {/*    path="/"*/}
+                    {/*    element={<Navigate replace to="/country" />}*/}
+                    {/*/>*/}
+                    <Route path="/" element={<AreaView />} />
                     <Route path="/country" element={<CountryView />} />
                     <Route path="/state" element={<StateView />} />
                     <Route path="/region" element={<RegionalView />} />

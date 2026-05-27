@@ -1,6 +1,7 @@
 import {
     Autocomplete,
     Box,
+    ListSubheader,
     MenuItem,
     TextField,
     Select,
@@ -19,20 +20,20 @@ import {
     selectCountryTotalCasesIsLoading,
 } from 'src/redux/Country/selectors';
 import {
+    selectAvailableResolutionsForOutbreaks,
     selectFocusedArea,
     selectLastUpdateDate,
-    selectOutbreakName,
+    selectOutbreakName, selectResolution,
 } from 'src/redux/App/selectors';
 import {
     setFocusedArea,
     setPopup,
     OutbreakNames,
-    setOutbreakName,
+    setOutbreakName, setResolution, Resolutions,
 } from 'src/redux/App/slice';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {
     selectRegionalData,
-    selectRegionalTotalCases,
 } from 'src/redux/Regional/selectors';
 import {selectStateData, selectStateTotalCases} from 'src/redux/State/selectors';
 import {convertStringDateToDate, getCountryISO2} from 'src/utils/helperFunctions';
@@ -74,11 +75,11 @@ const SideBar = () => {
     const totalCountryCasesCountIsLoading = useAppSelector(
         selectCountryTotalCasesIsLoading,
     );
-    const totalRegionalCasesCount = useAppSelector(selectRegionalTotalCases);
     const totalStateCasesCount = useAppSelector(selectStateTotalCases);
     const outbreakName = useAppSelector(selectOutbreakName);
 
-    const resolution = location.pathname.split('/')[1] as Resolution;
+    const resolution = useAppSelector(selectResolution);
+    const availableResolutionsForOutbreaks = useAppSelector(selectAvailableResolutionsForOutbreaks);
 
     const handleOnClick = () => {
         setOpenSidebar((value) => !value);
@@ -128,14 +129,11 @@ const SideBar = () => {
 
     useEffect(() => {
         switch (resolution) {
-            case Resolution.Country:
+            case Resolutions.Admin0:
                 mapDataToAutocomplete(countriesData);
                 break;
-            case Resolution.State:
+            case Resolutions.Admin1:
                 mapDataToAutocomplete(stateData);
-                break;
-            case Resolution.Region:
-                mapDataToAutocomplete(regionalData);
                 break;
         }
     }, [countriesData, stateData, regionalData]);
@@ -219,17 +217,13 @@ const SideBar = () => {
 
     const SidebarEntries = () => {
         switch (resolution) {
-            case Resolution.Country:
+            case Resolutions.Admin0:
                 return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(countriesData),
                 );
-            case Resolution.State:
+            case Resolutions.Admin1:
                 return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(stateData),
-                );
-            case Resolution.Region:
-                return renderAdministrativeAreaList(
-                    getDataForAdministrativeAreaList(regionalData),
                 );
             default:
                 return null;
@@ -238,7 +232,7 @@ const SideBar = () => {
 
     const getTotalCountText = () => {
         switch (resolution) {
-            case Resolution.State:
+            case Resolutions.Admin1:
                 return (
                     <>
                         <span id="total-cases" className="active">
@@ -247,18 +241,6 @@ const SideBar = () => {
                         <span className="reported-cases-label">
                             {' '}
                             confirmed cases available for State View
-                        </span>
-                    </>
-                );
-            case Resolution.Region:
-                return (
-                    <>
-                        <span id="total-cases" className="active">
-                            {totalRegionalCasesCount.toLocaleString()}
-                        </span>
-                        <span className="reported-cases-label">
-                            {' '}
-                            confirmed cases available for Regional View
                         </span>
                     </>
                 );
@@ -285,15 +267,26 @@ const SideBar = () => {
                         <Select
                             labelId="outbreak-select-label"
                             id="outbreak-select"
-                            value={outbreakName}
+                            value={`${outbreakName}|${resolution || Resolution.Country}`}
                             label="Selected Outbreak"
                             onChange={(event) => {
+                                const [outbreak, view] = (event.target.value as string).split('|');
+                                // const targetPath = `/${view}`;
+                                // if (location.pathname !== targetPath) {
+                                //     window.location.pathname = targetPath;
+                                // }
                                 dispatch(
                                     setOutbreakName(
-                                        event.target
-                                            .value as keyof typeof OutbreakNames,
+                                        outbreak as keyof typeof OutbreakNames,
                                     ),
                                 );
+                                dispatch(
+                                    setResolution(view == 'country' ? Resolutions.Admin0 : Resolutions.Admin1),
+                                )
+                            }}
+                            renderValue={(selected) => {
+                                const [outbreak, view] = (selected as string).split('|');
+                                return `${OutbreakNames[outbreak as keyof typeof OutbreakNames]} — ${view.charAt(0).toUpperCase() + view.slice(1)}`;
                             }}
                             sx={{
                                 background: 'rgb(25, 118, 210)',
@@ -312,11 +305,28 @@ const SideBar = () => {
                                 Object.keys(OutbreakNames) as Array<
                                     keyof typeof OutbreakNames
                                 >
-                            ).map((outbreak) => (
-                                <MenuItem key={outbreak} value={outbreak}>
-                                    {OutbreakNames[outbreak]}
-                                </MenuItem>
-                            ))}
+                            ).flatMap((outbreak) => {
+                                const availableResolutions = availableResolutionsForOutbreaks[outbreak] ?? [];
+                                const resolutionToView: Partial<Record<Resolutions, string>> = {
+                                    [Resolutions.Admin0]: 'country',
+                                    [Resolutions.Admin1]: 'state',
+                                };
+                                const items = availableResolutions.map((res) => {
+                                    const view = resolutionToView[res]!;
+                                    return (
+                                        <MenuItem key={`${outbreak}|${view}`} value={`${outbreak}|${view}`} sx={{pl: 4}}>
+                                            {OutbreakNames[outbreak]} — {view.charAt(0).toUpperCase() + view.slice(1)}
+                                        </MenuItem>
+                                    );
+                                });
+                                if (items.length === 0) return [];
+                                return [
+                                    <ListSubheader key={`header-${outbreak}`}>
+                                        {OutbreakNames[outbreak]}
+                                    </ListSubheader>,
+                                    ...items,
+                                ];
+                            })}
                         </Select>
                     </FormControl>
                 </div>
@@ -390,7 +400,7 @@ const SideBar = () => {
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label={`Choose a ${resolution}`}
+                            label={`Choose a ${resolution === Resolutions.Admin0 ? 'country' : 'state'}...`}
                         />
                     )}
                 />

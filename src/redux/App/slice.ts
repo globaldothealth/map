@@ -16,6 +16,11 @@ export enum OutbreakNames {
     Mpox2024 = 'Mpox 2024',
 }
 
+export enum Resolutions {
+    Admin0 = 'Admin0',
+    Admin1 = 'Admin1',
+}
+
 interface AppState {
     isLoading: boolean;
     isMapLoading: boolean;
@@ -25,6 +30,10 @@ interface AppState {
     lastUpdateDate: string;
     popup: IPopup;
     outbreakName: keyof typeof OutbreakNames;
+    resolution: Resolutions;
+    availableResolutionsForOutbreaks: {
+        [key in keyof typeof OutbreakNames]: Resolutions[];
+    }
 }
 
 // This function checks the URL for an 'outbreakName' and sets it, this is done to avoid multiple fetching of outbreak data
@@ -47,6 +56,15 @@ const initialState: AppState = {
         countryCode: '',
     },
     outbreakName: getInitialOutbreakName(),
+    resolution: Resolutions.Admin0,
+    availableResolutionsForOutbreaks: {
+        Covid19: [Resolutions.Admin0],
+        AvianInfluenza: [Resolutions.Admin0, Resolutions.Admin1],
+        Ebola: [Resolutions.Admin0, Resolutions.Admin1],
+        Marburg: [Resolutions.Admin0, Resolutions.Admin1],
+        Mpox2022: [Resolutions.Admin0],
+        Mpox2024: [Resolutions.Admin0],
+    }
 };
 
 export const appSlice = createSlice({
@@ -67,6 +85,9 @@ export const appSlice = createSlice({
         },
         setOutbreakName: (state, action: PayloadAction<keyof typeof OutbreakNames>) => {
             state.outbreakName = action.payload;
+        },
+        setResolution: (state, action: PayloadAction<Resolutions>) => {
+            state.resolution = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -92,6 +113,7 @@ export const {
     setFocusedArea,
     setPopup,
     setOutbreakName,
+    setResolution,
 } = appSlice.actions;
 
 export default appSlice.reducer;

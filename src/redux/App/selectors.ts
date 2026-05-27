@@ -12,3 +12,5 @@ export const selectLastUpdateDate = (state: RootState) =>
     state.app.lastUpdateDate;
 export const selectPopup = (state: RootState) => state.app.popup;
 export const selectOutbreakName = (state: RootState) => state.app.outbreakName;
+export const selectResolution = (state: RootState) => state.app.resolution;
+export const selectAvailableResolutionsForOutbreaks = (state: RootState) => state.app.availableResolutionsForOutbreaks;
