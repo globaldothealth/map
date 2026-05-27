@@ -4,7 +4,7 @@ import MapContainer from 'src/components/MapContainer';
 import { ChartTypeNames } from 'src/models/ViewParamURLValues';
 import {selectFocusedArea, selectOutbreakName, selectResolution} from 'src/redux/App/selectors';
 import { selectCountriesData } from 'src/redux/Country/selectors';
-import {Resolutions, setFocusedArea} from 'src/redux/App/slice';
+import {OutbreakNames, Resolutions, setFocusedArea} from 'src/redux/App/slice';
 import { fetchCountriesData } from 'src/redux/Country/thunks';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 import {fetchStateData} from "src/redux/State/thunks.ts";
@@ -46,7 +46,9 @@ export const AreaView: React.FC = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                dispatch(fetchCountriesData());
+                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
+                    dispatch(fetchCountriesData());
+                }
                 break;
             default:
                 dispatch(fetchStateData());
@@ -60,7 +62,9 @@ export const AreaView: React.FC = () => {
 
     const adminLevel = resolution === Resolutions.Admin0 ? 0 : 1;
     const chartType = resolution === Resolutions.Admin0 ? ChartTypeNames.Country : ChartTypeNames.State;
-    const data = resolution === Resolutions.Admin0 ? countryData : stateData;
+    const data = resolution === Resolutions.Admin0
+        ? countryData[OutbreakNames[outbreakName]]
+        : stateData;
 
     return (
         <MapContainer

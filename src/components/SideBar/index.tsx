@@ -130,7 +130,7 @@ const SideBar = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                mapDataToAutocomplete(countriesData);
+                mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin1:
                 mapDataToAutocomplete(stateData);
@@ -172,7 +172,7 @@ const SideBar = () => {
                         administrativeAreaEntry;
                     const isActive = focusedArea?.areaId === areaId;
                     const casesPercentage =
-                        (caseCount / totalCountryCasesCount) * 100;
+                        (caseCount / totalCountryCasesCount[OutbreakNames[outbreakName]]) * 100;
 
                     return (
                         <LocationListItem
@@ -219,7 +219,7 @@ const SideBar = () => {
         switch (resolution) {
             case Resolutions.Admin0:
                 return renderAdministrativeAreaList(
-                    getDataForAdministrativeAreaList(countriesData),
+                    getDataForAdministrativeAreaList(countriesData[OutbreakNames[outbreakName]]),
                 );
             case Resolutions.Admin1:
                 return renderAdministrativeAreaList(
@@ -248,7 +248,7 @@ const SideBar = () => {
                 return (
                     <>
                         <span id="total-cases" className="active">
-                            {totalCountryCasesCount.toLocaleString()}
+                            {totalCountryCasesCount[OutbreakNames[outbreakName]].toLocaleString()}
                         </span>
                         <span className="reported-cases-label">
                             {' '}

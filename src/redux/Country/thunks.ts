@@ -27,6 +27,7 @@ export const fetchCountriesData = createAsyncThunk<
         countriesData: CountryData[];
         totalNumberOfCases: number;
         lastUpdateDate: string;
+        outbreakName: string;
     },
     void,
     { rejectValue: string; state: RootState }
@@ -42,6 +43,7 @@ export const fetchCountriesData = createAsyncThunk<
                 countriesData: [],
                 totalNumberOfCases: 0,
                 lastUpdateDate: '',
+                outbreakName: outbreakName
             };
         }
         let totalNumberOfCases = 0;
@@ -53,7 +55,7 @@ export const fetchCountriesData = createAsyncThunk<
             }
         }
 
-        return { countriesData, totalNumberOfCases, lastUpdateDate };
+        return { countriesData, totalNumberOfCases, lastUpdateDate, outbreakName };
     } catch (err: any) {
         console.log('ERR',err)
         if (err.response) return rejectWithValue(err.response.message);
