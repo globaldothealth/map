@@ -44,6 +44,14 @@ const getInitialOutbreakName = (): keyof typeof OutbreakNames => {
     return 'AvianInfluenza';
 };
 
+// This function checks the URL for an 'resolution' and sets it, this is done to avoid multiple fetching of outbreak data
+const getInitialResolution = (): Resolutions => {
+    const params = new URLSearchParams(window.location.search);
+    const urlValue = params.get('resolution') as Resolutions | null;
+    if (urlValue && urlValue in Resolutions) return urlValue;
+    return Resolutions['Admin0'];
+};
+
 const initialState: AppState = {
     isLoading: false,
     isMapLoading: false,
@@ -56,7 +64,7 @@ const initialState: AppState = {
         countryCode: '',
     },
     outbreakName: getInitialOutbreakName(),
-    resolution: Resolutions.Admin0,
+    resolution: getInitialResolution(),
     availableResolutionsForOutbreaks: {
         Covid19: [Resolutions.Admin0],
         AvianInfluenza: [Resolutions.Admin0, Resolutions.Admin1],

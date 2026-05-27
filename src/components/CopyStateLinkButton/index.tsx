@@ -8,7 +8,7 @@ import {ChartTypeNames} from 'src/models/ViewParamURLValues';
 // import {CountryData} from 'src/models/CountryData';
 // import {RegionalData} from 'src/models/RegionalData';
 // import {StateData} from 'src/models/StateData';
-import {selectFocusedArea, selectOutbreakName} from 'src/redux/App/selectors';
+import {selectFocusedArea, selectOutbreakName, selectResolution} from 'src/redux/App/selectors';
 // import {setFocusedArea} from 'src/redux/App/slice';
 // import {selectCountriesData} from 'src/redux/Country/selectors';
 import {useAppSelector} from 'src/redux/hooks';
@@ -33,6 +33,7 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
     // const regionalData = useAppSelector(selectRegionalData);
     // const popup = useAppSelector(selectPopup);
     const outbreakName = useAppSelector(selectOutbreakName);
+    const resolution = useAppSelector(selectResolution);
 
     // const handleLocationChange = (
     //     areaId: string,
@@ -67,7 +68,9 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
             const newViewValues = URLToFilters(location.search);
             const remainingQueryParams = new URLSearchParams(location.search);
 
+            // We set the outbreakName and resolution in the App Slice
             remainingQueryParams.delete('outbreakName');
+            remainingQueryParams.delete('resolution');
 
             const mapRef = map.current;
             if (newViewValues.lng && newViewValues.lat) {
@@ -157,7 +160,7 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
         else {
             const center = mapRef.getCenter().toArray();
             const zoom = mapRef.getZoom();
-            const mapDataQuery = `outbreakName=${outbreakName}&lng=${center[0]}&lat=${center[1]}&zoom=${zoom}`;
+            const mapDataQuery = `resolution=${resolution}&outbreakName=${outbreakName}&lng=${center[0]}&lat=${center[1]}&zoom=${zoom}`;
             const locationHref = window.location.href.split('?')[0];
 
 
