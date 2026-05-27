@@ -26,7 +26,7 @@ export const StyledSideBar = styled('aside')<StyledSideBarProps>`
     margin-top: 0;
     top: 15%;
     transition: left 0.2s;
-    width: 28rem;
+    width: 32rem;
     z-index: 3;
 
     #sidebar-tab {

@@ -14,35 +14,14 @@ const TopBar = () => (
                 <GHListLogo/>
                 <NavBar>
                     <NavLink
-                        to="/country"
+                        to="/"
                         className={({isActive}) =>
                             'nav-link countryViewNavButton' +
                             (isActive ? ' activated' : '')
                         }
                     >
                         <Typography variant="navbarlink" gutterBottom>
-                            Country
-                        </Typography>
-                    </NavLink>
-                    <NavLink
-                        to="/state"
-                        className={({isActive}) =>
-                            'nav-link stateViewNavButton' +
-                            (isActive ? ' activated' : '')
-                        }
-                    >
-                        <Typography variant="navbarlink" gutterBottom>First-level Administrative Division
-                        </Typography>
-                    </NavLink>
-                    <NavLink
-                        to="/region"
-                        className={({isActive}) =>
-                            'nav-link regionalViewNavButton' +
-                            (isActive ? ' activated' : '')
-                        }
-                    >
-                        <Typography variant="navbarlink" gutterBottom>
-                            Second-level Administrative Division
+                            Map
                         </Typography>
                     </NavLink>
                     <a

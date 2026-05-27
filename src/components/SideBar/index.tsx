@@ -271,10 +271,6 @@ const SideBar = () => {
                             label="Selected Outbreak"
                             onChange={(event) => {
                                 const [outbreak, view] = (event.target.value as string).split('|');
-                                // const targetPath = `/${view}`;
-                                // if (location.pathname !== targetPath) {
-                                //     window.location.pathname = targetPath;
-                                // }
                                 dispatch(
                                     setOutbreakName(
                                         outbreak as keyof typeof OutbreakNames,
@@ -284,10 +280,12 @@ const SideBar = () => {
                                     setResolution(view == 'country' ? Resolutions.Admin0 : Resolutions.Admin1),
                                 )
                             }}
-                            renderValue={(selected) => {
-                                const [outbreak, view] = (selected as string).split('|');
-                                return `${OutbreakNames[outbreak as keyof typeof OutbreakNames]} — ${view.charAt(0).toUpperCase() + view.slice(1)}`;
-                            }}
+                            renderValue={() =>
+                                (
+                                    <p>{OutbreakNames[outbreakName]} <span
+                                        style={{fontWeight: '300'}}>({resolution === Resolutions.Admin0 ? 'Countries' : 'States'})</span>
+                                    </p>)
+                            }
                             sx={{
                                 background: 'rgb(25, 118, 210)',
                                 fontSize: '1.8rem',
@@ -314,8 +312,10 @@ const SideBar = () => {
                                 const items = availableResolutions.map((res) => {
                                     const view = resolutionToView[res]!;
                                     return (
-                                        <MenuItem key={`${outbreak}|${view}`} value={`${outbreak}|${view}`} sx={{pl: 4}}>
-                                            {OutbreakNames[outbreak]} — {view.charAt(0).toUpperCase() + view.slice(1)}
+                                        <MenuItem key={`${outbreak}|${view}`} value={`${outbreak}|${view}`}
+                                                  sx={{pl: 4}}>
+                                            {OutbreakNames[outbreak]}<span
+                                            style={{fontWeight: '300', marginLeft: '.3em'}}>({view === 'country' ? 'Countries' : 'States'})</span>
                                         </MenuItem>
                                     );
                                 });
