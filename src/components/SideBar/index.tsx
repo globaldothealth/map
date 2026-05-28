@@ -267,22 +267,24 @@ const SideBar = () => {
         <StyledSideBar $sidebaropen={openSidebar} data-cy="sidebar">
             <SideBarHeader id="sidebar-header">
                 <div id="disease-selector">
+                    <span style={{fontSize: '.8em'}}>Select Outbreak:</span>
                     <Button
                         onClick={(e) => setMenuAnchorEl(e.currentTarget)}
                         endIcon={menuAnchorEl ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
                         sx={{
                             background: 'rgb(25, 118, 210)',
-                            fontSize: '1.8rem',
+                            fontSize: '2rem',
                             color: 'white',
                             fontWeight: 'bold',
                             textTransform: 'none',
                             width: '100%',
                             justifyContent: 'space-between',
                             '&:hover': {background: 'rgb(21, 101, 180)'},
-                            p: "1.2rem"
+                            p: "1.2rem",
+                            marginTop: '10px'
                         }}
                     >
-                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]} <span style={{fontWeight: '300'}}>({resolution === Resolutions.Admin0 ? 'Countries' : 'States'})</span></span>
+                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]}<br/><span style={{fontWeight: '300', fontSize: '16px'}}>{resolution === Resolutions.Admin0 ? 'Country level' : 'State/Province level'}</span></span>
                     </Button>
                     <Menu
                         anchorEl={menuAnchorEl}
@@ -328,7 +330,7 @@ const SideBar = () => {
                         }}
                     >
                         {hoveredOutbreak && (availableResolutionsForOutbreaks[hoveredOutbreak] ?? []).map((res) => {
-                            const label = res === Resolutions.Admin0 ? 'Countries' : 'States';
+                            const label = res === Resolutions.Admin0 ? 'Country level' : 'State/Province level';
                             return (
                                 <MenuItem
                                     key={res}
