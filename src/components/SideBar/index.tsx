@@ -1,14 +1,16 @@
 import {
     Autocomplete,
     Box,
-    ListSubheader,
     MenuItem,
     TextField,
-    Select,
-    FormControl,
+    Menu,
+    Button,
 } from '@mui/material';
 import {useState, useEffect, SyntheticEvent} from 'react';
 import {whereAlpha3} from 'iso-3166-1';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import {CountryData} from 'src/models/CountryData';
 import {FocusedArea} from 'src/models/FocusedArea';
@@ -55,15 +57,13 @@ import {
     StyledSideBar,
 } from './styled';
 
-enum Resolution {
-    Country = 'country',
-    State = 'state',
-    Region = 'region',
-}
 
 const SideBar = () => {
     const [openSidebar, setOpenSidebar] = useState(true);
     const [autocompleteData, setAutocompleteData] = useState<FocusedArea[]>([]);
+    const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+    const [submenuAnchorEl, setSubmenuAnchorEl] = useState<null | HTMLElement>(null);
+    const [hoveredOutbreak, setHoveredOutbreak] = useState<keyof typeof OutbreakNames | null>(null);
 
     const dispatch = useAppDispatch();
 
@@ -267,75 +267,84 @@ const SideBar = () => {
         <StyledSideBar $sidebaropen={openSidebar} data-cy="sidebar">
             <SideBarHeader id="sidebar-header">
                 <div id="disease-selector">
-                    <FormControl fullWidth>
-                        <Select
-                            labelId="outbreak-select-label"
-                            id="outbreak-select"
-                            value={`${outbreakName}|${resolution || Resolution.Country}`}
-                            label="Selected Outbreak"
-                            onChange={(event) => {
-                                const [outbreak, view] = (event.target.value as string).split('|');
-                                dispatch(
-                                    setOutbreakName(
-                                        outbreak as keyof typeof OutbreakNames,
-                                    ),
-                                );
-                                dispatch(
-                                    setResolution(view == 'country' ? Resolutions.Admin0 : Resolutions.Admin1),
-                                )
-                            }}
-                            renderValue={() =>
-                                (
-                                    <p>{OutbreakNames[outbreakName]} <span
-                                        style={{fontWeight: '300'}}>({resolution === Resolutions.Admin0 ? 'Countries' : 'States'})</span>
-                                    </p>)
-                            }
-                            sx={{
-                                background: 'rgb(25, 118, 210)',
-                                fontSize: '1.8rem',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                '& .MuiSelect-icon': {
-                                    color: 'white',
-                                },
-                                '& .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none',
-                                },
-                            }}
-                        >
-                            {(
-                                Object.keys(OutbreakNames) as Array<
-                                    keyof typeof OutbreakNames
+                    <Button
+                        onClick={(e) => setMenuAnchorEl(e.currentTarget)}
+                        endIcon={menuAnchorEl ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
+                        sx={{
+                            background: 'rgb(25, 118, 210)',
+                            fontSize: '1.8rem',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            textTransform: 'none',
+                            width: '100%',
+                            justifyContent: 'space-between',
+                            '&:hover': {background: 'rgb(21, 101, 180)'},
+                            p: "1.2rem"
+                        }}
+                    >
+                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]} <span style={{fontWeight: '300'}}>({resolution === Resolutions.Admin0 ? 'Countries' : 'States'})</span></span>
+                    </Button>
+                    <Menu
+                        anchorEl={menuAnchorEl}
+                        open={Boolean(menuAnchorEl)}
+                        onClose={() => {
+                            setMenuAnchorEl(null);
+                            setSubmenuAnchorEl(null);
+                            setHoveredOutbreak(null);
+                        }}
+                        slotProps={{
+                            paper: {sx: {minWidth: menuAnchorEl?.offsetWidth ?? 'auto'}},
+                        }}
+                    >
+                        {(Object.keys(OutbreakNames) as Array<keyof typeof OutbreakNames>)
+                            .filter((outbreak) => (availableResolutionsForOutbreaks[outbreak] ?? []).length > 0)
+                            .map((outbreak) => (
+                                <MenuItem
+                                    key={outbreak}
+                                    onMouseEnter={(e) => {
+                                        setHoveredOutbreak(outbreak);
+                                        setSubmenuAnchorEl(e.currentTarget);
+                                    }}
+                                    sx={{display: 'flex', justifyContent: 'space-between'}}
                                 >
-                            ).flatMap((outbreak) => {
-                                const availableResolutions = availableResolutionsForOutbreaks[outbreak] ?? [];
-                                const resolutionToView: Partial<Record<Resolutions, string>> = {
-                                    [Resolutions.Admin0]: 'country',
-                                    [Resolutions.Admin1]: 'state',
-                                };
-                                const items = availableResolutions.map((res) => {
-                                    const view = resolutionToView[res]!;
-                                    return (
-                                        <MenuItem key={`${outbreak}|${view}`} value={`${outbreak}|${view}`}
-                                                  sx={{pl: 4}}>
-                                            {OutbreakNames[outbreak]}<span
-                                            style={{
-                                                fontWeight: '300',
-                                                marginLeft: '.3em'
-                                            }}>({view === 'country' ? 'Countries' : 'States'})</span>
-                                        </MenuItem>
-                                    );
-                                });
-                                if (items.length === 0) return [];
-                                return [
-                                    <ListSubheader key={`header-${outbreak}`}>
-                                        {OutbreakNames[outbreak]}
-                                    </ListSubheader>,
-                                    ...items,
-                                ];
-                            })}
-                        </Select>
-                    </FormControl>
+                                    {OutbreakNames[outbreak]} <ArrowRightIcon/>
+                                </MenuItem>
+                            ))}
+                    </Menu>
+                    <Menu
+                        anchorEl={submenuAnchorEl}
+                        open={Boolean(menuAnchorEl) && Boolean(submenuAnchorEl) && Boolean(hoveredOutbreak)}
+                        onClose={() => {
+                            setSubmenuAnchorEl(null);
+                            setHoveredOutbreak(null);
+                        }}
+                        anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                        transformOrigin={{vertical: 'top', horizontal: 'left'}}
+                        disableAutoFocus
+                        autoFocus={false}
+                        slotProps={{
+                            paper: {sx: {pointerEvents: 'auto', marginTop: '-8px'}},
+                            root: {sx: {pointerEvents: 'none'}},
+                        }}
+                    >
+                        {hoveredOutbreak && (availableResolutionsForOutbreaks[hoveredOutbreak] ?? []).map((res) => {
+                            const label = res === Resolutions.Admin0 ? 'Countries' : 'States';
+                            return (
+                                <MenuItem
+                                    key={res}
+                                    onClick={() => {
+                                        dispatch(setOutbreakName(hoveredOutbreak));
+                                        dispatch(setResolution(res));
+                                        setMenuAnchorEl(null);
+                                        setSubmenuAnchorEl(null);
+                                        setHoveredOutbreak(null);
+                                    }}
+                                >
+                                    {label}
+                                </MenuItem>
+                            );
+                        })}
+                    </Menu>
                 </div>
             </SideBarHeader>
             <LatestGlobal id="latest-global" $sidebaropen={openSidebar}>
