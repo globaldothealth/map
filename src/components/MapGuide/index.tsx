@@ -61,7 +61,7 @@ export const MapGuide: React.FC = () => {
                 aria-labelledby="map-guide"
             >
                 <StyledDialogTitle id="map-guide" sx={{color: 'white'}}>
-                    Global.health Map Guide Coming Soon
+                    Welcome to Global.health Map
                     <CloseButton aria-label="close" onClick={handleClose}>
                         <CloseIcon/>
                     </CloseButton>
@@ -71,40 +71,47 @@ export const MapGuide: React.FC = () => {
                         ref={descriptionElementRef}
                         tabIndex={-1}
                     >
-                        {/*These geospatial data visualisations allow you to*/}
-                        {/*explore our line-list dataset through a few*/}
-                        {/*different views:*/}
-                        {/*<br/>*/}
-                        {/*<br/>*/}
-                        {/*<strong>Country View (admin0/country):</strong> Click on a country to see*/}
-                        {/*case count of available line-list data for that country.*/}
-                        {/*You can also use the left-hand navigation to search or*/}
-                        {/*select a country. Darker colours indicate more cases.*/}
-                        {/*Please see our{' '}*/}
-                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
-                        {/*    FAQs*/}
-                        {/*</a>{' '}*/}
-                        {/*for more info.*/}
-                        {/*<br/>*/}
-                        {/*<br/>*/}
-                        {/*<strong>State View (admin1):</strong> Click on a region to see*/}
-                        {/*case count of available line-list data for that state.*/}
-                        {/*Darker colours indicate more available line-list*/}
-                        {/*data. Please see our{' '}*/}
-                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
-                        {/*    FAQs*/}
-                        {/*</a>{' '}*/}
-                        {/*for more info.*/}
-                        {/*<br/>*/}
-                        {/*<br/>*/}
-                        {/*<strong>Regional View (admin2):</strong> Click on a region to see*/}
-                        {/*case count of available line-list data for that region.*/}
-                        {/*Darker colours indicate more available line-list*/}
-                        {/*data. Please see our{' '}*/}
-                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
-                        {/*    FAQs*/}
-                        {/*</a>{' '}*/}
-                        {/*for more info.*/}
+                        Explore outbreak data using interactive geospatial visualisations. Use the controls and views
+                        below to navigate the data.
+                        <br/>
+                        <br/>
+                        <strong>Map views</strong>
+                        <ul style={{marginLeft: '2em'}}>
+                            <li><strong>Country level</strong> — Admin 0 boundaries. Shows country-level case data
+                                across all available outbreaks.
+                            </li>
+                            <li><strong>State / Province level</strong> — Admin 1 boundaries. Shows state /
+                                province-level data where available.
+                            </li>
+                        </ul>
+                        <br/>
+                        <strong>How to navigate</strong>
+                        <br/>
+                        <ol style={{marginLeft: '2em'}}>
+                            <li><strong>Select an outbreak</strong> — Use the module on the left to choose from
+                                available outbreaks.
+                            </li>
+                            <li><strong>Choose a geographic resolution</strong> — Switch between country-level and
+                                state/province-level views in the same panel.
+                            </li>
+                            <li><strong>Read the colour scale</strong> — Darker colours indicate higher case counts. The
+                                scale adjusts per outbreak and is shown on the right.
+                            </li>
+                            <li><strong>Access underlying data</strong> — The navigation menu at the top links to the
+                                full dataset at Data.Global.health.
+                            </li>
+                        </ol>
+                        <br/>
+                        <strong>Feedback</strong> — Questions or comments? Reach out to info@global.health.
+                        <br/>
+                        <br/>
+                        <strong>Disclaimer</strong> — The Global.health Map is a public resource to support outbreak
+                        response. All data is subject to change as new reports become available or existing records are
+                        reconciled. Due to reporting delays and potential gaps in source data, case information may be
+                        incomplete, outdated, or inaccurate and should not be treated as final or as a substitute for
+                        official reports. The data displayed reflects only what Global.health has collected and curated
+                        from publicly available resources; coverage for a given location or outbreak may be partial or
+                        absent.
                     </DialogContentText>
                 </DialogContent>
             </StyledMapGuideDialog>
