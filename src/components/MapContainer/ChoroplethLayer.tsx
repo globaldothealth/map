@@ -254,6 +254,35 @@ export const useChoroplethLayer = (
         setupLayer();
     }, [mapLoaded, dataFeatureSet]);
 
+    // Update choropleth colors when dataLayerBounds change
+    useEffect(() => {
+        if (!map || !mapLoaded || !map.getLayer('adminJoin')) return;
+
+        map.setPaintProperty('adminJoin', 'fill-color', [
+            'case',
+            ['has', 'caseCount'],
+            [
+                'case',
+                ['==', ['get', 'caseCount'], 0],
+                ChoroplethMapColors.empty,
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                ChoroplethMapColors.level1,
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                ChoroplethMapColors.level2,
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                ChoroplethMapColors.level3,
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                ChoroplethMapColors.level4,
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                ChoroplethMapColors.level5,
+                ['>', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                ChoroplethMapColors.level6,
+                ChoroplethMapColors.empty,
+            ],
+            ChoroplethMapColors.empty,
+        ]);
+    }, [map, mapLoaded, dataLayerBounds]);
+
     // Fly to country
     useEffect(() => {
         if (!focusedArea) {
