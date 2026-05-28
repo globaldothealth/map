@@ -61,7 +61,7 @@ export const MapGuide: React.FC = () => {
                 aria-labelledby="map-guide"
             >
                 <StyledDialogTitle id="map-guide" sx={{color: 'white'}}>
-                    Welcome to Global.health Map!
+                    Global.health Map Guide Coming Soon
                     <CloseButton aria-label="close" onClick={handleClose}>
                         <CloseIcon/>
                     </CloseButton>
@@ -71,40 +71,40 @@ export const MapGuide: React.FC = () => {
                         ref={descriptionElementRef}
                         tabIndex={-1}
                     >
-                        These geospatial data visualisations allow you to
-                        explore our line-list dataset through a few
-                        different views:
-                        <br/>
-                        <br/>
-                        <strong>Country View (admin0/country):</strong> Click on a country to see
-                        case count of available line-list data for that country.
-                        You can also use the left-hand navigation to search or
-                        select a country. Darker colours indicate more cases.
-                        Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
-                        <br/>
-                        <br/>
-                        <strong>State View (admin1):</strong> Click on a region to see
-                        case count of available line-list data for that state.
-                        Darker colours indicate more available line-list
-                        data. Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
-                        <br/>
-                        <br/>
-                        <strong>Regional View (admin2):</strong> Click on a region to see
-                        case count of available line-list data for that region.
-                        Darker colours indicate more available line-list
-                        data. Please see our{' '}
-                        <a href="https://global.health/faqs/" title="FAQs">
-                            FAQs
-                        </a>{' '}
-                        for more info.
+                        {/*These geospatial data visualisations allow you to*/}
+                        {/*explore our line-list dataset through a few*/}
+                        {/*different views:*/}
+                        {/*<br/>*/}
+                        {/*<br/>*/}
+                        {/*<strong>Country View (admin0/country):</strong> Click on a country to see*/}
+                        {/*case count of available line-list data for that country.*/}
+                        {/*You can also use the left-hand navigation to search or*/}
+                        {/*select a country. Darker colours indicate more cases.*/}
+                        {/*Please see our{' '}*/}
+                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
+                        {/*    FAQs*/}
+                        {/*</a>{' '}*/}
+                        {/*for more info.*/}
+                        {/*<br/>*/}
+                        {/*<br/>*/}
+                        {/*<strong>State View (admin1):</strong> Click on a region to see*/}
+                        {/*case count of available line-list data for that state.*/}
+                        {/*Darker colours indicate more available line-list*/}
+                        {/*data. Please see our{' '}*/}
+                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
+                        {/*    FAQs*/}
+                        {/*</a>{' '}*/}
+                        {/*for more info.*/}
+                        {/*<br/>*/}
+                        {/*<br/>*/}
+                        {/*<strong>Regional View (admin2):</strong> Click on a region to see*/}
+                        {/*case count of available line-list data for that region.*/}
+                        {/*Darker colours indicate more available line-list*/}
+                        {/*data. Please see our{' '}*/}
+                        {/*<a href="https://global.health/faqs/" title="FAQs">*/}
+                        {/*    FAQs*/}
+                        {/*</a>{' '}*/}
+                        {/*for more info.*/}
                     </DialogContentText>
                 </DialogContent>
             </StyledMapGuideDialog>
