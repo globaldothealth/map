@@ -34,6 +34,7 @@ export const useChoroplethLayer = (
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
     const handlersRef = React.useRef<{
         click: ((e: any) => void) | null;
         mousemove: ((e: any) => void) | null;
@@ -352,6 +353,8 @@ export const useChoroplethLayer = (
     useEffect(() => {
         if (!focusedArea) {
             currentPopup?.remove();
+            popupRootRef.current?.unmount();
+            popupRootRef.current = null;
             setCurrentPopup(null);
             return;
         }
@@ -378,7 +381,8 @@ export const useChoroplethLayer = (
             );
 
             const popupElement = document.createElement('div');
-            createRoot(popupElement).render(
+            const popupRoot = createRoot(popupElement);
+            popupRoot.render(
                 <MapPopup
                     title={popupTitle}
                     content={popupContent}
@@ -388,6 +392,12 @@ export const useChoroplethLayer = (
 
             if (map) {
                 if (!currentPopup) {
+                    // Unmount any lingering root before creating a new popup
+                    if (popupRootRef.current) {
+                        popupRootRef.current.unmount();
+                    }
+                    popupRootRef.current = popupRoot;
+
                     const popup = new Popup({
                         anchor: smallScreen ? 'center' : undefined,
                         closeButton: false,
@@ -398,12 +408,20 @@ export const useChoroplethLayer = (
                         .addTo(map);
 
                     popup.on('close', () => {
+                        popupRootRef.current?.unmount();
+                        popupRootRef.current = null;
                         dispatch(setFocusedArea(null));
                         setCurrentPopup(null);
                     });
 
                     setCurrentPopup(popup);
                 } else {
+                    // Unmount the previous root before replacing the DOM content
+                    if (popupRootRef.current) {
+                        popupRootRef.current.unmount();
+                    }
+                    popupRootRef.current = popupRoot;
+
                     currentPopup
                         .setLngLat([foundArea.long, foundArea.lat])
                         .setDOMContent(popupElement);
