@@ -34,6 +34,11 @@ export const useChoroplethLayer = (
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    const handlersRef = React.useRef<{
+        click: ((e: any) => void) | null;
+        mousemove: ((e: any) => void) | null;
+        mouseleave: (() => void) | null;
+    }>({ click: null, mousemove: null, mouseleave: null });
     useEffect(() => {
         // Calculate bounds for all data entries to focus map on content
         if (!map || !mapLoaded || data.length === 0) return;
@@ -235,8 +240,19 @@ export const useChoroplethLayer = (
                     );
                 }
 
+                // Remove previously registered handlers to prevent duplicates
+                if (handlersRef.current.click) {
+                    map.off('click', 'adminJoin', handlersRef.current.click);
+                }
+                if (handlersRef.current.mousemove) {
+                    map.off('mousemove', 'adminJoin', handlersRef.current.mousemove);
+                }
+                if (handlersRef.current.mouseleave) {
+                    map.off('mouseleave', 'adminJoin', handlersRef.current.mouseleave);
+                }
+
                 // Click handler
-                map.on('click', `adminJoin`, (e) => {
+                const clickHandler = (e: any) => {
                     if (!e.features || !e.features[0].properties?.areaName) {
                         dispatch(setFocusedArea(null));
                         return;
@@ -247,18 +263,28 @@ export const useChoroplethLayer = (
                     const countryCode = e.features[0].properties.countryCode;
 
                     dispatch(setFocusedArea({ name, areaId, countryCode }));
-                });
+                };
 
                 // Cursor pointer on hover
-                map.on('mousemove', `adminJoin`, (e) => {
+                const mousemoveHandler = (e: any) => {
                     if (e.features?.[0]?.properties?.caseCount != null)
                         map.getCanvas().style.cursor = 'pointer';
                     else map.getCanvas().style.cursor = '';
-                });
+                };
 
-                map.on('mouseleave', `adminJoin`, () => {
+                const mouseleaveHandler = () => {
                     map.getCanvas().style.cursor = '';
-                });
+                };
+
+                map.on('click', 'adminJoin', clickHandler);
+                map.on('mousemove', 'adminJoin', mousemoveHandler);
+                map.on('mouseleave', 'adminJoin', mouseleaveHandler);
+
+                handlersRef.current = {
+                    click: clickHandler,
+                    mousemove: mousemoveHandler,
+                    mouseleave: mouseleaveHandler,
+                };
 
                 setMapLoaded(true);
             } catch (error) {
