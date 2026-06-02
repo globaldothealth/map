@@ -1,19 +1,19 @@
-import ReactDOM from 'react-dom';
-import React, { useEffect, useState } from 'react';
-import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { Feature, FeatureCollection } from 'geojson';
-import { Map, Popup } from 'maplibre-gl';
+import {createRoot} from 'react-dom/client';
+import React, {useEffect, useState} from 'react';
+import {ActionCreatorWithPayload} from '@reduxjs/toolkit';
+import {Feature, FeatureCollection} from 'geojson';
+import {Map, Popup} from 'maplibre-gl';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
-import { PopupContentText } from 'src/components/MapPopup/styled';
-import { ChoroplethMapColors } from 'src/models/Colors';
-import { CountryData } from 'src/models/CountryData';
-import { FocusedArea } from 'src/models/FocusedArea';
-import { RegionalData } from 'src/models/RegionalData';
-import { StateData } from 'src/models/StateData';
-import { useAppDispatch } from 'src/redux/hooks';
-import { convertStringDateToDate } from 'src/utils/helperFunctions';
+import {PopupContentText} from 'src/components/MapPopup/styled';
+import {ChoroplethMapColors} from 'src/models/Colors';
+import {CountryData} from 'src/models/CountryData';
+import {FocusedArea} from 'src/models/FocusedArea';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
+import {useAppDispatch} from 'src/redux/hooks';
+import {convertStringDateToDate} from 'src/utils/helperFunctions';
 
 export const useChoroplethLayer = (
     map: Map | null,
@@ -34,17 +34,36 @@ export const useChoroplethLayer = (
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    useEffect(() => {
+        // Calculate bounds for all data entries to focus map on content
+        if (map && data.length > 0) {
+            const bounds = data.reduce(
+                (acc, entry) => {
+                    const entryBounds = entry.bounds;
+                    return [
+                        Math.min(acc[0], entryBounds[0]),
+                        Math.min(acc[1], entryBounds[1]),
+                        Math.max(acc[2], entryBounds[2]),
+                        Math.max(acc[3], entryBounds[3]),
+                    ];
+                },
+                [180, 90, -180, -90],
+            );
+            map.fitBounds(bounds, {padding: 150});
+        }
+    }, [data]);
 
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
         const setupLayer = async () => {
             try {
+                const dataUnion = data as (CountryData | StateData | RegionalData)[];
                 // Only load boundaries for the current admin level and for areas with case storage
                 const boundaries: FeatureCollection = {
                     type: 'FeatureCollection',
-                    features: data.map((d) => ({
-                        type: 'Feature',
+                    features: dataUnion.map((d) => ({
+                        type: 'Feature' as const,
                         geometry: d.geometry as any,
                         properties: {
                             shapeGroup: d.countryCode,
@@ -63,13 +82,8 @@ export const useChoroplethLayer = (
                         const shapeGroup = props.shapeGroup;
 
                         // Find matching storage entry by name (case-insensitive)
-                        const matchedData = data.find(
-                            (
-                                d:
-                                    | CountryData
-                                    | StateData
-                                    | RegionalData,
-                            ) => {
+                        const matchedData = dataUnion.find(
+                            (d) => {
                                 if (adminLevel === 0) {
                                     // For countries, match by ISO code if available
                                     return (
@@ -80,9 +94,9 @@ export const useChoroplethLayer = (
                                 // For sub-national, match by name within the same country
                                 return (
                                     d.name?.toLowerCase() ===
-                                        shapeName?.toLowerCase() &&
+                                    shapeName?.toLowerCase() &&
                                     d.countryCode?.toUpperCase() ===
-                                        shapeGroup?.toUpperCase()
+                                    shapeGroup?.toUpperCase()
                                 );
                             },
                         );
@@ -189,7 +203,7 @@ export const useChoroplethLayer = (
                                     ChoroplethMapColors.empty,
                                 ],
                             },
-                        },
+                        } as any,
                         firstSymbolLayer,
                     );
                 }
@@ -215,7 +229,7 @@ export const useChoroplethLayer = (
                                     ChoroplethMapColors['empty'],
                                 ],
                             },
-                        },
+                        } as any,
                         firstSymbolLayer,
                     );
                 }
@@ -231,7 +245,7 @@ export const useChoroplethLayer = (
                     const areaId = e.features[0].properties.areaId || '';
                     const countryCode = e.features[0].properties.countryCode;
 
-                    dispatch(setFocusedArea({ name, areaId, countryCode }));
+                    dispatch(setFocusedArea({name, areaId, countryCode}));
                 });
 
                 // Cursor pointer on hover
@@ -293,20 +307,12 @@ export const useChoroplethLayer = (
 
         const areaId = focusedArea.areaId;
 
-        const foundArea = data.find(
-            (rd: CountryData | StateData | RegionalData) =>
-                rd.areaId === areaId,
-        );
+        const dataUnion2 = data as (CountryData | StateData | RegionalData)[];
+        const foundArea = dataUnion2.find((rd) => rd.areaId === areaId);
 
         if (foundArea) {
-            const foundAreaData:
-                | CountryData
-                | StateData
-                | RegionalData
-                | undefined = data.find(
-                (rd: CountryData | StateData | RegionalData) =>
-                    rd.areaId === areaId,
-            );
+            const foundAreaData: CountryData | StateData | RegionalData | undefined =
+                dataUnion2.find((rd) => rd.areaId === areaId);
             if (!foundAreaData) return;
             const bounds = foundArea.bounds;
             const lastUploadDate = convertStringDateToDate(
@@ -314,7 +320,7 @@ export const useChoroplethLayer = (
             );
             const popupTitle = foundArea.name;
 
-            map?.fitBounds(bounds, { padding: 250 });
+            map?.fitBounds(bounds, {padding: 150});
 
             const popupContent = (
                 <PopupContentText>
@@ -324,13 +330,12 @@ export const useChoroplethLayer = (
             );
 
             const popupElement = document.createElement('div');
-            ReactDOM.render(
+            createRoot(popupElement).render(
                 <MapPopup
                     title={popupTitle}
                     content={popupContent}
                     lastUploadDate={lastUploadDate}
                 />,
-                popupElement,
             );
 
             if (map) {
