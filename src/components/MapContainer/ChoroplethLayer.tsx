@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom';
-import React, { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import React, { useEffect } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Feature, FeatureCollection } from 'geojson';
 import { Map, Popup } from 'maplibre-gl';
@@ -33,18 +33,48 @@ export const useChoroplethLayer = (
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
-    const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    const currentPopupRef = React.useRef<Popup | null>(null);
+    const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
+    const handlersRef = React.useRef<{
+        click: ((e: any) => void) | null;
+        mousemove: ((e: any) => void) | null;
+        mouseleave: (() => void) | null;
+    }>({ click: null, mousemove: null, mouseleave: null });
+    useEffect(() => {
+        // Calculate bounds for all data entries to focus map on content
+        if (!map || !mapLoaded || data.length === 0) return;
+        const bounds = data.reduce<[number, number, number, number]>(
+            (acc, entry) => {
+                const [w, s, e, n] = entry.bounds;
+                return [
+                    Math.min(acc[0], w),
+                    Math.min(acc[1], s),
+                    Math.max(acc[2], e),
+                    Math.max(acc[3], n),
+                ];
+            },
+            [180, 90, -180, -90],
+        );
+        map.fitBounds(bounds, { padding: 150 });
+    }, [map, mapLoaded, data]);
 
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
+        let isCancelled = false;
+
         const setupLayer = async () => {
             try {
+                const dataUnion = data as (
+                    | CountryData
+                    | StateData
+                    | RegionalData
+                )[];
                 // Only load boundaries for the current admin level and for areas with case storage
                 const boundaries: FeatureCollection = {
                     type: 'FeatureCollection',
-                    features: data.map((d) => ({
-                        type: 'Feature',
+                    features: dataUnion.map((d) => ({
+                        type: 'Feature' as const,
                         geometry: d.geometry as any,
                         properties: {
                             shapeGroup: d.countryCode,
@@ -63,29 +93,22 @@ export const useChoroplethLayer = (
                         const shapeGroup = props.shapeGroup;
 
                         // Find matching storage entry by name (case-insensitive)
-                        const matchedData = data.find(
-                            (
-                                d:
-                                    | CountryData
-                                    | StateData
-                                    | RegionalData,
-                            ) => {
-                                if (adminLevel === 0) {
-                                    // For countries, match by ISO code if available
-                                    return (
-                                        d.countryCode?.toUpperCase() ===
-                                        shapeGroup?.toUpperCase()
-                                    );
-                                }
-                                // For sub-national, match by name within the same country
+                        const matchedData = dataUnion.find((d) => {
+                            if (adminLevel === 0) {
+                                // For countries, match by ISO code if available
                                 return (
-                                    d.name?.toLowerCase() ===
-                                        shapeName?.toLowerCase() &&
                                     d.countryCode?.toUpperCase() ===
-                                        shapeGroup?.toUpperCase()
+                                    shapeGroup?.toUpperCase()
                                 );
-                            },
-                        );
+                            }
+                            // For sub-national, match by name within the same country
+                            return (
+                                d.name?.toLowerCase() ===
+                                    shapeName?.toLowerCase() &&
+                                d.countryCode?.toUpperCase() ===
+                                    shapeGroup?.toUpperCase()
+                            );
+                        });
 
                         const newProps: Record<string, any> = {
                             ...props,
@@ -127,7 +150,12 @@ export const useChoroplethLayer = (
                 }
 
                 // Remove popup if it was opened
-                if (currentPopup) currentPopup.remove();
+                if (currentPopupRef.current) {
+                    popupRootRef.current?.unmount();
+                    popupRootRef.current = null;
+                    currentPopupRef.current.remove();
+                    currentPopupRef.current = null;
+                }
 
                 // Find the first symbol (label) layer so we insert below it
                 const firstSymbolLayer = map
@@ -189,7 +217,7 @@ export const useChoroplethLayer = (
                                     ChoroplethMapColors.empty,
                                 ],
                             },
-                        },
+                        } as any,
                         firstSymbolLayer,
                     );
                 }
@@ -215,13 +243,24 @@ export const useChoroplethLayer = (
                                     ChoroplethMapColors['empty'],
                                 ],
                             },
-                        },
+                        } as any,
                         firstSymbolLayer,
                     );
                 }
 
+                // Remove previously registered handlers to prevent duplicates
+                if (handlersRef.current.click) {
+                    map.off('click', 'adminJoin', handlersRef.current.click);
+                }
+                if (handlersRef.current.mousemove) {
+                    map.off('mousemove', 'adminJoin', handlersRef.current.mousemove);
+                }
+                if (handlersRef.current.mouseleave) {
+                    map.off('mouseleave', 'adminJoin', handlersRef.current.mouseleave);
+                }
+
                 // Click handler
-                map.on('click', `adminJoin`, (e) => {
+                const clickHandler = (e: any) => {
                     if (!e.features || !e.features[0].properties?.areaName) {
                         dispatch(setFocusedArea(null));
                         return;
@@ -232,18 +271,36 @@ export const useChoroplethLayer = (
                     const countryCode = e.features[0].properties.countryCode;
 
                     dispatch(setFocusedArea({ name, areaId, countryCode }));
-                });
+                };
 
                 // Cursor pointer on hover
-                map.on('mousemove', `adminJoin`, (e) => {
+                const mousemoveHandler = (e: any) => {
                     if (e.features?.[0]?.properties?.caseCount != null)
                         map.getCanvas().style.cursor = 'pointer';
                     else map.getCanvas().style.cursor = '';
-                });
+                };
 
-                map.on('mouseleave', `adminJoin`, () => {
+                const mouseleaveHandler = () => {
                     map.getCanvas().style.cursor = '';
-                });
+                };
+
+                map.on('click', 'adminJoin', clickHandler);
+                map.on('mousemove', 'adminJoin', mousemoveHandler);
+                map.on('mouseleave', 'adminJoin', mouseleaveHandler);
+
+                if (isCancelled) {
+                    // Effect was superseded — remove the just-registered handlers immediately
+                    map.off('click', 'adminJoin', clickHandler);
+                    map.off('mousemove', 'adminJoin', mousemoveHandler);
+                    map.off('mouseleave', 'adminJoin', mouseleaveHandler);
+                    return;
+                }
+
+                handlersRef.current = {
+                    click: clickHandler,
+                    mousemove: mousemoveHandler,
+                    mouseleave: mouseleaveHandler,
+                };
 
                 setMapLoaded(true);
             } catch (error) {
@@ -252,7 +309,18 @@ export const useChoroplethLayer = (
         };
 
         setupLayer();
-    }, [mapLoaded, dataFeatureSet]);
+
+        return () => {
+            isCancelled = true;
+            const { click, mousemove, mouseleave } = handlersRef.current;
+            if (map) {
+                if (click) map.off('click', 'adminJoin', click);
+                if (mousemove) map.off('mousemove', 'adminJoin', mousemove);
+                if (mouseleave) map.off('mouseleave', 'adminJoin', mouseleave);
+            }
+            handlersRef.current = { click: null, mousemove: null, mouseleave: null };
+        };
+    }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, dispatch, setFocusedArea]);
 
     // Update choropleth colors when dataLayerBounds change
     useEffect(() => {
@@ -265,17 +333,41 @@ export const useChoroplethLayer = (
                 'case',
                 ['==', ['get', 'caseCount'], 0],
                 ChoroplethMapColors.empty,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                [
+                    '<=',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level1.upper.number,
+                ],
                 ChoroplethMapColors.level1,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                [
+                    '<=',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level2.upper.number,
+                ],
                 ChoroplethMapColors.level2,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                [
+                    '<=',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level3.upper.number,
+                ],
                 ChoroplethMapColors.level3,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                [
+                    '<=',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level4.upper.number,
+                ],
                 ChoroplethMapColors.level4,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                [
+                    '<=',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level5.upper.number,
+                ],
                 ChoroplethMapColors.level5,
-                ['>', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                [
+                    '>',
+                    ['get', 'caseCount'],
+                    dataLayerBounds.level5.upper.number,
+                ],
                 ChoroplethMapColors.level6,
                 ChoroplethMapColors.empty,
             ],
@@ -286,55 +378,52 @@ export const useChoroplethLayer = (
     // Fly to country
     useEffect(() => {
         if (!focusedArea) {
-            currentPopup?.remove();
-            setCurrentPopup(null);
+            currentPopupRef.current?.remove();
+            popupRootRef.current?.unmount();
+            popupRootRef.current = null;
+            currentPopupRef.current = null;
             return;
         }
 
         const areaId = focusedArea.areaId;
 
-        const foundArea = data.find(
-            (rd: CountryData | StateData | RegionalData) =>
-                rd.areaId === areaId,
-        );
+        const dataUnion2 = data as (CountryData | StateData | RegionalData)[];
+        const foundArea = dataUnion2.find((rd) => rd.areaId === areaId);
 
         if (foundArea) {
-            const foundAreaData:
-                | CountryData
-                | StateData
-                | RegionalData
-                | undefined = data.find(
-                (rd: CountryData | StateData | RegionalData) =>
-                    rd.areaId === areaId,
-            );
-            if (!foundAreaData) return;
             const bounds = foundArea.bounds;
             const lastUploadDate = convertStringDateToDate(
-                foundAreaData.lastUpdated,
+                foundArea.lastUpdated,
             );
             const popupTitle = foundArea.name;
 
-            map?.fitBounds(bounds, { padding: 250 });
+            map?.fitBounds(bounds, { padding: 150 });
 
             const popupContent = (
                 <PopupContentText>
-                    {foundAreaData.caseCount.toLocaleString()} confirmed case
-                    {foundAreaData.caseCount > 1 ? 's' : ''}
+                    {foundArea.caseCount.toLocaleString()} confirmed case
+                    {foundArea.caseCount > 1 ? 's' : ''}
                 </PopupContentText>
             );
 
             const popupElement = document.createElement('div');
-            ReactDOM.render(
+            const popupRoot = createRoot(popupElement);
+            popupRoot.render(
                 <MapPopup
                     title={popupTitle}
                     content={popupContent}
                     lastUploadDate={lastUploadDate}
                 />,
-                popupElement,
             );
 
             if (map) {
-                if (!currentPopup) {
+                // Unmount the previous root before replacing content
+                if (popupRootRef.current) {
+                    popupRootRef.current.unmount();
+                }
+                popupRootRef.current = popupRoot;
+
+                if (!currentPopupRef.current) {
                     const popup = new Popup({
                         anchor: smallScreen ? 'center' : undefined,
                         closeButton: false,
@@ -345,20 +434,23 @@ export const useChoroplethLayer = (
                         .addTo(map);
 
                     popup.on('close', () => {
+                        popupRootRef.current?.unmount();
+                        popupRootRef.current = null;
+                        currentPopupRef.current = null;
                         dispatch(setFocusedArea(null));
-                        setCurrentPopup(null);
                     });
 
-                    setCurrentPopup(popup);
+                    currentPopupRef.current = popup;
                 } else {
-                    currentPopup
+                    currentPopupRef.current
                         .setLngLat([foundArea.long, foundArea.lat])
                         .setDOMContent(popupElement);
                 }
             }
         } else {
-            if (currentPopup) currentPopup.remove();
+            currentPopupRef.current?.remove();
+            currentPopupRef.current = null;
             map?.fitBounds([0, -12.4, 0, 70.15]);
         }
-    }, [focusedArea]);
+    }, [focusedArea, map, data, smallScreen, dispatch, setFocusedArea]);
 };
