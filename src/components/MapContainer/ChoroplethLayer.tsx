@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Feature, FeatureCollection } from 'geojson';
 import { Map, Popup } from 'maplibre-gl';
@@ -33,7 +33,7 @@ export const useChoroplethLayer = (
 ) => {
     const dispatch = useAppDispatch();
     const smallScreen = useMediaQuery('(max-width:1400px)');
-    const [currentPopup, setCurrentPopup] = useState<Popup | null>();
+    const currentPopupRef = React.useRef<Popup | null>(null);
     const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
     const handlersRef = React.useRef<{
         click: ((e: any) => void) | null;
@@ -60,6 +60,8 @@ export const useChoroplethLayer = (
 
     useEffect(() => {
         if (!map || !mapLoaded || !dataFeatureSet) return;
+
+        let isCancelled = false;
 
         const setupLayer = async () => {
             try {
@@ -148,7 +150,12 @@ export const useChoroplethLayer = (
                 }
 
                 // Remove popup if it was opened
-                if (currentPopup) currentPopup.remove();
+                if (currentPopupRef.current) {
+                    popupRootRef.current?.unmount();
+                    popupRootRef.current = null;
+                    currentPopupRef.current.remove();
+                    currentPopupRef.current = null;
+                }
 
                 // Find the first symbol (label) layer so we insert below it
                 const firstSymbolLayer = map
@@ -281,6 +288,14 @@ export const useChoroplethLayer = (
                 map.on('mousemove', 'adminJoin', mousemoveHandler);
                 map.on('mouseleave', 'adminJoin', mouseleaveHandler);
 
+                if (isCancelled) {
+                    // Effect was superseded — remove the just-registered handlers immediately
+                    map.off('click', 'adminJoin', clickHandler);
+                    map.off('mousemove', 'adminJoin', mousemoveHandler);
+                    map.off('mouseleave', 'adminJoin', mouseleaveHandler);
+                    return;
+                }
+
                 handlersRef.current = {
                     click: clickHandler,
                     mousemove: mousemoveHandler,
@@ -294,7 +309,18 @@ export const useChoroplethLayer = (
         };
 
         setupLayer();
-    }, [mapLoaded, dataFeatureSet]);
+
+        return () => {
+            isCancelled = true;
+            const { click, mousemove, mouseleave } = handlersRef.current;
+            if (map) {
+                if (click) map.off('click', 'adminJoin', click);
+                if (mousemove) map.off('mousemove', 'adminJoin', mousemove);
+                if (mouseleave) map.off('mouseleave', 'adminJoin', mouseleave);
+            }
+            handlersRef.current = { click: null, mousemove: null, mouseleave: null };
+        };
+    }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, dispatch, setFocusedArea]);
 
     // Update choropleth colors when dataLayerBounds change
     useEffect(() => {
@@ -352,10 +378,10 @@ export const useChoroplethLayer = (
     // Fly to country
     useEffect(() => {
         if (!focusedArea) {
-            currentPopup?.remove();
+            currentPopupRef.current?.remove();
             popupRootRef.current?.unmount();
             popupRootRef.current = null;
-            setCurrentPopup(null);
+            currentPopupRef.current = null;
             return;
         }
 
@@ -391,13 +417,13 @@ export const useChoroplethLayer = (
             );
 
             if (map) {
-                if (!currentPopup) {
-                    // Unmount any lingering root before creating a new popup
-                    if (popupRootRef.current) {
-                        popupRootRef.current.unmount();
-                    }
-                    popupRootRef.current = popupRoot;
+                // Unmount the previous root before replacing content
+                if (popupRootRef.current) {
+                    popupRootRef.current.unmount();
+                }
+                popupRootRef.current = popupRoot;
 
+                if (!currentPopupRef.current) {
                     const popup = new Popup({
                         anchor: smallScreen ? 'center' : undefined,
                         closeButton: false,
@@ -410,26 +436,21 @@ export const useChoroplethLayer = (
                     popup.on('close', () => {
                         popupRootRef.current?.unmount();
                         popupRootRef.current = null;
+                        currentPopupRef.current = null;
                         dispatch(setFocusedArea(null));
-                        setCurrentPopup(null);
                     });
 
-                    setCurrentPopup(popup);
+                    currentPopupRef.current = popup;
                 } else {
-                    // Unmount the previous root before replacing the DOM content
-                    if (popupRootRef.current) {
-                        popupRootRef.current.unmount();
-                    }
-                    popupRootRef.current = popupRoot;
-
-                    currentPopup
+                    currentPopupRef.current
                         .setLngLat([foundArea.long, foundArea.lat])
                         .setDOMContent(popupElement);
                 }
             }
         } else {
-            if (currentPopup) currentPopup.remove();
+            currentPopupRef.current?.remove();
+            currentPopupRef.current = null;
             map?.fitBounds([0, -12.4, 0, 70.15]);
         }
-    }, [focusedArea]);
+    }, [focusedArea, map, data, smallScreen, dispatch, setFocusedArea]);
 };
