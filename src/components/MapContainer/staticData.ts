@@ -259,6 +259,22 @@ export const significantEventsData = [
         relatedCaseStatus: 'Confirmed',
         description: 'Gh_ID20 is a Canadian citizen who was confirmed positive for Andes hantavirus on May 17 following a presumptive positive test result the day prior. The patient was transported to hospital in Vancouver for care on May 14, along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius.'
     },
+    {
+        marker: 17,
+        location: 'Netherlands',
+        date: 'May 22nd 2026',
+        dateStart: '2026-05-22',
+        relatedCaseStatus: 'Confirmed',
+        description: 'Case 12 (Gh_ID23) is a Dutch national who was confirmed positive for hantavirus on May 22.  The person was a crew member who left the ship in Tenerife, Canary Islands, Spain, was repatriated, and has been isolating in home quarantine. Laboratory tests by RIVM, which are administered every week to all persons in quarantine in the Netherlands, indicated that the person has Andes virus. The patient has since been admitted to hospital and is in isolation.'
+    },
+    {
+        marker: 18,
+        location: 'Spain',
+        date: 'May 25th 2026',
+        dateStart: '2026-05-25',
+        relatedCaseStatus: 'Confirmed',
+        description: 'Case 13 (Gh_ID24) is a Spanish national who was confirmed positive for hantavirus on May 25. The patient had been in preventive quarantine at the Gomez Ulla Hospital in Madrid and was detected during the periodic checks carried out on the contacts under follow-up. Following PCR confirmation, the patient was transferred to the High-Level Isolation Unit of the hospital where they will remain under specialized medical supervision with biosafety measures in place. This is the second positive case among the fourteen Spanish nationals who were evacuated from Tenerife to Madrid.'
+    },
 ]
 
 export const transfers = [
