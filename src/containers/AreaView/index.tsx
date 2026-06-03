@@ -149,6 +149,52 @@ const dataLayerBounds = {
             },
         }
     },
+    "EbolaBVD": {
+        [Resolutions.Admin0]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        },
+        [Resolutions.Admin1]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        }
+    },
     "Marburg": {
         [Resolutions.Admin0]: {
             level1: {
