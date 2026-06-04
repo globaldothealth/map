@@ -57,6 +57,28 @@ const dataLayerBounds = {
                 lower: {number: 2000001, text: '2M'},
                 upper: {number: 10000000, text: '10M'},
             },
+        },
+        [Resolutions.Admin2]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
         }
     },
     'AvianInfluenza': {
@@ -103,6 +125,28 @@ const dataLayerBounds = {
                 lower: {number: 10, text: '10'},
                 upper: {number: 20, text: '20'},
             },
+        },
+        [Resolutions.Admin2]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
         }
     },
     "Ebola": {
@@ -129,6 +173,28 @@ const dataLayerBounds = {
             },
         },
         [Resolutions.Admin1]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        },
+        [Resolutions.Admin2]: {
             level1: {
                 lower: {number: 1, text: '1'},
                 upper: {number: 3, text: '3'},
@@ -263,6 +329,28 @@ const dataLayerBounds = {
                 lower: {number: 20, text: '20'},
                 upper: {number: 25, text: '25'},
             },
+        },
+        [Resolutions.Admin2]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
         }
     },
     "Mpox2022": {
@@ -308,6 +396,28 @@ const dataLayerBounds = {
             level5: {
                 lower: {number: 2001, text: '2001'},
                 upper: {number: 5000, text: '5000'},
+            },
+        },
+        [Resolutions.Admin2]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
             },
         }
     },
@@ -356,8 +466,32 @@ const dataLayerBounds = {
                     lower: {number: 2001, text: '2001'},
                     upper: {number: 5000, text: '5000'},
                 },
+            },
+            [Resolutions.Admin2]: {
+                level1: {
+                    lower: {number: 1, text: '1'},
+                    upper: {number: 3, text: '3'},
+                },
+                level2: {
+                    lower: {number: 4, text: '4'},
+                    upper: {number: 10, text: '10'},
+                },
+                level3: {
+                    lower: {number: 11, text: '11'},
+                    upper: {number: 20, text: '20'},
+                },
+                level4: {
+                    lower: {number: 21, text: '21'},
+                    upper: {number: 50, text: '50'},
+                },
+                level5: {
+                    lower: {number: 51, text: '51'},
+                    upper: {number: 100, text: '100'},
+                },
             }
+
         }
+
 }
 
 export const AreaView: React.FC = () => {

@@ -49,7 +49,7 @@ export const RegionalView: React.FC = () => {
 
     return (
         <MapContainer
-            data={regionalData}
+            data={regionalData[outbreakName as keyof typeof regionalData]}
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={ChartTypeNames.Regional}

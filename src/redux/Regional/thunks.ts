@@ -23,8 +23,11 @@ const mapToRegionalData = (cases: FetchedCaseData[]): RegionalData[]  => {
 }
 
 export const fetchRegionalData = createAsyncThunk<
-    {regionalData: RegionalData[],         totalNumberOfCases: number;
+    {
+        regionalData: RegionalData[],
+        totalNumberOfCases: number;
         lastUpdateDate: string;
+        outbreakName: string;
     },
     void,
     { rejectValue: string, state: RootState }
