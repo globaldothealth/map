@@ -35,11 +35,15 @@ export const useChoroplethLayer = (
     const smallScreen = useMediaQuery('(max-width:1400px)');
     const currentPopupRef = React.useRef<Popup | null>(null);
     const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
+    const suppressPopupCloseRef = React.useRef(false);
     const handlersRef = React.useRef<{
         click: ((e: any) => void) | null;
         mousemove: ((e: any) => void) | null;
         mouseleave: (() => void) | null;
-    }>({ click: null, mousemove: null, mouseleave: null });
+        clickOther: ((e: any) => void) | null;
+        mousemoveOther: ((e: any) => void) | null;
+        mouseleaveOther: (() => void) | null;
+    }>({ click: null, mousemove: null, mouseleave: null, clickOther: null, mousemoveOther: null, mouseleaveOther: null });
     useEffect(() => {
         // Calculate bounds for all data entries to focus map on content
         if (!map || !mapLoaded || data.length === 0) return;
@@ -149,6 +153,52 @@ export const useChoroplethLayer = (
                     });
                 }
 
+                // Create per-level stripe patterns (colored stripes on transparent background)
+                const stripePatternEntries: [string, string][] = [
+                    ['stripe-empty', ChoroplethMapColors.empty],
+                    ['stripe-level1', ChoroplethMapColors.level1],
+                    ['stripe-level2', ChoroplethMapColors.level2],
+                    ['stripe-level3', ChoroplethMapColors.level3],
+                    ['stripe-level4', ChoroplethMapColors.level4],
+                    ['stripe-level5', ChoroplethMapColors.level5],
+                    ['stripe-level6', ChoroplethMapColors.level6],
+                ];
+                for (const [name, color] of stripePatternEntries) {
+                    if (!map.hasImage(name)) {
+                        const size = 10;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext('2d')!;
+                        ctx.clearRect(0, 0, size, size);
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 2;
+                        // Main diagonal: bottom-left to top-right
+                        ctx.beginPath();
+                        ctx.moveTo(0, size);
+                        ctx.lineTo(size, 0);
+                        ctx.stroke();
+                        // Top-left corner continuation (wraps from bottom-right of previous tile)
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(0, 0);
+                        ctx.moveTo(-size / 2, size / 2);
+                        ctx.lineTo(size / 2, -size / 2);
+                        ctx.stroke();
+                        // Bottom-right corner continuation
+                        ctx.beginPath();
+                        ctx.moveTo(size / 2, size + size / 2);
+                        ctx.lineTo(size + size / 2, size / 2);
+                        ctx.stroke();
+                        const imageData = ctx.getImageData(0, 0, size, size);
+                        map.addImage(name, {
+                            width: size,
+                            height: size,
+                            data: imageData.data as unknown as Uint8Array<ArrayBuffer>,
+                        });
+                    }
+                }
+
                 // Remove popup if it was opened
                 if (currentPopupRef.current) {
                     popupRootRef.current?.unmount();
@@ -162,15 +212,55 @@ export const useChoroplethLayer = (
                     .getStyle()
                     .layers?.find((layer) => layer.type === 'symbol')?.id;
 
+                const stripePatternExpression = [
+                    'case',
+                    ['has', 'caseCount'],
+                    [
+                        'case',
+                        ['==', ['get', 'caseCount'], 0],
+                        'stripe-empty',
+                        ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                        'stripe-level1',
+                        ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                        'stripe-level2',
+                        ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                        'stripe-level3',
+                        ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                        'stripe-level4',
+                        ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                        'stripe-level5',
+                        'stripe-level6',
+                    ],
+                    'stripe-empty',
+                ];
+
+                if (!map.getLayer('adminJoinOtherStripe')) {
+                    map.addLayer(
+                        {
+                            id: 'adminJoinOtherStripe',
+                            type: 'fill',
+                            source: sourceId,
+                            filter: ['==', ['get', 'areaName'], 'Other (Ituri Province)'],
+                            paint: {
+                                'fill-pattern': stripePatternExpression,
+                            },
+                        } as any,
+                        firstSymbolLayer,
+                    );
+                }
+
                 if (!map.getLayer(`adminJoin`)) {
                     map.addLayer(
                         {
                             id: `adminJoin`,
                             type: 'fill',
                             source: sourceId,
+                            filter: ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
                             paint: {
                                 'fill-color': [
                                     'case',
+                                    ['==', ['get', 'areaName'], 'Other (Ituri Province)'],
+                                    ChoroplethMapColors.empty,
                                     ['has', 'caseCount'],
                                     [
                                         'case',
@@ -248,6 +338,8 @@ export const useChoroplethLayer = (
                     );
                 }
 
+
+
                 // Remove previously registered handlers to prevent duplicates
                 if (handlersRef.current.click) {
                     map.off('click', 'adminJoin', handlersRef.current.click);
@@ -257,6 +349,15 @@ export const useChoroplethLayer = (
                 }
                 if (handlersRef.current.mouseleave) {
                     map.off('mouseleave', 'adminJoin', handlersRef.current.mouseleave);
+                }
+                if (handlersRef.current.clickOther) {
+                    map.off('click', 'adminJoinOtherStripe', handlersRef.current.clickOther);
+                }
+                if (handlersRef.current.mousemoveOther) {
+                    map.off('mousemove', 'adminJoinOtherStripe', handlersRef.current.mousemoveOther);
+                }
+                if (handlersRef.current.mouseleaveOther) {
+                    map.off('mouseleave', 'adminJoinOtherStripe', handlersRef.current.mouseleaveOther);
                 }
 
                 // Click handler
@@ -269,6 +370,14 @@ export const useChoroplethLayer = (
                     const name = e.features[0].properties.areaName;
                     const areaId = e.features[0].properties.areaId || '';
                     const countryCode = e.features[0].properties.countryCode;
+
+                    // Suppress the popup close handler from clearing focusedArea
+                    suppressPopupCloseRef.current = true;
+                    if (currentPopupRef.current) {
+                        currentPopupRef.current.remove();
+                        currentPopupRef.current = null;
+                    }
+                    suppressPopupCloseRef.current = false;
 
                     dispatch(setFocusedArea({ name, areaId, countryCode }));
                 };
@@ -284,15 +393,38 @@ export const useChoroplethLayer = (
                     map.getCanvas().style.cursor = '';
                 };
 
+                // "Other" layer uses the same handlers (lower hit priority since adminJoin is above it)
+                const clickOtherHandler = (e: any) => {
+                    // Only fire if no adminJoin feature was hit at this point
+                    const features = map.queryRenderedFeatures(e.point, { layers: ['adminJoin'] });
+                    if (features.length > 0) return;
+                    clickHandler(e);
+                };
+
+                const mousemoveOtherHandler = (e: any) => {
+                    const features = map.queryRenderedFeatures(e.point, { layers: ['adminJoin'] });
+                    if (features.length > 0) return;
+                    mousemoveHandler(e);
+                };
+
+                const mouseleaveOtherHandler = () => {
+                    mouseleaveHandler();
+                };
+
                 map.on('click', 'adminJoin', clickHandler);
                 map.on('mousemove', 'adminJoin', mousemoveHandler);
                 map.on('mouseleave', 'adminJoin', mouseleaveHandler);
+                map.on('click', 'adminJoinOtherStripe', clickOtherHandler);
+                map.on('mousemove', 'adminJoinOtherStripe', mousemoveOtherHandler);
+                map.on('mouseleave', 'adminJoinOtherStripe', mouseleaveOtherHandler);
 
                 if (isCancelled) {
-                    // Effect was superseded — remove the just-registered handlers immediately
                     map.off('click', 'adminJoin', clickHandler);
                     map.off('mousemove', 'adminJoin', mousemoveHandler);
                     map.off('mouseleave', 'adminJoin', mouseleaveHandler);
+                    map.off('click', 'adminJoinOtherStripe', clickOtherHandler);
+                    map.off('mousemove', 'adminJoinOtherStripe', mousemoveOtherHandler);
+                    map.off('mouseleave', 'adminJoinOtherStripe', mouseleaveOtherHandler);
                     return;
                 }
 
@@ -300,6 +432,9 @@ export const useChoroplethLayer = (
                     click: clickHandler,
                     mousemove: mousemoveHandler,
                     mouseleave: mouseleaveHandler,
+                    clickOther: clickOtherHandler,
+                    mousemoveOther: mousemoveOtherHandler,
+                    mouseleaveOther: mouseleaveOtherHandler,
                 };
 
                 setMapLoaded(true);
@@ -312,67 +447,77 @@ export const useChoroplethLayer = (
 
         return () => {
             isCancelled = true;
-            const { click, mousemove, mouseleave } = handlersRef.current;
+            const { click, mousemove, mouseleave, clickOther, mousemoveOther, mouseleaveOther } = handlersRef.current;
             if (map) {
                 if (click) map.off('click', 'adminJoin', click);
                 if (mousemove) map.off('mousemove', 'adminJoin', mousemove);
                 if (mouseleave) map.off('mouseleave', 'adminJoin', mouseleave);
+                if (clickOther) map.off('click', 'adminJoinOtherStripe', clickOther);
+                if (mousemoveOther) map.off('mousemove', 'adminJoinOtherStripe', mousemoveOther);
+                if (mouseleaveOther) map.off('mouseleave', 'adminJoinOtherStripe', mouseleaveOther);
             }
-            handlersRef.current = { click: null, mousemove: null, mouseleave: null };
+            handlersRef.current = { click: null, mousemove: null, mouseleave: null, clickOther: null, mousemoveOther: null, mouseleaveOther: null };
         };
     }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, dispatch, setFocusedArea]);
 
     // Update choropleth colors when dataLayerBounds change
     useEffect(() => {
-        if (!map || !mapLoaded || !map.getLayer('adminJoin')) return;
+        if (!map || !mapLoaded) return;
 
-        map.setPaintProperty('adminJoin', 'fill-color', [
+        const fillColorExpression = [
             'case',
+            ['==', ['get', 'areaName'], 'Other'],
+            ChoroplethMapColors.empty,
             ['has', 'caseCount'],
             [
                 'case',
                 ['==', ['get', 'caseCount'], 0],
                 ChoroplethMapColors.empty,
-                [
-                    '<=',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level1.upper.number,
-                ],
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
                 ChoroplethMapColors.level1,
-                [
-                    '<=',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level2.upper.number,
-                ],
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
                 ChoroplethMapColors.level2,
-                [
-                    '<=',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level3.upper.number,
-                ],
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
                 ChoroplethMapColors.level3,
-                [
-                    '<=',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level4.upper.number,
-                ],
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
                 ChoroplethMapColors.level4,
-                [
-                    '<=',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level5.upper.number,
-                ],
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
                 ChoroplethMapColors.level5,
-                [
-                    '>',
-                    ['get', 'caseCount'],
-                    dataLayerBounds.level5.upper.number,
-                ],
+                ['>', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
                 ChoroplethMapColors.level6,
                 ChoroplethMapColors.empty,
             ],
             ChoroplethMapColors.empty,
-        ]);
+        ];
+
+        const stripePatternExpression = [
+            'case',
+            ['has', 'caseCount'],
+            [
+                'case',
+                ['==', ['get', 'caseCount'], 0],
+                'stripe-empty',
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                'stripe-level1',
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                'stripe-level2',
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                'stripe-level3',
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                'stripe-level4',
+                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                'stripe-level5',
+                'stripe-level6',
+            ],
+            'stripe-empty',
+        ];
+
+        if (map.getLayer('adminJoin')) {
+            map.setPaintProperty('adminJoin', 'fill-color', fillColorExpression);
+        }
+        if (map.getLayer('adminJoinOtherStripe')) {
+            map.setPaintProperty('adminJoinOtherStripe', 'fill-pattern', stripePatternExpression);
+        }
     }, [map, mapLoaded, dataLayerBounds]);
 
     // Fly to country
@@ -437,7 +582,9 @@ export const useChoroplethLayer = (
                         popupRootRef.current?.unmount();
                         popupRootRef.current = null;
                         currentPopupRef.current = null;
-                        dispatch(setFocusedArea(null));
+                        if (!suppressPopupCloseRef.current) {
+                            dispatch(setFocusedArea(null));
+                        }
                     });
 
                     currentPopupRef.current = popup;

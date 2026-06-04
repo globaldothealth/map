@@ -46,7 +46,7 @@ export const fetchRegionalData = createAsyncThunk<
             }
         }
 
-        return { regionalData, totalNumberOfCases, lastUpdateDate };
+        return { regionalData, totalNumberOfCases, lastUpdateDate, outbreakName };
     } catch (error: any) {
         if (!error.response) throw error;
 

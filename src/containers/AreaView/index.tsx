@@ -9,6 +9,8 @@ import {fetchCountriesData} from 'src/redux/Country/thunks';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {fetchStateData} from "src/redux/State/thunks.ts";
 import {selectStateData} from "src/redux/State/selectors.ts";
+import {selectRegionalData} from "src/redux/Regional/selectors.ts";
+import {fetchRegionalData} from "src/redux/Regional/thunks.ts";
 
 const dataLayerBounds = {
     'Covid19': {
@@ -193,6 +195,28 @@ const dataLayerBounds = {
                 lower: {number: 51, text: '51'},
                 upper: {number: 100, text: '100'},
             },
+        },
+        [Resolutions.Admin2]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
         }
     },
     "Marburg": {
@@ -341,6 +365,7 @@ export const AreaView: React.FC = () => {
 
     const countryData = useAppSelector(selectCountriesData);
     const stateData = useAppSelector(selectStateData);
+    const regionalData = useAppSelector(selectRegionalData);
     const resolution = useAppSelector(selectResolution);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
@@ -349,14 +374,13 @@ export const AreaView: React.FC = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
-                    dispatch(fetchCountriesData());
-                }
+                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchCountriesData());
+                break;
+            case Resolutions.Admin1:
+                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchStateData());
                 break;
             default:
-                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
-                    dispatch(fetchStateData());
-                }
+                if (!regionalData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchRegionalData());
                 break;
         }
         dispatch(setFocusedArea(null));
@@ -365,11 +389,13 @@ export const AreaView: React.FC = () => {
         };
     }, [outbreakName, dispatch, resolution]);
 
-    const adminLevel = resolution === Resolutions.Admin0 ? 0 : 1;
-    const chartType = resolution === Resolutions.Admin0 ? ChartTypeNames.Country : ChartTypeNames.State;
-    const data = resolution === Resolutions.Admin0
-        ? countryData[OutbreakNames[outbreakName]]
-        : stateData[OutbreakNames[outbreakName]];
+    const resolutionConfig = {
+        [Resolutions.Admin0]: { adminLevel: 0, chartType: ChartTypeNames.Country, data: countryData[OutbreakNames[outbreakName]] },
+        [Resolutions.Admin1]: { adminLevel: 1, chartType: ChartTypeNames.State, data: stateData[OutbreakNames[outbreakName]] },
+        [Resolutions.Admin2]: { adminLevel: 2, chartType: ChartTypeNames.Regional, data: regionalData[OutbreakNames[outbreakName]] },
+    };
+
+    const { adminLevel, chartType, data } = resolutionConfig[resolution];
 
     return (
         <MapContainer
