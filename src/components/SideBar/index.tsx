@@ -120,7 +120,7 @@ const SideBar = () => {
     };
 
     const mapDataToAutocomplete = (
-        administrativeAreaData: CountryData[] | StateData[],
+        administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
     ) => {
         const mappedData = administrativeAreaData.map(
             (administrativeAreaEntry) => {
@@ -145,8 +145,11 @@ const SideBar = () => {
             case Resolutions.Admin1:
                 mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
                 break;
+            case Resolutions.Admin2:
+                mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
+                break;
         }
-    }, [countriesData, stateData, resolution, outbreakName]);
+    }, [countriesData, stateData, regionalData, resolution, outbreakName]);
 
     const getDataForAdministrativeAreaList = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
