@@ -254,13 +254,41 @@ export const useChoroplethLayer = (
                     );
                 }
 
+                if (!map.getLayer('adminJoinEmpty')) {
+                    map.addLayer(
+                        {
+                            id: 'adminJoinEmpty',
+                            type: 'fill',
+                            source: sourceId,
+                            filter: [
+                                'all',
+                                ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
+                                [
+                                    'any',
+                                    ['!', ['has', 'caseCount']],
+                                    ['==', ['get', 'caseCount'], 0],
+                                ],
+                            ],
+                            paint: {
+                                'fill-color': ChoroplethMapColors.empty,
+                            },
+                        } as any,
+                        firstSymbolLayer,
+                    );
+                }
+
                 if (!map.getLayer(`adminJoin`)) {
                     map.addLayer(
                         {
                             id: `adminJoin`,
                             type: 'fill',
                             source: sourceId,
-                            filter: ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
+                            filter: [
+                                'all',
+                                ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
+                                ['has', 'caseCount'],
+                                ['>', ['get', 'caseCount'], 0],
+                            ],
                             paint: {
                                 'fill-color': [
                                     'case',
@@ -610,7 +638,7 @@ export const useChoroplethLayer = (
 
                 if (!currentPopupRef.current) {
                     const popup = new Popup({
-                        anchor: smallScreen ? 'center' : undefined,
+                        anchor: 'bottom',
                         closeButton: false,
                         closeOnClick: true,
                     })
