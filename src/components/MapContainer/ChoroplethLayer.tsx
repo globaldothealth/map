@@ -114,11 +114,16 @@ export const useChoroplethLayer = (
                             );
                         });
 
+                        const areaName = matchedData ? matchedData.name : shapeName;
+                        const labelName =
+                            areaName?.startsWith('Other (') && areaName?.endsWith(')')
+                                ? areaName.slice('Other ('.length, -1)
+                                : areaName;
+
                         const newProps: Record<string, any> = {
                             ...props,
-                            areaName: matchedData
-                                ? matchedData.name
-                                : shapeName,
+                            areaName,
+                            labelName,
                             countryCode: shapeGroup,
                             areaId: matchedData?.areaId || props.shapeID,
                         };
@@ -325,13 +330,45 @@ export const useChoroplethLayer = (
                                     [
                                         'case',
                                         ['==', ['get', 'caseCount'], 0],
-                                        ChoroplethMapColors['empty'],
+                                        ChoroplethMapColors['borders'],
                                         ['>', ['get', 'caseCount'], 0],
                                         ChoroplethMapColors['borders'],
                                         ChoroplethMapColors['empty'],
                                     ],
                                     ChoroplethMapColors['empty'],
                                 ],
+                            },
+                        } as any,
+                        firstSymbolLayer,
+                    );
+                }
+
+                if (!map.getLayer('adminJoinLabels')) {
+                    map.addLayer(
+                        {
+                            id: 'adminJoinLabels',
+                            type: 'symbol',
+                            source: sourceId,
+                            layout: {
+                                'text-field': ['get', 'labelName'],
+                                'text-size': [
+                                    'interpolate',
+                                    ['linear'],
+                                    ['zoom'],
+                                    3, 11,
+                                    6, 14,
+                                    10, 16,
+                                ],
+                                'text-font': ['Open Sans Regular'],
+                                'text-max-width': 8,
+                                'text-anchor': 'center',
+                                'text-allow-overlap': false,
+                                'text-ignore-placement': false,
+                            },
+                            paint: {
+                                'text-color': '#333333',
+                                'text-halo-color': '#ffffff',
+                                'text-halo-width': 1.5,
                             },
                         } as any,
                         firstSymbolLayer,
@@ -367,6 +404,8 @@ export const useChoroplethLayer = (
                         return;
                     }
 
+                    if (e.features[0].properties?.caseCount === 0) return;
+
                     const name = e.features[0].properties.areaName;
                     const areaId = e.features[0].properties.areaId || '';
                     const countryCode = e.features[0].properties.countryCode;
@@ -384,7 +423,8 @@ export const useChoroplethLayer = (
 
                 // Cursor pointer on hover
                 const mousemoveHandler = (e: any) => {
-                    if (e.features?.[0]?.properties?.caseCount != null)
+                    const caseCount = e.features?.[0]?.properties?.caseCount;
+                    if (caseCount != null && caseCount > 0)
                         map.getCanvas().style.cursor = 'pointer';
                     else map.getCanvas().style.cursor = '';
                 };

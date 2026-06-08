@@ -122,7 +122,7 @@ const SideBar = () => {
     const mapDataToAutocomplete = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
     ) => {
-        const mappedData = administrativeAreaData.map(
+        const mappedData = (administrativeAreaData as (CountryData | StateData | RegionalData)[]).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0).map(
             (administrativeAreaEntry) => {
                 return {
                     name: administrativeAreaEntry.name || '',
@@ -134,6 +134,7 @@ const SideBar = () => {
                 };
             },
         );
+        console.log(mappedData);
         setAutocompleteData(mappedData);
     };
 
@@ -167,7 +168,7 @@ const SideBar = () => {
                 (administrativeAreaEntry1, administrativeAreaEntry2) =>
                     administrativeAreaEntry2.caseCount -
                     administrativeAreaEntry1.caseCount,
-            );
+            ).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0);
     };
 
     const renderAdministrativeAreaList = (
