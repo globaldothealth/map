@@ -148,6 +148,18 @@ export const useChoroplethLayer = (
 
                 const sourceId = `adminSource`;
 
+                // Remove layers before re-adding so they always reflect current adminLevel and data
+                const layersToRemove = [
+                    'adminJoinLabels',
+                    'adminJoinOtherStripe',
+                    'adminJoinBorder',
+                    'adminJoin',
+                    'adminJoinEmpty',
+                ];
+                for (const layerId of layersToRemove) {
+                    if (map.getLayer(layerId)) map.removeLayer(layerId);
+                }
+
                 if (map.getSource(sourceId)) {
                     (map.getSource(sourceId) as any).setData(joinedGeoJSON);
                 } else {
@@ -239,8 +251,7 @@ export const useChoroplethLayer = (
                     'stripe-empty',
                 ];
 
-                if (!map.getLayer('adminJoinOtherStripe')) {
-                    map.addLayer(
+                map.addLayer(
                         {
                             id: 'adminJoinOtherStripe',
                             type: 'fill',
@@ -252,10 +263,8 @@ export const useChoroplethLayer = (
                         } as any,
                         firstSymbolLayer,
                     );
-                }
 
-                if (!map.getLayer('adminJoinEmpty')) {
-                    map.addLayer(
+                map.addLayer(
                         {
                             id: 'adminJoinEmpty',
                             type: 'fill',
@@ -275,10 +284,8 @@ export const useChoroplethLayer = (
                         } as any,
                         firstSymbolLayer,
                     );
-                }
 
-                if (!map.getLayer(`adminJoin`)) {
-                    map.addLayer(
+                map.addLayer(
                         {
                             id: `adminJoin`,
                             type: 'fill',
@@ -343,10 +350,8 @@ export const useChoroplethLayer = (
                         } as any,
                         firstSymbolLayer,
                     );
-                }
 
-                if (!map.getLayer(`adminJoinBorder`)) {
-                    map.addLayer(
+                map.addLayer(
                         {
                             id: `adminJoinBorder`,
                             type: 'line',
@@ -369,9 +374,8 @@ export const useChoroplethLayer = (
                         } as any,
                         firstSymbolLayer,
                     );
-                }
 
-                if (!map.getLayer('adminJoinLabels')) {
+                if (adminLevel === 2) {
                     map.addLayer(
                         {
                             id: 'adminJoinLabels',
