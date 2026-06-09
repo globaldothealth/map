@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { Feature, FeatureCollection } from 'geojson';
 import { Map, Popup } from 'maplibre-gl';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 import MapPopup from 'src/components/MapPopup';
 import { PopupContentText } from 'src/components/MapPopup/styled';
