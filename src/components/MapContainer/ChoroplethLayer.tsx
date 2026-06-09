@@ -32,7 +32,6 @@ export const useChoroplethLayer = (
     },
 ) => {
     const dispatch = useAppDispatch();
-    const smallScreen = useMediaQuery('(max-width:1400px)');
     const currentPopupRef = React.useRef<Popup | null>(null);
     const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
     const suppressPopupCloseRef = React.useRef(false);
@@ -299,8 +298,6 @@ export const useChoroplethLayer = (
                             paint: {
                                 'fill-color': [
                                     'case',
-                                    ['==', ['get', 'areaName'], 'Other (Ituri Province)'],
-                                    ChoroplethMapColors.empty,
                                     ['has', 'caseCount'],
                                     [
                                         'case',
@@ -669,5 +666,5 @@ export const useChoroplethLayer = (
             currentPopupRef.current = null;
             map?.fitBounds([0, -12.4, 0, 70.15]);
         }
-    }, [focusedArea, map, data, smallScreen, dispatch, setFocusedArea]);
+    }, [focusedArea, map, data, dispatch, setFocusedArea]);
 };

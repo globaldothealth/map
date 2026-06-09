@@ -289,7 +289,8 @@ const SideBar = () => {
         }
     };
 
-    const admin_level_text = resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'State/Province' : 'Health Zone (DRC only)';
+    const adminLevelText = resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'State/Province' : 'Health Zone (DRC only)';
+    const dataLoading = resolution === Resolutions.Admin0 ? totalCountryCasesCountIsLoading : resolution === Resolutions.Admin1 ? totalStateCasesCountIsLoading : totalRegionalCasesCountIsLoading;
 
     return (
         <StyledSideBar $sidebaropen={openSidebar} data-cy="sidebar">
@@ -312,7 +313,7 @@ const SideBar = () => {
                             marginTop: '10px'
                         }}
                     >
-                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]}<br/><span style={{fontWeight: '300', fontSize: '16px'}}>{admin_level_text}</span></span>
+                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]}<br/><span style={{fontWeight: '300', fontSize: '16px'}}>{adminLevelText}</span></span>
                     </Button>
                     <Menu
                         anchorEl={menuAnchorEl}
@@ -378,7 +379,7 @@ const SideBar = () => {
                 </div>
             </SideBarHeader>
             <LatestGlobal id="latest-global" $sidebaropen={openSidebar}>
-                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading || totalRegionalCasesCountIsLoading? (
+                {dataLoading? (
                     <SideBarTitlesSkeleton
                         animation="pulse"
                         variant="rectangular"
@@ -389,7 +390,7 @@ const SideBar = () => {
                 )}
                 <div className="last-updated-date">
                     Last reported case:{' '}
-                    {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading || totalRegionalCasesCountIsLoading ? (
+                    {dataLoading ? (
                         <SideBarTitlesSkeleton
                             animation="pulse"
                             variant="rectangular"
@@ -452,7 +453,7 @@ const SideBar = () => {
                 />
             </SearchBar>
             <LocationList>
-                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading || totalRegionalCasesCountIsLoading? (
+                {dataLoading? (
                     <CountriesListSkeleton
                         animation="pulse"
                         variant="rectangular"

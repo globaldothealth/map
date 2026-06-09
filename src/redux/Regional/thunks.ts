@@ -40,8 +40,17 @@ export const fetchRegionalData = createAsyncThunk<
         const fetchedCases = await fetchCasesData(url.toString());
         const regionalData = mapToRegionalData(fetchedCases);
 
+        if (regionalData.length === 0) {
+            return {
+                regionalData: [],
+                totalNumberOfCases: 0,
+                lastUpdateDate: '',
+                outbreakName,
+            };
+        }
+
         let totalNumberOfCases = 0;
-        let lastUpdateDate = fetchedCases[0].last_updated;
+        let lastUpdateDate = regionalData[0].lastUpdated;
         for (const result of regionalData) {
             totalNumberOfCases += result.caseCount;
             if (result.lastUpdated > lastUpdateDate) {
