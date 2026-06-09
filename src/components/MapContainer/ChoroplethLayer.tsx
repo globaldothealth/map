@@ -538,8 +538,6 @@ export const useChoroplethLayer = (
 
         const fillColorExpression = [
             'case',
-            ['==', ['get', 'areaName'], 'Other'],
-            ChoroplethMapColors.empty,
             ['has', 'caseCount'],
             [
                 'case',

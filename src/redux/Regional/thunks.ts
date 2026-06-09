@@ -27,7 +27,7 @@ export const fetchRegionalData = createAsyncThunk<
         regionalData: RegionalData[],
         totalNumberOfCases: number;
         lastUpdateDate: string;
-        outbreakName: string;
+        outbreakName: keyof typeof OutbreakNames;
     },
     void,
     { rejectValue: string, state: RootState }

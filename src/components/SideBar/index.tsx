@@ -56,7 +56,7 @@ import {
     SideBarTitlesSkeleton,
     StyledSideBar,
 } from './styled';
-import {selectRegionalData, selectRegionalTotalCases, selectRegionalTotalCasesIsLoading} from "src/redux/Regional/selectors.ts";
+import {selectRegionalData, selectRegionalLastUpdatedDate, selectRegionalTotalCases, selectRegionalTotalCasesIsLoading} from "src/redux/Regional/selectors.ts";
 
 
 const SideBar = () => {
@@ -71,6 +71,7 @@ const SideBar = () => {
     const countriesData = useAppSelector(selectCountriesData);
     const lastUpdateCountryDate = useAppSelector(selectCountryLastUpdateDate);
     const lastUpdateStateDate = useAppSelector(selectStateLastUpdatedDate);
+    const lastUpdateRegionalDate = useAppSelector(selectRegionalLastUpdatedDate);
     const stateData = useAppSelector(selectStateData);
     const regionalData = useAppSelector(selectRegionalData);
     const focusedArea = useAppSelector(selectFocusedArea);
@@ -134,7 +135,6 @@ const SideBar = () => {
                 };
             },
         );
-        console.log(mappedData);
         setAutocompleteData(mappedData);
     };
 
@@ -397,7 +397,7 @@ const SideBar = () => {
                         />
                     ) : (
                         <span id="last-updated-date">
-                            {convertStringDateToDate(resolution === Resolutions.Admin0 ? lastUpdateCountryDate[OutbreakNames[outbreakName]] : lastUpdateStateDate[OutbreakNames[outbreakName]]).toLocaleString()}
+                            {convertStringDateToDate(resolution === Resolutions.Admin0 ? lastUpdateCountryDate[OutbreakNames[outbreakName]] : resolution === Resolutions.Admin1 ? lastUpdateStateDate[OutbreakNames[outbreakName]] : lastUpdateRegionalDate[OutbreakNames[outbreakName]]).toLocaleString()}
                         </span>
                     )}
                 </div>
