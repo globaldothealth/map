@@ -23,8 +23,11 @@ const mapToRegionalData = (cases: FetchedCaseData[]): RegionalData[]  => {
 }
 
 export const fetchRegionalData = createAsyncThunk<
-    {regionalData: RegionalData[],         totalNumberOfCases: number;
+    {
+        regionalData: RegionalData[],
+        totalNumberOfCases: number;
         lastUpdateDate: string;
+        outbreakName: keyof typeof OutbreakNames;
     },
     void,
     { rejectValue: string, state: RootState }
@@ -37,8 +40,17 @@ export const fetchRegionalData = createAsyncThunk<
         const fetchedCases = await fetchCasesData(url.toString());
         const regionalData = mapToRegionalData(fetchedCases);
 
+        if (regionalData.length === 0) {
+            return {
+                regionalData: [],
+                totalNumberOfCases: 0,
+                lastUpdateDate: '',
+                outbreakName,
+            };
+        }
+
         let totalNumberOfCases = 0;
-        let lastUpdateDate = fetchedCases[0].last_updated;
+        let lastUpdateDate = regionalData[0].lastUpdated;
         for (const result of regionalData) {
             totalNumberOfCases += result.caseCount;
             if (result.lastUpdated > lastUpdateDate) {
@@ -46,7 +58,7 @@ export const fetchRegionalData = createAsyncThunk<
             }
         }
 
-        return { regionalData, totalNumberOfCases, lastUpdateDate };
+        return { regionalData, totalNumberOfCases, lastUpdateDate, outbreakName };
     } catch (error: any) {
         if (!error.response) throw error;
 

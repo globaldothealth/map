@@ -9,6 +9,21 @@ import {fetchCountriesData} from 'src/redux/Country/thunks';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {fetchStateData} from "src/redux/State/thunks.ts";
 import {selectStateData} from "src/redux/State/selectors.ts";
+import {selectRegionalData} from "src/redux/Regional/selectors.ts";
+import {fetchRegionalData} from "src/redux/Regional/thunks.ts";
+
+const emptyLevel = {
+        lower: {number: 0, text: '0'},
+        upper: {number: 0, text: '0'},
+    }
+
+const emptyLevels =  {
+        level1: emptyLevel,
+        level2: emptyLevel,
+        level3: emptyLevel,
+        level4: emptyLevel,
+        level5: emptyLevel,
+    }
 
 const dataLayerBounds = {
     'Covid19': {
@@ -34,29 +49,9 @@ const dataLayerBounds = {
                 upper: {number: 10000000, text: '10M'},
             },
         },
-        [Resolutions.Admin1]: {
-            level1: {
-                lower: {number: 1, text: '1'},
-                upper: {number: 10000, text: '10k'},
-            },
-            level2: {
-                lower: {number: 10001, text: '10k'},
-                upper: {number: 100000, text: '100k'},
-            },
-            level3: {
-                lower: {number: 100001, text: '100k'},
-                upper: {number: 500000, text: '500k'},
-            },
-            level4: {
-                lower: {number: 500001, text: '500K'},
-                upper: {number: 2000000, text: '2M'},
-            },
-            level5: {
-                lower: {number: 2000001, text: '2M'},
-                upper: {number: 10000000, text: '10M'},
-            },
-        }
-    },
+        [Resolutions.Admin1]: emptyLevels,
+        [Resolutions.Admin2]: emptyLevels,
+        },
     'AvianInfluenza': {
         [Resolutions.Admin0]: {
             level1: {
@@ -101,7 +96,8 @@ const dataLayerBounds = {
                 lower: {number: 10, text: '10'},
                 upper: {number: 20, text: '20'},
             },
-        }
+        },
+        [Resolutions.Admin2]: emptyLevels
     },
     "Ebola": {
         [Resolutions.Admin0]: {
@@ -127,6 +123,75 @@ const dataLayerBounds = {
             },
         },
         [Resolutions.Admin1]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        },
+        [Resolutions.Admin2]: emptyLevels
+    },
+    "EbolaBVD": {
+        [Resolutions.Admin0]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        },
+        [Resolutions.Admin1]: {
+            level1: {
+                lower: {number: 1, text: '1'},
+                upper: {number: 3, text: '3'},
+            },
+            level2: {
+                lower: {number: 4, text: '4'},
+                upper: {number: 10, text: '10'},
+            },
+            level3: {
+                lower: {number: 11, text: '11'},
+                upper: {number: 20, text: '20'},
+            },
+            level4: {
+                lower: {number: 21, text: '21'},
+                upper: {number: 50, text: '50'},
+            },
+            level5: {
+                lower: {number: 51, text: '51'},
+                upper: {number: 100, text: '100'},
+            },
+        },
+        [Resolutions.Admin2]: {
             level1: {
                 lower: {number: 1, text: '1'},
                 upper: {number: 3, text: '3'},
@@ -193,7 +258,8 @@ const dataLayerBounds = {
                 lower: {number: 20, text: '20'},
                 upper: {number: 25, text: '25'},
             },
-        }
+        },
+        [Resolutions.Admin2]: emptyLevels
     },
     "Mpox2022": {
         [Resolutions.Admin0]: {
@@ -218,31 +284,10 @@ const dataLayerBounds = {
                 upper: {number: 5000, text: '5000'},
             },
         },
-        [Resolutions.Admin1]: {
-            level1: {
-                lower: {number: 1, text: '1'},
-                upper: {number: 10, text: '10'},
-            },
-            level2: {
-                lower: {number: 11, text: '11'},
-                upper: {number: 100, text: '100'},
-            },
-            level3: {
-                lower: {number: 101, text: '101'},
-                upper: {number: 500, text: '500'},
-            },
-            level4: {
-                lower: {number: 501, text: '501'},
-                upper: {number: 2000, text: '2000'},
-            },
-            level5: {
-                lower: {number: 2001, text: '2001'},
-                upper: {number: 5000, text: '5000'},
-            },
-        }
+        [Resolutions.Admin1]: emptyLevels,
+        [Resolutions.Admin2]: emptyLevels
     },
-    "Mpox2024":
-        {
+    "Mpox2024": {
             [Resolutions.Admin0]: {
                 level1: {
                     lower: {number: 1, text: '1'},
@@ -265,29 +310,9 @@ const dataLayerBounds = {
                     upper: {number: 5000, text: '5000'},
                 },
             },
-            [Resolutions.Admin1]: {
-                level1: {
-                    lower: {number: 1, text: '1'},
-                    upper: {number: 10, text: '10'},
-                },
-                level2: {
-                    lower: {number: 11, text: '11'},
-                    upper: {number: 100, text: '100'},
-                },
-                level3: {
-                    lower: {number: 101, text: '101'},
-                    upper: {number: 500, text: '500'},
-                },
-                level4: {
-                    lower: {number: 501, text: '501'},
-                    upper: {number: 2000, text: '2000'},
-                },
-                level5: {
-                    lower: {number: 2001, text: '2001'},
-                    upper: {number: 5000, text: '5000'},
-                },
+            [Resolutions.Admin1]: emptyLevels,
+            [Resolutions.Admin2]: emptyLevels
             }
-        }
 }
 
 export const AreaView: React.FC = () => {
@@ -295,6 +320,7 @@ export const AreaView: React.FC = () => {
 
     const countryData = useAppSelector(selectCountriesData);
     const stateData = useAppSelector(selectStateData);
+    const regionalData = useAppSelector(selectRegionalData);
     const resolution = useAppSelector(selectResolution);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
@@ -303,14 +329,13 @@ export const AreaView: React.FC = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
-                    dispatch(fetchCountriesData());
-                }
+                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchCountriesData());
+                break;
+            case Resolutions.Admin1:
+                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchStateData());
                 break;
             default:
-                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
-                    dispatch(fetchStateData());
-                }
+                if (!regionalData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchRegionalData());
                 break;
         }
         dispatch(setFocusedArea(null));
@@ -319,11 +344,13 @@ export const AreaView: React.FC = () => {
         };
     }, [outbreakName, dispatch, resolution]);
 
-    const adminLevel = resolution === Resolutions.Admin0 ? 0 : 1;
-    const chartType = resolution === Resolutions.Admin0 ? ChartTypeNames.Country : ChartTypeNames.State;
-    const data = resolution === Resolutions.Admin0
-        ? countryData[OutbreakNames[outbreakName]]
-        : stateData[OutbreakNames[outbreakName]];
+    const resolutionConfig = {
+        [Resolutions.Admin0]: { adminLevel: 0, chartType: ChartTypeNames.Country, data: countryData[OutbreakNames[outbreakName]] },
+        [Resolutions.Admin1]: { adminLevel: 1, chartType: ChartTypeNames.State, data: stateData[OutbreakNames[outbreakName]] },
+        [Resolutions.Admin2]: { adminLevel: 2, chartType: ChartTypeNames.Regional, data: regionalData[OutbreakNames[outbreakName]] },
+    };
+
+    const { adminLevel, chartType, data } = resolutionConfig[resolution];
 
     return (
         <MapContainer

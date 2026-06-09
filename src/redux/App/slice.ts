@@ -11,6 +11,7 @@ export enum OutbreakNames {
     Covid19 = 'COVID-19',
     AvianInfluenza = 'Avian Influenza',
     Ebola = 'Ebola',
+    EbolaBVD = 'Ebola BVD',
     Marburg = 'Marburg',
     Mpox2022 = 'Mpox 2022',
     Mpox2024 = 'Mpox 2024',
@@ -19,6 +20,7 @@ export enum OutbreakNames {
 export enum Resolutions {
     Admin0 = 'Admin0',
     Admin1 = 'Admin1',
+    Admin2 = 'Admin2',
 }
 
 interface AppState {
@@ -69,6 +71,7 @@ const initialState: AppState = {
         Covid19: [Resolutions.Admin0],
         AvianInfluenza: [Resolutions.Admin0, Resolutions.Admin1],
         Ebola: [Resolutions.Admin0, Resolutions.Admin1],
+        EbolaBVD: [Resolutions.Admin0, Resolutions.Admin1, Resolutions.Admin2],
         Marburg: [Resolutions.Admin0, Resolutions.Admin1],
         Mpox2022: [Resolutions.Admin0],
         Mpox2024: [Resolutions.Admin0],

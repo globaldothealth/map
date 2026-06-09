@@ -56,6 +56,7 @@ import {
     SideBarTitlesSkeleton,
     StyledSideBar,
 } from './styled';
+import {selectRegionalData, selectRegionalLastUpdatedDate, selectRegionalTotalCases, selectRegionalTotalCasesIsLoading} from "src/redux/Regional/selectors.ts";
 
 
 const SideBar = () => {
@@ -70,7 +71,9 @@ const SideBar = () => {
     const countriesData = useAppSelector(selectCountriesData);
     const lastUpdateCountryDate = useAppSelector(selectCountryLastUpdateDate);
     const lastUpdateStateDate = useAppSelector(selectStateLastUpdatedDate);
+    const lastUpdateRegionalDate = useAppSelector(selectRegionalLastUpdatedDate);
     const stateData = useAppSelector(selectStateData);
+    const regionalData = useAppSelector(selectRegionalData);
     const focusedArea = useAppSelector(selectFocusedArea);
     const totalCountryCasesCount = useAppSelector(selectCountryTotalCases);
     const totalCountryCasesCountIsLoading = useAppSelector(
@@ -79,6 +82,10 @@ const SideBar = () => {
     const totalStateCasesCount = useAppSelector(selectStateTotalCases);
     const totalStateCasesCountIsLoading = useAppSelector(
         selectStateTotalCasesIsLoading,
+    );
+    const totalRegionalCasesCount = useAppSelector(selectRegionalTotalCases);
+    const totalRegionalCasesCountIsLoading = useAppSelector(
+        selectRegionalTotalCasesIsLoading,
     );
     const outbreakName = useAppSelector(selectOutbreakName);
 
@@ -114,9 +121,9 @@ const SideBar = () => {
     };
 
     const mapDataToAutocomplete = (
-        administrativeAreaData: CountryData[] | StateData[],
+        administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
     ) => {
-        const mappedData = administrativeAreaData.map(
+        const mappedData = (administrativeAreaData as (CountryData | StateData | RegionalData)[]).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0).map(
             (administrativeAreaEntry) => {
                 return {
                     name: administrativeAreaEntry.name || '',
@@ -139,8 +146,11 @@ const SideBar = () => {
             case Resolutions.Admin1:
                 mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
                 break;
+            case Resolutions.Admin2:
+                mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
+                break;
         }
-    }, [countriesData, stateData, resolution, outbreakName]);
+    }, [countriesData, stateData, regionalData, resolution, outbreakName]);
 
     const getDataForAdministrativeAreaList = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
@@ -158,7 +168,7 @@ const SideBar = () => {
                 (administrativeAreaEntry1, administrativeAreaEntry2) =>
                     administrativeAreaEntry2.caseCount -
                     administrativeAreaEntry1.caseCount,
-            );
+            ).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0);
     };
 
     const renderAdministrativeAreaList = (
@@ -229,6 +239,10 @@ const SideBar = () => {
                 return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(stateData[OutbreakNames[outbreakName]]),
                 );
+            case Resolutions.Admin2:
+                return renderAdministrativeAreaList(
+                    getDataForAdministrativeAreaList(regionalData[OutbreakNames[outbreakName]]),
+                );
             default:
                 return null;
         }
@@ -236,6 +250,18 @@ const SideBar = () => {
 
     const getTotalCountText = () => {
         switch (resolution) {
+            case Resolutions.Admin2:
+                return (
+                    <>
+                        <span id="total-cases" className="active">
+                            {totalRegionalCasesCount[OutbreakNames[outbreakName]].toLocaleString()}
+                        </span>
+                        <span className="reported-cases-label">
+                            {' '}
+                            confirmed cases available for Health Zone View
+                        </span>
+                    </>
+                );
             case Resolutions.Admin1:
                 return (
                     <>
@@ -263,6 +289,9 @@ const SideBar = () => {
         }
     };
 
+    const adminLevelText = resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'State/Province' : 'Health Zone (DRC only)';
+    const dataLoading = resolution === Resolutions.Admin0 ? totalCountryCasesCountIsLoading : resolution === Resolutions.Admin1 ? totalStateCasesCountIsLoading : totalRegionalCasesCountIsLoading;
+
     return (
         <StyledSideBar $sidebaropen={openSidebar} data-cy="sidebar">
             <SideBarHeader id="sidebar-header">
@@ -284,7 +313,7 @@ const SideBar = () => {
                             marginTop: '10px'
                         }}
                     >
-                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]}<br/><span style={{fontWeight: '300', fontSize: '16px'}}>{resolution === Resolutions.Admin0 ? 'Country level' : 'State/Province level'}</span></span>
+                        <span style={{textAlign: 'left'}}>{OutbreakNames[outbreakName]}<br/><span style={{fontWeight: '300', fontSize: '16px'}}>{adminLevelText}</span></span>
                     </Button>
                     <Menu
                         anchorEl={menuAnchorEl}
@@ -330,7 +359,7 @@ const SideBar = () => {
                         }}
                     >
                         {hoveredOutbreak && (availableResolutionsForOutbreaks[hoveredOutbreak] ?? []).map((res) => {
-                            const label = res === Resolutions.Admin0 ? 'Country level' : 'State/Province level';
+                            const label = res === Resolutions.Admin0 ? 'Country level' : res === Resolutions.Admin1 ? 'State/Province level' : "Health Zone level (DRC only)";
                             return (
                                 <MenuItem
                                     key={res}
@@ -350,7 +379,7 @@ const SideBar = () => {
                 </div>
             </SideBarHeader>
             <LatestGlobal id="latest-global" $sidebaropen={openSidebar}>
-                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
+                {dataLoading? (
                     <SideBarTitlesSkeleton
                         animation="pulse"
                         variant="rectangular"
@@ -361,7 +390,7 @@ const SideBar = () => {
                 )}
                 <div className="last-updated-date">
                     Last reported case:{' '}
-                    {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
+                    {dataLoading ? (
                         <SideBarTitlesSkeleton
                             animation="pulse"
                             variant="rectangular"
@@ -369,7 +398,7 @@ const SideBar = () => {
                         />
                     ) : (
                         <span id="last-updated-date">
-                            {convertStringDateToDate(resolution === Resolutions.Admin0 ? lastUpdateCountryDate[OutbreakNames[outbreakName]] : lastUpdateStateDate[OutbreakNames[outbreakName]]).toLocaleString()}
+                            {convertStringDateToDate(resolution === Resolutions.Admin0 ? lastUpdateCountryDate[OutbreakNames[outbreakName]] : resolution === Resolutions.Admin1 ? lastUpdateStateDate[OutbreakNames[outbreakName]] : lastUpdateRegionalDate[OutbreakNames[outbreakName]]).toLocaleString()}
                         </span>
                     )}
                 </div>
@@ -418,13 +447,13 @@ const SideBar = () => {
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label={`Choose a ${resolution === Resolutions.Admin0 ? 'country' : 'state'}...`}
+                            label={`Choose a ${resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'state' : 'health zone'}...`}
                         />
                     )}
                 />
             </SearchBar>
             <LocationList>
-                {totalCountryCasesCountIsLoading || totalStateCasesCountIsLoading ? (
+                {dataLoading? (
                     <CountriesListSkeleton
                         animation="pulse"
                         variant="rectangular"

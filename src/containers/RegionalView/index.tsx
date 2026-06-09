@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import MapContainer from 'src/components/MapContainer';
 import { ChartTypeNames } from 'src/models/ViewParamURLValues';
 import { selectFocusedArea, selectOutbreakName } from 'src/redux/App/selectors';
-import { setFocusedArea } from 'src/redux/App/slice';
+import {OutbreakNames, setFocusedArea } from 'src/redux/App/slice';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 import { selectRegionalData } from 'src/redux/Regional/selectors';
 import { fetchRegionalData } from 'src/redux/Regional/thunks';
@@ -49,7 +49,7 @@ export const RegionalView: React.FC = () => {
 
     return (
         <MapContainer
-            data={regionalData}
+            data={regionalData[OutbreakNames[outbreakName]]}
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={ChartTypeNames.Regional}
