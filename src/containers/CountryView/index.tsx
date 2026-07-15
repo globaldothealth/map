@@ -55,6 +55,7 @@ export const CountryView: React.FC = () => {
             chartType={ChartTypeNames.Country}
             adminLevel={0}
             dataLayerBounds={dataLayerBounds}
+            outbreakName={outbreakName}
         />
     );
 };
