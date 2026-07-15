@@ -192,7 +192,7 @@ const dataLayerBounds = {
             },
         },
         [Resolutions.Admin2]: {
-            level1: {
+          level1: {
                 lower: {number: 1, text: '1'},
                 upper: {number: 3, text: '3'},
             },
@@ -202,15 +202,15 @@ const dataLayerBounds = {
             },
             level3: {
                 lower: {number: 11, text: '11'},
-                upper: {number: 20, text: '20'},
+                upper: {number: 40, text: '40'},
             },
             level4: {
-                lower: {number: 21, text: '21'},
-                upper: {number: 50, text: '50'},
+                lower: {number: 41, text: '41'},
+                upper: {number: 100, text: '100'},
             },
             level5: {
-                lower: {number: 51, text: '51'},
-                upper: {number: 100, text: '100'},
+                lower: {number: 101, text: '101'},
+                upper: {number: 1000, text: '1000'},
             },
         }
     },
