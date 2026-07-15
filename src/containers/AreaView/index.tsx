@@ -360,6 +360,7 @@ export const AreaView: React.FC = () => {
             chartType={chartType}
             adminLevel={adminLevel}
             dataLayerBounds={dataLayerBounds[outbreakName][resolution]}
+            outbreakName={outbreakName}
         />
     );
 };
