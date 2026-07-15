@@ -29,6 +29,7 @@ export const useChoroplethLayer = (
             upper: { number: number; text: string };
         };
     },
+    outbreakName: string,
 ) => {
     const dispatch = useAppDispatch();
     const currentPopupRef = React.useRef<Popup | null>(null);
@@ -370,8 +371,9 @@ export const useChoroplethLayer = (
                         } as any,
                         firstSymbolLayer,
                     );
+                console.log('ON',outbreakName)
 
-                if (adminLevel === 2) {
+                if (adminLevel === 2 || adminLevel === 1 && outbreakName === 'EbolaBVD') {
                     map.addLayer(
                         {
                             id: 'adminJoinLabels',
