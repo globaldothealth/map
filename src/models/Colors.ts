@@ -6,7 +6,7 @@ export enum ChoroplethMapColors {
     'level5' = 'rgba(38, 163, 232, 1)',
     'level6' = 'rgba(38, 137, 183, 1)',
     'empty' = 'rgba(0, 0, 0, 0)',
-    'borders' = 'rgb(0, 98, 143)',
+    'borders' = 'rgb(0, 98, 143, 1)',
     'water' = 'rgba(237, 243, 241, 1)',
     'land' = 'rgba(220, 235, 237, 1)',
 }
