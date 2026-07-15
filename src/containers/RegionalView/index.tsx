@@ -55,6 +55,7 @@ export const RegionalView: React.FC = () => {
             chartType={ChartTypeNames.Regional}
             adminLevel={2}
             dataLayerBounds={dataLayerBounds}
+            outbreakName={outbreakName}
         />
     );
 };
