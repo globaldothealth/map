@@ -526,7 +526,7 @@ export const useChoroplethLayer = (
             }
             handlersRef.current = { click: null, mousemove: null, mouseleave: null, clickOther: null, mousemoveOther: null, mouseleaveOther: null };
         };
-    }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, dispatch, setFocusedArea]);
+    }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, outbreakName, dispatch, setFocusedArea]);
 
     // Update choropleth colors when dataLayerBounds change
     useEffect(() => {
