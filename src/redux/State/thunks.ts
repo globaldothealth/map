@@ -39,6 +39,9 @@ export const fetchStateData = createAsyncThunk<
 
         const fetchedCases = await fetchCasesData(url.toString());
         const stateData = mapToStateData(fetchedCases);
+        for (const result of stateData) {
+            console.log(result.areaId)
+        }
 
         let totalNumberOfCases = 0;
         let lastUpdateDate = fetchedCases[0].last_updated;

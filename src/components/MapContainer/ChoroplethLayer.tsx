@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import React, { useEffect } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { Feature, FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import { Map, Popup } from 'maplibre-gl';
 
 import MapPopup from 'src/components/MapPopup';
@@ -29,11 +29,13 @@ export const useChoroplethLayer = (
             upper: { number: number; text: string };
         };
     },
+    outbreakName?: string,
 ) => {
     const dispatch = useAppDispatch();
     const currentPopupRef = React.useRef<Popup | null>(null);
     const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
     const suppressPopupCloseRef = React.useRef(false);
+    const previousFeatureStateIdsRef = React.useRef<(string | number)[]>([]);
     const handlersRef = React.useRef<{
         click: ((e: any) => void) | null;
         mousemove: ((e: any) => void) | null;
@@ -64,6 +66,18 @@ export const useChoroplethLayer = (
         if (!map || !mapLoaded || !dataFeatureSet) return;
 
         let isCancelled = false;
+        const admin0TilesUrl = import.meta.env.VITE_ADMIN0_TILES_URL as
+            | string
+            | undefined;
+        const admin0SourceLayer =
+            (import.meta.env.VITE_ADMIN0_TILES_SOURCE_LAYER as
+                | string
+                | undefined) || 'admin0';
+        const admin0PromoteId =
+            (import.meta.env.VITE_ADMIN0_TILES_PROMOTE_ID as
+                | string
+                | undefined) || 'areaID';
+        const useAdmin0Tiles = adminLevel === 0 && !!admin0TilesUrl;
 
         const setupLayer = async () => {
             try {
@@ -72,79 +86,48 @@ export const useChoroplethLayer = (
                     | StateData
                     | RegionalData
                 )[];
-                // Only load boundaries for the current admin level and for areas with case storage
-                const boundaries: FeatureCollection = {
-                    type: 'FeatureCollection',
-                    features: dataUnion.map((d) => ({
-                        type: 'Feature' as const,
-                        geometry: d.geometry as any,
-                        properties: {
-                            shapeGroup: d.countryCode,
-                            shapeName: d.name,
-                            shapeType: `ADMIN`,
-                        },
-                    })),
-                };
 
-                // Join case storage into boundary features by matching name and country code
-                const joinedFeatures: Feature[] = boundaries.features.map(
-                    (feature) => {
-                        const props = feature.properties || {};
-                        // geoBoundaries uses shapeGroup (ISO3) and shapeName
-                        const shapeName = props.shapeName;
-                        const shapeGroup = props.shapeGroup;
-
-                        // Find matching storage entry by name (case-insensitive)
-                        const matchedData = dataUnion.find((d) => {
-                            if (adminLevel === 0) {
-                                // For countries, match by ISO code if available
-                                return (
-                                    d.countryCode?.toUpperCase() ===
-                                    shapeGroup?.toUpperCase()
-                                );
-                            }
-                            // For sub-national, match by name within the same country
-                            return (
-                                d.name?.toLowerCase() ===
-                                    shapeName?.toLowerCase() &&
-                                d.countryCode?.toUpperCase() ===
-                                    shapeGroup?.toUpperCase()
-                            );
-                        });
-
-                        const areaName = matchedData ? matchedData.name : shapeName;
-                        const labelName =
-                            areaName?.startsWith('Other (') && areaName?.endsWith(')')
-                                ? areaName.slice('Other ('.length, -1)
-                                : areaName;
-
-                        const newProps: Record<string, any> = {
-                            ...props,
-                            areaName,
-                            labelName,
-                            countryCode: shapeGroup,
-                            areaId: matchedData?.areaId || props.shapeID,
-                        };
-
-                        if (matchedData) {
-                            newProps.caseCount = matchedData.caseCount;
-                            newProps.lat = matchedData.lat;
-                            newProps.long = matchedData.long;
-                        }
-
-                        return {
-                            ...feature,
-                            properties: newProps,
-                        };
-                    },
-                );
-
-                const joinedGeoJSON: FeatureCollection = {
-                    type: 'FeatureCollection',
-                    features: joinedFeatures,
-                };
+                const boundaries: FeatureCollection | null = !useAdmin0Tiles
+                    ? {
+                          type: 'FeatureCollection',
+                          features: dataUnion.map((d) => ({
+                              type: 'Feature' as const,
+                              id: d.areaId,
+                              geometry: d.geometry as any,
+                              properties: {
+                                  shapeGroup: d.countryCode,
+                                  shapeName: d.name,
+                                  shapeType: `ADMIN`,
+                                  areaName: d.name,
+                                  labelName:
+                                      d.name?.startsWith('Other (') &&
+                                      d.name?.endsWith(')')
+                                          ? d.name.slice('Other ('.length, -1)
+                                          : d.name,
+                                  countryCode: d.countryCode,
+                                  areaId: d.areaId,
+                                  lat: d.lat,
+                                  long: d.long,
+                              },
+                          })),
+                      }
+                    : null;
 
                 const sourceId = `adminSource`;
+                const sourceLayerProps = useAdmin0Tiles
+                    ? ({ 'source-layer': admin0SourceLayer } as const)
+                    : {};
+                const featureStateTarget = (id: string | number) =>
+                    useAdmin0Tiles
+                        ? {
+                              source: sourceId,
+                              sourceLayer: admin0SourceLayer,
+                              id,
+                          }
+                        : {
+                              source: sourceId,
+                              id,
+                          };
 
                 // Remove layers before re-adding so they always reflect current adminLevel and data
                 const layersToRemove = [
@@ -158,14 +141,43 @@ export const useChoroplethLayer = (
                     if (map.getLayer(layerId)) map.removeLayer(layerId);
                 }
 
-                if (map.getSource(sourceId)) {
-                    (map.getSource(sourceId) as any).setData(joinedGeoJSON);
+                const currentSource = map.getSource(sourceId) as any;
+                const currentSourceType = currentSource?.type;
+                const expectedSourceType = useAdmin0Tiles ? 'vector' : 'geojson';
+                if (currentSource && currentSourceType !== expectedSourceType) {
+                    map.removeSource(sourceId);
+                }
+
+                if (useAdmin0Tiles) {
+                    if (!map.getSource(sourceId)) {
+                        map.addSource(sourceId, {
+                            type: 'vector',
+                            tiles: [admin0TilesUrl!],
+                            promoteId: admin0PromoteId,
+                        } as any);
+                    }
+                } else if (map.getSource(sourceId)) {
+                    (map.getSource(sourceId) as any).setData(boundaries);
                 } else {
                     map.addSource(sourceId, {
                         type: 'geojson',
-                        data: joinedGeoJSON,
-                        promoteId: 'shapeID',
+                        data: boundaries as FeatureCollection,
+                        promoteId: 'areaId',
                     });
+                }
+
+                // Clear stale feature-state from previous outbreak/admin view.
+                for (const id of previousFeatureStateIdsRef.current) {
+                    map.removeFeatureState(featureStateTarget(id));
+                }
+                previousFeatureStateIdsRef.current = [];
+
+                for (const area of dataUnion) {
+                    if (!area.areaId) continue;
+                    map.setFeatureState(featureStateTarget(area.areaId), {
+                        caseCount: area.caseCount,
+                    });
+                    previousFeatureStateIdsRef.current.push(area.areaId);
                 }
 
                 // Create per-level stripe patterns (colored stripes on transparent background)
@@ -229,20 +241,18 @@ export const useChoroplethLayer = (
 
                 const stripePatternExpression = [
                     'case',
-                    ['has', 'caseCount'],
+                    ['>', ['coalesce', ['feature-state', 'caseCount'], 0], 0],
                     [
                         'case',
-                        ['==', ['get', 'caseCount'], 0],
-                        'stripe-empty',
-                        ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                        ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level1.upper.number],
                         'stripe-level1',
-                        ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                        ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level2.upper.number],
                         'stripe-level2',
-                        ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                        ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level3.upper.number],
                         'stripe-level3',
-                        ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                        ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level4.upper.number],
                         'stripe-level4',
-                        ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                        ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level5.upper.number],
                         'stripe-level5',
                         'stripe-level6',
                     ],
@@ -254,7 +264,8 @@ export const useChoroplethLayer = (
                             id: 'adminJoinOtherStripe',
                             type: 'fill',
                             source: sourceId,
-                            filter: ['==', ['get', 'areaName'], 'Other (Ituri Province)'],
+                            ...sourceLayerProps,
+                            filter: ['==', ['coalesce', ['get', 'areaName'], ['get', 'shapeName']], 'Other (Ituri Province)'],
                             paint: {
                                 'fill-pattern': stripePatternExpression,
                             },
@@ -267,17 +278,23 @@ export const useChoroplethLayer = (
                             id: 'adminJoinEmpty',
                             type: 'fill',
                             source: sourceId,
+                            ...sourceLayerProps,
                             filter: [
                                 'all',
-                                ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
-                                [
-                                    'any',
-                                    ['!', ['has', 'caseCount']],
-                                    ['==', ['get', 'caseCount'], 0],
-                                ],
+                                ['!=', ['coalesce', ['get', 'areaName'], ['get', 'shapeName']], 'Other (Ituri Province)'],
                             ],
                             paint: {
                                 'fill-color': ChoroplethMapColors.empty,
+                                'fill-opacity': [
+                                    'case',
+                                    [
+                                        '<=',
+                                        ['coalesce', ['feature-state', 'caseCount'], 0],
+                                        0,
+                                    ],
+                                    1,
+                                    0,
+                                ],
                             },
                         } as any,
                         firstSymbolLayer,
@@ -288,59 +305,66 @@ export const useChoroplethLayer = (
                             id: `adminJoin`,
                             type: 'fill',
                             source: sourceId,
+                            ...sourceLayerProps,
                             filter: [
                                 'all',
-                                ['!=', ['get', 'areaName'], 'Other (Ituri Province)'],
-                                ['has', 'caseCount'],
-                                ['>', ['get', 'caseCount'], 0],
+                                ['!=', ['coalesce', ['get', 'areaName'], ['get', 'shapeName']], 'Other (Ituri Province)'],
                             ],
                             paint: {
                                 'fill-color': [
                                     'case',
-                                    ['has', 'caseCount'],
+                                    ['>', ['coalesce', ['feature-state', 'caseCount'], 0], 0],
                                     [
                                         'case',
-                                        ['==', ['get', 'caseCount'], 0],
-                                        ChoroplethMapColors.empty,
                                         [
                                             '<=',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level1.upper.number,
                                         ],
                                         ChoroplethMapColors.level1,
                                         [
                                             '<=',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level2.upper.number,
                                         ],
                                         ChoroplethMapColors.level2,
                                         [
                                             '<=',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level3.upper.number,
                                         ],
                                         ChoroplethMapColors.level3,
                                         [
                                             '<=',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level4.upper.number,
                                         ],
                                         ChoroplethMapColors.level4,
                                         [
                                             '<=',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level5.upper.number,
                                         ],
                                         ChoroplethMapColors.level5,
                                         [
                                             '>',
-                                            ['get', 'caseCount'],
+                                            ['coalesce', ['feature-state', 'caseCount'], 0],
                                             dataLayerBounds.level5.upper.number,
                                         ],
                                         ChoroplethMapColors.level6,
                                         ChoroplethMapColors.empty,
                                     ],
                                     ChoroplethMapColors.empty,
+                                ],
+                                'fill-opacity': [
+                                    'case',
+                                    [
+                                        '>',
+                                        ['coalesce', ['feature-state', 'caseCount'], 0],
+                                        0,
+                                    ],
+                                    1,
+                                    0,
                                 ],
                             },
                         } as any,
@@ -352,33 +376,28 @@ export const useChoroplethLayer = (
                             id: `adminJoinBorder`,
                             type: 'line',
                             source: sourceId,
+                            ...sourceLayerProps,
                             paint: {
-                                'line-color': [
-                                    'case',
-                                    ['has', 'caseCount'],
-                                    [
-                                        'case',
-                                        ['==', ['get', 'caseCount'], 0],
-                                        ChoroplethMapColors['borders'],
-                                        ['>', ['get', 'caseCount'], 0],
-                                        ChoroplethMapColors['borders'],
-                                        ChoroplethMapColors['empty'],
-                                    ],
-                                    ChoroplethMapColors['empty'],
-                                ],
+                                'line-color': ChoroplethMapColors['borders'],
                             },
                         } as any,
                         firstSymbolLayer,
                     );
 
-                if (adminLevel === 2) {
+                if (adminLevel === 2 || (adminLevel === 1 && outbreakName === 'EbolaBVD')) {
                     map.addLayer(
                         {
                             id: 'adminJoinLabels',
                             type: 'symbol',
                             source: sourceId,
+                            ...sourceLayerProps,
                             layout: {
-                                'text-field': ['get', 'labelName'],
+                                'text-field': [
+                                    'coalesce',
+                                    ['get', 'labelName'],
+                                    ['get', 'shapeName'],
+                                    ['get', 'name'],
+                                ],
                                 'text-size': [
                                     'interpolate',
                                     ['linear'],
@@ -427,16 +446,28 @@ export const useChoroplethLayer = (
 
                 // Click handler
                 const clickHandler = (e: any) => {
-                    if (!e.features || !e.features[0].properties?.areaName) {
+                    const feature = e.features?.[0];
+                    const props = feature?.properties || {};
+                    const areaName = props.areaName || props.shapeName || props.name;
+
+                    if (!feature || !areaName) {
                         dispatch(setFocusedArea(null));
                         return;
                     }
 
-                    if (e.features[0].properties?.caseCount === 0) return;
+                    const featureId =
+                        props.areaId || props.areaID || props.area_id || feature.id;
+                    if (!featureId) return;
 
-                    const name = e.features[0].properties.areaName;
-                    const areaId = e.features[0].properties.areaId || '';
-                    const countryCode = e.features[0].properties.countryCode;
+                    const featureState = map.getFeatureState(
+                        featureStateTarget(featureId),
+                    ) as { caseCount?: number };
+
+                    if ((featureState?.caseCount ?? 0) === 0) return;
+
+                    const name = String(areaName);
+                    const areaId = String(featureId);
+                    const countryCode = props.countryCode || props.country_code || props.shapeGroup;
 
                     // Suppress the popup close handler from clearing focusedArea
                     suppressPopupCloseRef.current = true;
@@ -451,7 +482,13 @@ export const useChoroplethLayer = (
 
                 // Cursor pointer on hover
                 const mousemoveHandler = (e: any) => {
-                    const caseCount = e.features?.[0]?.properties?.caseCount;
+                    const props = e.features?.[0]?.properties || {};
+                    const featureId =
+                        props.areaId || props.areaID || props.area_id || e.features?.[0]?.id;
+                    const caseCount = featureId
+                        ? (map.getFeatureState(featureStateTarget(featureId)) as { caseCount?: number })
+                              ?.caseCount
+                        : null;
                     if (caseCount != null && caseCount > 0)
                         map.getCanvas().style.cursor = 'pointer';
                     else map.getCanvas().style.cursor = '';
@@ -525,6 +562,21 @@ export const useChoroplethLayer = (
                 if (mouseleaveOther) map.off('mouseleave', 'adminJoinOtherStripe', mouseleaveOther);
             }
             handlersRef.current = { click: null, mousemove: null, mouseleave: null, clickOther: null, mousemoveOther: null, mouseleaveOther: null };
+
+            if (map) {
+                for (const id of previousFeatureStateIdsRef.current) {
+                    map.removeFeatureState(
+                        useAdmin0Tiles
+                            ? {
+                                  source: 'adminSource',
+                                  sourceLayer: admin0SourceLayer,
+                                  id,
+                              }
+                            : { source: 'adminSource', id },
+                    );
+                }
+            }
+            previousFeatureStateIdsRef.current = [];
         };
     }, [map, mapLoaded, data, adminLevel, dataFeatureSet, dataLayerBounds, outbreakName, dispatch, setFocusedArea]);
 
@@ -534,22 +586,20 @@ export const useChoroplethLayer = (
 
         const fillColorExpression = [
             'case',
-            ['has', 'caseCount'],
+            ['>', ['coalesce', ['feature-state', 'caseCount'], 0], 0],
             [
                 'case',
-                ['==', ['get', 'caseCount'], 0],
-                ChoroplethMapColors.empty,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level1.upper.number],
                 ChoroplethMapColors.level1,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level2.upper.number],
                 ChoroplethMapColors.level2,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level3.upper.number],
                 ChoroplethMapColors.level3,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level4.upper.number],
                 ChoroplethMapColors.level4,
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level5.upper.number],
                 ChoroplethMapColors.level5,
-                ['>', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                ['>', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level5.upper.number],
                 ChoroplethMapColors.level6,
                 ChoroplethMapColors.empty,
             ],
@@ -558,20 +608,18 @@ export const useChoroplethLayer = (
 
         const stripePatternExpression = [
             'case',
-            ['has', 'caseCount'],
+            ['>', ['coalesce', ['feature-state', 'caseCount'], 0], 0],
             [
                 'case',
-                ['==', ['get', 'caseCount'], 0],
-                'stripe-empty',
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level1.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level1.upper.number],
                 'stripe-level1',
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level2.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level2.upper.number],
                 'stripe-level2',
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level3.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level3.upper.number],
                 'stripe-level3',
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level4.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level4.upper.number],
                 'stripe-level4',
-                ['<=', ['get', 'caseCount'], dataLayerBounds.level5.upper.number],
+                ['<=', ['coalesce', ['feature-state', 'caseCount'], 0], dataLayerBounds.level5.upper.number],
                 'stripe-level5',
                 'stripe-level6',
             ],
