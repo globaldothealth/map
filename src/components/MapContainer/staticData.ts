@@ -152,8 +152,8 @@ export const significantEventsData = [
         location: 'Tristan da Cunha',
         date: 'April 14th 2026',
         dateStart: '2026-04-14',
-        relatedCaseStatus: 'Probable',
-        description: 'Case 8 (Gh_ID12), a 65 year old British male, disembarked the ship in Tristan da Cunha, where he is a local resident, on April 14. He reported onset of symptoms on April 28 with diarrhea, and fever on April 30. He was admitted to hospital on May 2 and remains hospitalized. He is considered a probable case as no laboratory testing has been possible.'
+        relatedCaseStatus: 'Confirmed',
+        description: 'Case 8 (Gh_ID12), a 65 year old British male, disembarked the ship in Tristan da Cunha, where he is a local resident, on April 15. He reported onset of symptoms on April 28 with diarrhea, and fever on April 30. He was admitted to hospital on May 2, has since recovered and is now clinically well at home in Tristan de Cunha. Lab testing confirmed a positive hantavirus test result for the individual, who was previously considered a probable case.'
     },
     {
         marker: 4,
