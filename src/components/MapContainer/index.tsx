@@ -35,6 +35,7 @@ interface MapContainerProps {
             upper: { number: number; text: string };
         };
     };
+    outbreakName: string;
 }
 
 const MapContainer = ({
@@ -44,6 +45,7 @@ const MapContainer = ({
     chartType,
     adminLevel,
     dataLayerBounds,
+    outbreakName,
 }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -78,6 +80,7 @@ const MapContainer = ({
         setFocusedArea,
         focusedArea,
         dataLayerBounds,
+        outbreakName
     );
 
     return (
