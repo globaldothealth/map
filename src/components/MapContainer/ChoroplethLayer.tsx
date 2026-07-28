@@ -526,7 +526,7 @@ export const useChoroplethLayer = (
                 "text-halo-width": 1.5,
                 "text-opacity": [
                   "case",
-                  [">", ["coalesce", ["feature-state", "caseCount"], 0], 0],
+                  shouldShowBorderExpression,
                   1,
                   0,
                 ],
@@ -629,21 +629,33 @@ export const useChoroplethLayer = (
           map.getCanvas().style.cursor = "";
         };
 
-        // "Other" layer uses the same handlers (lower hit priority since adminJoin is above it)
-        const clickOtherHandler = (e: any) => {
-          // Only fire if no adminJoin feature was hit at this point
-          const features = map.queryRenderedFeatures(e.point, {
+        const hasClickableAdminJoinFeatureAtPoint = (point: any) => {
+          const featuresAtPoint = map.queryRenderedFeatures(point, {
             layers: ["adminJoin"],
           });
-          if (features.length > 0) return;
+
+          for (const feature of featuresAtPoint) {
+            const props = feature?.properties || {};
+            const featureId =
+              props.areaId || props.areaID || props.area_id || feature.id;
+            if (!featureId) continue;
+            const featureState = map.getFeatureState(
+              featureStateTarget(featureId),
+            ) as { caseCount?: number };
+            if ((featureState?.caseCount ?? 0) > 0) return true;
+          }
+
+          return false;
+        };
+
+        // "Other" layer uses the same handlers (lower hit priority since adminJoin is above it)
+        const clickOtherHandler = (e: any) => {
+          if (hasClickableAdminJoinFeatureAtPoint(e.point)) return;
           clickHandler(e);
         };
 
         const mousemoveOtherHandler = (e: any) => {
-          const features = map.queryRenderedFeatures(e.point, {
-            layers: ["adminJoin"],
-          });
-          if (features.length > 0) return;
+          if (hasClickableAdminJoinFeatureAtPoint(e.point)) return;
           mousemoveHandler(e);
         };
 

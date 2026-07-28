@@ -16,6 +16,7 @@ import { MapContainer as StyledMapContainer } from 'src/theme/globalStyles';
 
 import CopyStateLinkButton from 'src/components/CopyStateLinkButton';
 import { ChartTypeNames } from 'src/models/ViewParamURLValues';
+import { OutbreakNames } from 'src/redux/App/slice';
 
 import {
     convertStateDataToFeatureSet,
@@ -35,6 +36,7 @@ interface MapContainerProps {
             upper: { number: number; text: string };
         };
     };
+    outbreakName: keyof typeof OutbreakNames;
 }
 
 const MapContainer = ({
@@ -44,6 +46,7 @@ const MapContainer = ({
     chartType,
     adminLevel,
     dataLayerBounds,
+    outbreakName,
 }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -78,6 +81,7 @@ const MapContainer = ({
         setFocusedArea,
         focusedArea,
         dataLayerBounds,
+        outbreakName,
     );
 
     return (

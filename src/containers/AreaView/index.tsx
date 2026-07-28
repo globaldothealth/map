@@ -366,6 +366,7 @@ export const AreaView: React.FC = () => {
             chartType={chartType}
             adminLevel={adminLevel}
             dataLayerBounds={getDataLayerBounds(outbreakName, resolution)}
+            outbreakName={outbreakName}
         />
     );
 };
