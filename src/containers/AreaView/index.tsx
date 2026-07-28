@@ -25,7 +25,15 @@ const emptyLevels =  {
         level5: emptyLevel,
     }
 
-const dataLayerBounds = {
+type LevelBounds = typeof emptyLevels;
+type DataLayerBoundsConfig = Partial<
+    Record<
+        keyof typeof OutbreakNames,
+        Partial<Record<Resolutions, LevelBounds>>
+    >
+>;
+
+const dataLayerBounds: DataLayerBoundsConfig = {
     'Covid19': {
         [Resolutions.Admin0]: {
             level1: {
@@ -48,9 +56,7 @@ const dataLayerBounds = {
                 lower: {number: 2000001, text: '2M'},
                 upper: {number: 10000000, text: '10M'},
             },
-        },
-        [Resolutions.Admin1]: emptyLevels,
-        [Resolutions.Admin2]: emptyLevels,
+        }
         },
     'AvianInfluenza': {
         [Resolutions.Admin0]: {
@@ -96,8 +102,7 @@ const dataLayerBounds = {
                 lower: {number: 10, text: '10'},
                 upper: {number: 20, text: '20'},
             },
-        },
-        [Resolutions.Admin2]: emptyLevels
+        }
     },
     "Ebola": {
         [Resolutions.Admin0]: {
@@ -143,8 +148,7 @@ const dataLayerBounds = {
                 lower: {number: 51, text: '51'},
                 upper: {number: 100, text: '100'},
             },
-        },
-        [Resolutions.Admin2]: emptyLevels
+        }
     },
     "EbolaBVD": {
         [Resolutions.Admin0]: {
@@ -258,8 +262,7 @@ const dataLayerBounds = {
                 lower: {number: 20, text: '20'},
                 upper: {number: 25, text: '25'},
             },
-        },
-        [Resolutions.Admin2]: emptyLevels
+        }
     },
     "Mpox2022": {
         [Resolutions.Admin0]: {
@@ -283,9 +286,7 @@ const dataLayerBounds = {
                 lower: {number: 2001, text: '2001'},
                 upper: {number: 5000, text: '5000'},
             },
-        },
-        [Resolutions.Admin1]: emptyLevels,
-        [Resolutions.Admin2]: emptyLevels
+        }
     },
     "Mpox2024": {
             [Resolutions.Admin0]: {
@@ -309,11 +310,16 @@ const dataLayerBounds = {
                     lower: {number: 2001, text: '2001'},
                     upper: {number: 5000, text: '5000'},
                 },
-            },
-            [Resolutions.Admin1]: emptyLevels,
-            [Resolutions.Admin2]: emptyLevels
+            }
             }
 }
+
+const getDataLayerBounds = (
+    outbreak: keyof typeof OutbreakNames,
+    resolution: Resolutions,
+): LevelBounds => {
+    return dataLayerBounds[outbreak]?.[resolution] ?? emptyLevels;
+};
 
 export const AreaView: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -359,7 +365,7 @@ export const AreaView: React.FC = () => {
             setFocusedArea={setFocusedArea}
             chartType={chartType}
             adminLevel={adminLevel}
-            dataLayerBounds={dataLayerBounds[outbreakName][resolution]}
+            dataLayerBounds={getDataLayerBounds(outbreakName, resolution)}
         />
     );
 };

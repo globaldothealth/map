@@ -20,6 +20,7 @@ export function useMaplibreMap(
             center: [0, 40],
             zoom: 2.5,
             minZoom: 2,
+            maxZoom: 7,
         }).addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
         map.current.dragRotate.disable();

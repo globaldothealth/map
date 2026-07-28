@@ -32,7 +32,7 @@ export const fetchStateData = createAsyncThunk<
     { rejectValue: string, state: RootState }
 >('state/fetchStateData', async (_, { rejectWithValue, getState }) => {
     const outbreakName = getState().app.outbreakName;
-    const s3Path = `outbreaks/${OutbreakNames[outbreakName]}/admin1/simplified.json`;
+    const s3Path = `outbreaks/${OutbreakNames[outbreakName]}/admin1/latest.json`;
 
     try {
         const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
