@@ -354,17 +354,41 @@ export const useChoroplethLayer = (
 
         const stripePatternExpression = [
           "case",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level1]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level1],
+          ],
           "stripe-level1",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level2]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level2],
+          ],
           "stripe-level2",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level3]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level3],
+          ],
           "stripe-level3",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level4]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level4],
+          ],
           "stripe-level4",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level5]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level5],
+          ],
           "stripe-level5",
-          ["in", areaIdExpression, ["literal", otherAreaIdsByStripeLevel.level6]],
+          [
+            "in",
+            areaIdExpression,
+            ["literal", otherAreaIdsByStripeLevel.level6],
+          ],
           "stripe-level6",
           "stripe-empty",
         ];
@@ -403,11 +427,7 @@ export const useChoroplethLayer = (
               "all",
               [
                 "!",
-                [
-                  "in",
-                  areaIdExpression,
-                  ["literal", otherAreaIdsFromData],
-                ],
+                ["in", areaIdExpression, ["literal", otherAreaIdsFromData]],
               ],
             ],
             paint: {
@@ -475,12 +495,7 @@ export const useChoroplethLayer = (
             ...sourceLayerProps,
             paint: {
               "line-color": ChoroplethMapColors["borders"],
-              "line-opacity": [
-                "case",
-                shouldShowBorderExpression,
-                1,
-                0,
-              ],
+              "line-opacity": ["case", shouldShowBorderExpression, 1, 0],
             },
           } as any,
           firstSymbolLayer,
@@ -534,12 +549,7 @@ export const useChoroplethLayer = (
                 "text-color": "#333333",
                 "text-halo-color": "#ffffff",
                 "text-halo-width": 1.5,
-                "text-opacity": [
-                  "case",
-                  shouldShowBorderExpression,
-                  1,
-                  0,
-                ],
+                "text-opacity": ["case", shouldShowBorderExpression, 1, 0],
               },
             } as any,
             firstSymbolLayer,
@@ -581,6 +591,7 @@ export const useChoroplethLayer = (
         // Click handler
         const clickHandler = (e: any) => {
           const feature = e.features?.[0];
+          console.log(e.features);
           const props = feature?.properties || {};
           const areaName = props.areaName || props.shapeName || props.name;
 
