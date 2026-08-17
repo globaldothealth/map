@@ -50,6 +50,7 @@ export const locationNameToLongLat: Record<
   "%ship-belgium": { long: 2.914143, lat: 51.890459 },
 };
 
+// Ship path
 export const shipPath = [
   {
     location: "Ushuaia Argentina",
