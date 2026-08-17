@@ -228,7 +228,7 @@ export const significantEventsData = [
     marker: 10,
     location: "Praia, Cape Verde",
     date: "May 6th 2026",
-    dateStart: "2026-05-06",
+    dateStart: "2026-05-07",
     relatedCaseStatus: "Confirmed",
     description:
       "Case 5 (Gh_ID8), a 41 year old Dutch male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 7 and he was medically evacuated to the Netherlands. He has since recovered as of May 20th",
@@ -237,7 +237,7 @@ export const significantEventsData = [
     marker: 11,
     location: "Praia, Cape Verde",
     date: "May 6th 2026",
-    dateStart: "2026-05-06",
+    dateStart: "2026-05-07",
     relatedCaseStatus: "Confirmed",
     description:
       "Case 6 (Gh_ID7), a 56 year old British male working as a ship expedition guide, developed symptoms on April 28, including high fever, fatigue and diarrhea. PCR testing confirmed Andes virus on May 7. He was one of three suspected cases removed from the ship in Cape Verde and was medically evacuated to the Netherlands on May 7 for treatment.  He has since recovered and medically evacuated back to the United Kingdom on May 28th for self-isolation.",
@@ -273,7 +273,7 @@ export const significantEventsData = [
     marker: 15,
     location: "Madrid, Spain",
     date: "May 12th 2026",
-    dateStart: "2026-05-12",
+    dateStart: "2026-05-11",
     relatedCaseStatus: "Confirmed",
     description:
       "Case 10 (Gh_ID18), a 70 year old Spanish female, tested provisionally positive after disembarking from the ship in Tenerife and was evacuated to Spain for quarantine at Gómez Ulla Hospital in Madrid. The patient subsequently developed symptoms and was confirmed as positive on May 11. She has since recovered as of June 4.",
@@ -282,7 +282,7 @@ export const significantEventsData = [
     marker: 16,
     location: "Vancouver Island, British Columbia, Canada",
     date: "May 17th 2026",
-    dateStart: "2026-05-17",
+    dateStart: "2026-05-16",
     relatedCaseStatus: "Confirmed",
     description:
       "Case 11 (Gh_ID20) is a Canadian citizen who was confirmed positive for Andes hantavirus on May 16 following a presumptive positive test result the day prior. The patient developed mild symptoms on May 14 and was transported to a hospital in Vancouver for care along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius. Their spouse never tested positive, and Case 11 has since recovered as of June 6.",
@@ -291,7 +291,7 @@ export const significantEventsData = [
     marker: 17,
     location: "Netherlands",
     date: "May 22nd 2026",
-    dateStart: "2026-05-22",
+    dateStart: "2026-05-20",
     relatedCaseStatus: "Confirmed",
     description:
       "Case 12 (Gh_ID23) is a Dutch national who was confirmed positive for hantavirus on May 20.  The person was a crew member who left the ship in Tenerife, Canary Islands, Spain, was repatriated, and was isolating in home quarantine prior to the positive test. Laboratory tests by RIVM, which are administered every week to all persons in quarantine in the Netherlands, indicated that the person has Andes virus. The patient was subsequently admitted to hospital and put in isolation. They subsequently experienced symptom onset on May 27. They have since recovered as of June 18.",
