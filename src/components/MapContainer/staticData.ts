@@ -239,7 +239,7 @@ export const significantEventsData = [
     dateStart: "2026-05-06",
     relatedCaseStatus: "Confirmed",
     description:
-      "Case 6 (Gh_ID7), a 56 year old British male working as a ship expedition guide, developed symptoms on April 27, including high fever, fatigue and diarrhea. PCR testing confirmed Andes virus on May 7. He was one of three suspected cases removed from the ship in Cape Verde and was medically evacuated to the Netherlands on May 7 for treatment.  He has since recovered and medically evacuated back to the United Kingdom on May 28th for self-isolation.",
+      "Case 6 (Gh_ID7), a 56 year old British male working as a ship expedition guide, developed symptoms on April 28, including high fever, fatigue and diarrhea. PCR testing confirmed Andes virus on May 7. He was one of three suspected cases removed from the ship in Cape Verde and was medically evacuated to the Netherlands on May 7 for treatment.  He has since recovered and medically evacuated back to the United Kingdom on May 28th for self-isolation.",
   },
   {
     marker: 12,
@@ -275,7 +275,7 @@ export const significantEventsData = [
     dateStart: "2026-05-12",
     relatedCaseStatus: "Confirmed",
     description:
-      "Case 10 (Gh_ID18), a 70 year old Spanish female, tested provisionally positive after disembarking from the ship in Tenerife on May 11 and was evacuated to Spain. The patient developed symptoms on May 12, was officially confirmed as positive, and was quarantined at a hospital in Madrid. She has since recovered as of June 4.",
+      "Case 10 (Gh_ID18), a 70 year old Spanish female, tested provisionally positive after disembarking from the ship in Tenerife and was evacuated to Spain for quarantine at Gómez Ulla Hospital in Madrid. The patient subsequently developed symptoms and was confirmed as positive on May 11. She has since recovered as of June 4.",
   },
   {
     marker: 16,
@@ -293,7 +293,7 @@ export const significantEventsData = [
     dateStart: "2026-05-22",
     relatedCaseStatus: "Confirmed",
     description:
-      "Case 12 (Gh_ID23) is a Dutch national who was confirmed positive for hantavirus on May 22.  The person was a crew member who left the ship in Tenerife, Canary Islands, Spain, was repatriated, and was isolating in home quarantine prior to the positive test. Laboratory tests by RIVM, which are administered every week to all persons in quarantine in the Netherlands, indicated that the person has Andes virus. The patient was subsequently admitted to hospital and put in isolation. They subsequently experienced symptom onset on May 27. They have since recovered as of June 18.",
+      "Case 12 (Gh_ID23) is a Dutch national who was confirmed positive for hantavirus on May 20.  The person was a crew member who left the ship in Tenerife, Canary Islands, Spain, was repatriated, and was isolating in home quarantine prior to the positive test. Laboratory tests by RIVM, which are administered every week to all persons in quarantine in the Netherlands, indicated that the person has Andes virus. The patient was subsequently admitted to hospital and put in isolation. They subsequently experienced symptom onset on May 27. They have since recovered as of June 18.",
   },
   {
     marker: 18,
