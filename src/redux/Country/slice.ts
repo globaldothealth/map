@@ -1,17 +1,20 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {fetchCountriesData} from 'src/redux/Country/thunks';
+import {fetchCountriesData, fetchCountryMetadata} from 'src/redux/Country/thunks';
 import {CountryData} from 'src/models/CountryData';
 import {OutbreakNames} from "src/redux/App/slice.ts";
 
 interface AppState {
     isLoading: boolean;
+    isMetadataLoading: boolean;
     countriesData: Record<OutbreakNames, CountryData[]>;
+    metadata: {[key: string]: {name: string, long: number, lat: number, bounds: number[]}};
     totalNumberOfCases: Record<OutbreakNames, number>;
     lastUpdateDate: Record<OutbreakNames, string>;
 }
 
 const initialState: AppState = {
     isLoading: false,
+    isMetadataLoading: false,
     countriesData: Object.values(OutbreakNames).reduce(
         (acc, name) => ({ ...acc, [name]: [] }),
         {} as Record<OutbreakNames, CountryData[]>,
@@ -24,6 +27,7 @@ const initialState: AppState = {
         (acc, name) => ({ ...acc, [name]: '' }),
         {} as Record<OutbreakNames, string>,
     ),
+    metadata: {},
 };
 
 export const countrySlice = createSlice({
@@ -43,6 +47,16 @@ export const countrySlice = createSlice({
         });
         builder.addCase(fetchCountriesData.rejected, (state) => {
             state.isLoading = false;
+        });
+        builder.addCase(fetchCountryMetadata.pending, (state) => {
+            state.isMetadataLoading = true;
+        });
+        builder.addCase(fetchCountryMetadata.fulfilled, (state, {payload }) => {
+            state.isMetadataLoading = false;
+            state.metadata = payload;
+        });
+        builder.addCase(fetchCountryMetadata.rejected, (state) => {
+            state.isMetadataLoading = false;
         });
     },
 });

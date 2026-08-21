@@ -3,6 +3,8 @@ import { RootState } from 'src/redux/store';
 export const selectIsStateViewLoading = (state: RootState) =>
     state.state.isLoading;
 export const selectStateData = (state: RootState) => state.state.stateData;
+export const selectStateMetadata = (state: RootState) =>
+    state.state.metadata;
 export const selectStateTotalCases = (state: RootState) =>
     state.state.totalNumberOfCases;
 export const selectStateTotalCasesIsLoading = (state: RootState) =>

@@ -4,6 +4,8 @@ export const selectIsRegionalViewLoading = (state: RootState) =>
     state.regional.isLoading;
 export const selectRegionalData = (state: RootState) =>
     state.regional.regionalData;
+export const selectRegionalMetadata = (state: RootState) =>
+    state.regional.metadata;
 export const selectRegionalTotalCases = (state: RootState) =>
     state.regional.totalNumberOfCases;
 export const selectRegionalTotalCasesIsLoading = (state: RootState) =>

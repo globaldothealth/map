@@ -26,6 +26,7 @@ import { useChoroplethLayer } from './ChoroplethLayer';
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
+    metadata: { [key: string]: { name: string; long: number; lat: number; bounds: number[] } };
     focusedArea: FocusedArea | null;
     setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>;
     chartType: ChartTypeNames;
@@ -41,6 +42,7 @@ interface MapContainerProps {
 
 const MapContainer = ({
     data,
+    metadata,
     focusedArea,
     setFocusedArea,
     chartType,
@@ -49,7 +51,6 @@ const MapContainer = ({
     outbreakName,
 }: MapContainerProps) => {
     const [mapLoaded, setMapLoaded] = useState(false);
-
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useMaplibreMap(mapContainer);
 
@@ -75,6 +76,7 @@ const MapContainer = ({
         map.current,
         adminLevel,
         data,
+        metadata,
         setMapLoaded,
         mapLoaded,
         dataFeatureSet,

@@ -3,14 +3,14 @@ import {useEffect} from 'react';
 import MapContainer from 'src/components/MapContainer';
 import {ChartTypeNames} from 'src/models/ViewParamURLValues';
 import {selectFocusedArea, selectOutbreakName, selectResolution} from 'src/redux/App/selectors';
-import {selectCountriesData} from 'src/redux/Country/selectors';
+import {selectCountriesData, selectCountryMetadata} from 'src/redux/Country/selectors';
 import {OutbreakNames, Resolutions, setFocusedArea} from 'src/redux/App/slice';
-import {fetchCountriesData} from 'src/redux/Country/thunks';
+import {fetchCountriesData, fetchCountryMetadata} from 'src/redux/Country/thunks';
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
-import {fetchStateData} from "src/redux/State/thunks.ts";
-import {selectStateData} from "src/redux/State/selectors.ts";
-import {selectRegionalData} from "src/redux/Regional/selectors.ts";
-import {fetchRegionalData} from "src/redux/Regional/thunks.ts";
+import {fetchStateData, fetchStateMetadata} from "src/redux/State/thunks.ts";
+import {selectStateData, selectStateMetadata} from "src/redux/State/selectors.ts";
+import {selectRegionalData, selectRegionalMetadata} from "src/redux/Regional/selectors.ts";
+import {fetchRegionalData, fetchRegionalMetadata} from "src/redux/Regional/thunks.ts";
 
 const emptyLevel = {
         lower: {number: 0, text: '0'},
@@ -325,8 +325,11 @@ export const AreaView: React.FC = () => {
     const dispatch = useAppDispatch();
 
     const countryData = useAppSelector(selectCountriesData);
+    const countryMetadata = useAppSelector(selectCountryMetadata);
     const stateData = useAppSelector(selectStateData);
+    const stateMetadata = useAppSelector(selectStateMetadata);
     const regionalData = useAppSelector(selectRegionalData);
+    const regionalMetadata = useAppSelector(selectRegionalMetadata);
     const resolution = useAppSelector(selectResolution);
     const focusedArea = useAppSelector(selectFocusedArea);
     const outbreakName = useAppSelector(selectOutbreakName);
@@ -335,13 +338,22 @@ export const AreaView: React.FC = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchCountriesData());
+                if (!countryData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
+                    dispatch(fetchCountriesData());
+                    if(Object.keys(countryMetadata).length === 0) dispatch(fetchCountryMetadata());
+                    }
                 break;
             case Resolutions.Admin1:
-                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchStateData());
+                if (!stateData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
+                    dispatch(fetchStateData());
+                    if(Object.keys(stateMetadata).length === 0) dispatch(fetchStateMetadata());
+                }
                 break;
             default:
-                if (!regionalData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) dispatch(fetchRegionalData());
+                if (!regionalData[OutbreakNames[outbreakName as keyof typeof OutbreakNames]].length) {
+                    dispatch(fetchRegionalData());
+                    if(Object.keys(regionalMetadata).length === 0) dispatch(fetchRegionalMetadata());
+                }
                 break;
         }
         dispatch(setFocusedArea(null));
@@ -351,16 +363,17 @@ export const AreaView: React.FC = () => {
     }, [outbreakName, dispatch, resolution]);
 
     const resolutionConfig = {
-        [Resolutions.Admin0]: { adminLevel: 0, chartType: ChartTypeNames.Country, data: countryData[OutbreakNames[outbreakName]] },
-        [Resolutions.Admin1]: { adminLevel: 1, chartType: ChartTypeNames.State, data: stateData[OutbreakNames[outbreakName]] },
-        [Resolutions.Admin2]: { adminLevel: 2, chartType: ChartTypeNames.Regional, data: regionalData[OutbreakNames[outbreakName]] },
+        [Resolutions.Admin0]: { adminLevel: 0, chartType: ChartTypeNames.Country, data: countryData[OutbreakNames[outbreakName]], metadata: countryMetadata },
+        [Resolutions.Admin1]: { adminLevel: 1, chartType: ChartTypeNames.State, data: stateData[OutbreakNames[outbreakName]], metadata: stateMetadata },
+        [Resolutions.Admin2]: { adminLevel: 2, chartType: ChartTypeNames.Regional, data: regionalData[OutbreakNames[outbreakName]], metadata: regionalMetadata },
     };
 
-    const { adminLevel, chartType, data } = resolutionConfig[resolution];
+    const { adminLevel, chartType, data, metadata } = resolutionConfig[resolution];
 
     return (
         <MapContainer
             data={data}
+            metadata={metadata}
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={chartType}

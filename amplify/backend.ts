@@ -19,6 +19,7 @@ const existingBucket = s3.Bucket.fromBucketName(
 // Grant the Cognito unauthenticated (guest) role access to the existing bucket
 const unauthRole = backend.auth.resources.unauthenticatedUserIamRole;
 existingBucket.grantRead(unauthRole, 'outbreaks/*');
+existingBucket.grantRead(unauthRole, 'metadata/*');
 
 // Set CORS on the existing bucket to allow browser requests
 new AwsCustomResource(storageStack, 'BucketCors', {
@@ -60,6 +61,9 @@ backend.addOutput({
         aws_region: Stack.of(storageStack).region,
         paths: {
           'outbreaks/*': {
+            guest: ['get', 'list'],
+          },
+          'metadata/*': {
             guest: ['get', 'list'],
           },
         },

@@ -95,48 +95,6 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
         }
     }, [location.search, map?.current]);
 
-
-    // useEffect(() => {
-    //     const newViewValues = URLToFilters(location.search);
-    //     if (!newViewValues.chartType || !newViewValues.focusedArea) return;
-    //     const remainingQueryParams = new URLSearchParams(location.search);
-    //
-    //     const focusedAreaId = newViewValues.focusedArea;
-    //     if (focusedAreaId) {
-    //         switch (newViewValues.chartType) {
-    //             case ChartTypeNames.Country:
-    //                 if (countriesData?.length > 0) {
-    //                     console.log('lecii',focusedAreaId)
-    //                     handleLocationChange(focusedAreaId, countriesData);
-    //                     remainingQueryParams.delete('focusedArea');
-    //                     remainingQueryParams.delete('chartType');
-    //                 }
-    //                 break;
-    //             case ChartTypeNames.State:
-    //                 if (stateData?.length > 0) {
-    //                     handleLocationChange(focusedAreaId, stateData);
-    //                     remainingQueryParams.delete('focusedArea');
-    //                     remainingQueryParams.delete('chartType');
-    //                 }
-    //
-    //                 break;
-    //             case ChartTypeNames.Regional:
-    //                 if (regionalData?.length > 0) {
-    //                     handleLocationChange(focusedAreaId, regionalData);
-    //                     remainingQueryParams.delete('focusedArea');
-    //                     remainingQueryParams.delete('chartType');
-    //                 }
-    //                 break;
-    //         }
-    //         const newSearch = remainingQueryParams.toString();
-    //         if (newSearch) {
-    //             navigate(`${location.pathname}?${newSearch}`, {replace: true});
-    //         } else {
-    //             navigate(location.pathname, {replace: true});
-    //         }
-    //     }
-    // }, [location.search, countriesData, stateData, regionalData]);
-
     const [copyHandler, setCopyHandler] = useState({
         message: `Copy link to view`,
         isCopying: false,

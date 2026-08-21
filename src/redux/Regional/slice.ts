@@ -1,21 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RegionalData } from 'src/models/RegionalData';
-import { fetchRegionalData } from 'src/redux/Regional/thunks';
+import { fetchRegionalData, fetchRegionalMetadata } from 'src/redux/Regional/thunks';
 import {OutbreakNames} from "src/redux/App/slice.ts";
 
 interface RegionalState {
     isLoading: boolean;
+    isMetadataLoading: boolean;
     regionalData: Record<OutbreakNames, RegionalData[]>;
+    metadata: {[key: string]: {name: string, long: number, lat: number, bounds: number[]}};
     totalNumberOfCases: Record<OutbreakNames, number>;
     lastUpdateDate: Record<OutbreakNames, string>;
 }
 
 const initialState: RegionalState = {
     isLoading: false,
+    isMetadataLoading: false,
     regionalData: Object.values(OutbreakNames).reduce(
         (acc, name) => ({ ...acc, [name]: [] }),
         {} as Record<OutbreakNames, RegionalData[]>,
     ),
+    metadata: {},
     totalNumberOfCases: Object.values(OutbreakNames).reduce(
         (acc, name) => ({ ...acc, [name]: 0 }),
         {} as Record<OutbreakNames, number>,
@@ -43,6 +47,16 @@ const regionalSlice = createSlice({
         });
         builder.addCase(fetchRegionalData.rejected, (state) => {
             state.isLoading = false;
+        });
+        builder.addCase(fetchRegionalMetadata.pending, (state) => {
+            state.isMetadataLoading = true;
+        });
+        builder.addCase(fetchRegionalMetadata.fulfilled, (state, { payload }) => {
+            state.isMetadataLoading = false;
+            state.metadata = payload;
+        });
+        builder.addCase(fetchRegionalMetadata.rejected, (state) => {
+            state.isMetadataLoading = false;
         });
     },
 });

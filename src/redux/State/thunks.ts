@@ -39,9 +39,6 @@ export const fetchStateData = createAsyncThunk<
 
         const fetchedCases = await fetchCasesData(url.toString());
         const stateData = mapToStateData(fetchedCases);
-        for (const result of stateData) {
-            console.log(result.areaId)
-        }
 
         let totalNumberOfCases = 0;
         let lastUpdateDate = fetchedCases[0].last_updated;
@@ -57,5 +54,17 @@ export const fetchStateData = createAsyncThunk<
         console.error(error);
         if (!error.response) throw error;
         return rejectWithValue(error.response.message);
+    }
+});
+
+export const fetchStateMetadata = createAsyncThunk<any, void, { rejectValue: string }>('state/fetchStateMetadata', async (_, { rejectWithValue }) => {
+    const s3Path = `metadata/admin1.json`;
+    try {
+        const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
+        return await fetch(url.toString()).then(res => res.json());
+    } catch (err: any) {
+        console.log('ERR', err);
+        if (err.response) return rejectWithValue(err.response.message);
+        throw err;
     }
 });

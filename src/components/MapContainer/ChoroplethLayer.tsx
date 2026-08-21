@@ -14,41 +14,12 @@ import { StateData } from "src/models/StateData";
 import { useAppDispatch } from "src/redux/hooks";
 import { convertStringDateToDate } from "src/utils/helperFunctions";
 
-const getSpatialPropsFromTileFeature = (
-  feature: any,
-): {
-  lat: number;
-  long: number;
-  bounds: [number, number, number, number];
-} | null => {
-  const props = feature?.properties || {};
-  const lat = Number(props.lat);
-  const long = Number(props.long);
-  let bounds: [number, number, number, number] | null = null;
-  if (props.bounds != null) {
-    try {
-      bounds = JSON.parse(props.bounds);
-    } catch {
-      bounds = null;
-    }
-  }
-  if (bounds == null && props.bounds_w != null) {
-    const w = Number(props.bounds_w);
-    const s = Number(props.bounds_s);
-    const e = Number(props.bounds_e);
-    const n = Number(props.bounds_n);
-    if ([w, s, e, n].every(Number.isFinite)) bounds = [w, s, e, n];
-  }
-  if (!Number.isFinite(lat) || !Number.isFinite(long) || !bounds) {
-    return null;
-  }
-  return { lat, long, bounds };
-};
 
 export const useChoroplethLayer = (
   map: Map | null,
   adminLevel: number,
   data: CountryData[] | StateData[] | RegionalData[],
+  metadata: { [key: string]: { name: string; long: number; lat: number; bounds: number[] } },
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>,
   mapLoaded: boolean,
   dataFeatureSet: FeatureCollection,
@@ -67,11 +38,6 @@ export const useChoroplethLayer = (
   const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
   const suppressPopupCloseRef = React.useRef(false);
   const previousFeatureStateIdsRef = React.useRef<(string | number)[]>([]);
-  // Cache of areaId → spatial props, populated as tiles load so off-screen
-  // areas can still be panned to when selected from the sidebar.
-  const tileFeatureCacheRef = React.useRef<
-    Record<string, { lat: number; long: number; bounds: [number, number, number, number] }>
-  >({});
   // Keep tile-mode state accessible in effects without adding to dep arrays
   const useTilesRef = React.useRef(false);
   const activeTilesConfigRef = React.useRef<{
@@ -94,83 +60,7 @@ export const useChoroplethLayer = (
     mousemoveOther: null,
     mouseleaveOther: null,
   });
-
-  // // ─── Fit map to data bounds ───────────────────────────────────────────────
-  // useEffect(() => {
-  //   if (!map || !mapLoaded || data.length === 0) return;
-  //
-  //   if (useTilesRef.current && activeTilesConfigRef.current) {
-  //     // Derive aggregate bounds from tile feature properties
-  //     const sourceId = "adminSource";
-  //     const sourceLayer = activeTilesConfigRef.current.sourceLayer;
-  //     const dataUnion = data as (CountryData | StateData | RegionalData)[];
-  //     const areaIdSet = new Set(dataUnion.map((d) => String(d.areaId)));
-  //
-  //     const features = map.querySourceFeatures(sourceId, { sourceLayer });
-  //     let agg: [number, number, number, number] = [180, 90, -180, -90];
-  //     let found = false;
-  //
-  //     for (const f of features) {
-  //       const props = f.properties || {};
-  //       console.log("FEATURE", props);
-  //       const fid = String(props.areaID ?? props.areaId ?? props.area_id ?? "");
-  //       if (!areaIdSet.has(fid)) continue;
-  //
-  //       const w = parseFloat(
-  //         props.bounds_w ?? props.bbox_w ?? props.west ?? "",
-  //       );
-  //       const s = parseFloat(
-  //         props.bounds_s ?? props.bbox_s ?? props.south ?? "",
-  //       );
-  //       const e = parseFloat(
-  //         props.bounds_e ?? props.bbox_e ?? props.east ?? "",
-  //       );
-  //       const n = parseFloat(
-  //         props.bounds_n ?? props.bbox_n ?? props.north ?? "",
-  //       );
-  //
-  //       if ([w, s, e, n].some(isNaN)) continue;
-  //       agg = [
-  //         Math.min(agg[0], w),
-  //         Math.min(agg[1], s),
-  //         Math.max(agg[2], e),
-  //         Math.max(agg[3], n),
-  //       ];
-  //       found = true;
-  //     }
-  //
-  //     if (found) {
-  //       map.fitBounds(agg, { padding: 150 });
-  //       return;
-  //     }
-  //     // Fall through to Redux data bounds if tile features aren't queryable yet
-  //   }
-  //
-  //   // GeoJSON path (or tile fallback): use Redux data when valid bounds exist
-  //   let bounds: [number, number, number, number] | null = null;
-  //   for (const entry of data) {
-  //     console.log(entry);
-  //     const candidate = (entry as { bounds?: unknown }).bounds;
-  //     if (!Array.isArray(candidate) || candidate.length !== 4) continue;
-  //     const [w, s, e, n] = candidate.map((v) => Number(v));
-  //     if ([w, s, e, n].some((v) => !Number.isFinite(v))) continue;
-  //
-  //     if (!bounds) {
-  //       bounds = [w, s, e, n];
-  //     } else {
-  //       bounds = [
-  //         Math.min(bounds[0], w),
-  //         Math.min(bounds[1], s),
-  //         Math.max(bounds[2], e),
-  //         Math.max(bounds[3], n),
-  //       ];
-  //     }
-  //   }
-  //
-  //   if (bounds) {
-  //     map.fitBounds(bounds, { padding: 150 });
-  //   }
-  // }, [map, mapLoaded, data]);
+  console.log(dataFeatureSet)
 
   // ─── Setup layer ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -688,12 +578,8 @@ export const useChoroplethLayer = (
             handlersRef.current.mouseleaveOther,
           );
 
-        const getSpatialPropsFromFeature = (feature: any) =>
-          getSpatialPropsFromTileFeature(feature);
-
         const clickHandler = (e: any) => {
           const feature = e.features?.[0];
-          console.log(e.features);
           const props = feature?.properties || {};
           const areaName = props.areaName || props.shapeName || props.name;
 
@@ -709,7 +595,6 @@ export const useChoroplethLayer = (
           const featureState = map.getFeatureState(
             featureStateTarget(featureId),
           ) as { caseCount?: number };
-          console.log("AAAA", feature);
 
           if ((featureState?.caseCount ?? 0) === 0) return;
 
@@ -718,26 +603,18 @@ export const useChoroplethLayer = (
           const countryCode =
             props.countryCode || props.country_code || props.shapeGroup;
 
-          // Read spatial metadata from tile properties when in tile mode
-          const spatialFromTile = useTiles
-            ? getSpatialPropsFromFeature(feature)
-            : null;
-
           suppressPopupCloseRef.current = true;
           if (currentPopupRef.current) {
             currentPopupRef.current.remove();
             currentPopupRef.current = null;
           }
           suppressPopupCloseRef.current = false;
-          console.log("DDDDD", featureState);
 
           dispatch(
             setFocusedArea({
               name,
               areaId,
-              countryCode,
-              // Tile-derived spatial data; the fly-to effect prefers these over Redux data
-              ...(spatialFromTile ?? {}),
+              countryCode
             }),
           );
         };
@@ -828,36 +705,8 @@ export const useChoroplethLayer = (
 
     setupLayer();
 
-    // ─── Populate spatial cache as tiles load ───────────────────────────────
-    // querySourceFeatures only returns features in currently loaded tiles.
-    // By listening to `sourcedata` we accumulate spatial props (lat/long/bounds)
-    // for every feature we ever see, so sidebar selections for off-screen areas
-    // can still pan the map correctly.
-    const populateSpatialCache = () => {
-      if (!useTiles || !activeTilesConfig) return;
-      const features = map.querySourceFeatures("adminSource", {
-        sourceLayer: activeTilesConfig.sourceLayer,
-      });
-      for (const f of features) {
-        const props = f.properties || {};
-        const fid = String(
-          props.areaID ?? props.areaId ?? props.area_id ?? "",
-        );
-        if (!fid || tileFeatureCacheRef.current[fid]) continue;
-        const spatial = getSpatialPropsFromTileFeature(f);
-        if (spatial) tileFeatureCacheRef.current[fid] = spatial;
-      }
-    };
-
-    if (useTiles) {
-      map.on("sourcedata", populateSpatialCache);
-      // Also run once immediately in case tiles are already loaded
-      populateSpatialCache();
-    }
-
     return () => {
       isCancelled = true;
-      if (useTiles) map.off("sourcedata", populateSpatialCache);
       const {
         click,
         mousemove,
@@ -967,7 +816,6 @@ export const useChoroplethLayer = (
     }
   }, [map, mapLoaded, dataLayerBounds]);
 
-  // ─── Fly to area / show popup ─────────────────────────────────────────────
   useEffect(() => {
     if (!focusedArea) {
       currentPopupRef.current?.remove();
@@ -978,75 +826,20 @@ export const useChoroplethLayer = (
     }
 
     const areaId = focusedArea.areaId;
-    const dataUnion2 = data as (CountryData | StateData | RegionalData)[];
-    const foundArea = dataUnion2.find((rd) => rd.areaId === areaId);
+    const areaData = data.find(rd => rd.areaId == areaId)
+    const areaMetadata = metadata[areaId];
 
-    if (foundArea) {
-      console.log("found area", focusedArea);
-      // Prefer spatial data from FocusedArea (tile properties), then Redux fallback.
-      let lat = Number(focusedArea.lat ?? foundArea.lat);
-      let long = Number(focusedArea.long ?? foundArea.long);
-      const boundsCandidate = focusedArea.bounds ?? foundArea.bounds;
-      let bounds: [number, number, number, number] | null =
-        Array.isArray(boundsCandidate) && boundsCandidate.length === 4
-          ? (boundsCandidate as [number, number, number, number])
-          : null;
+    if (areaData && areaMetadata) {
+      const {long, lat, bounds} = areaMetadata;
 
-      // When bounds are not available from Redux data (common with vector tiles),
-      // first check the spatial cache (populated as tiles load), then fall back
-      // to querySourceFeatures for currently rendered tiles.
-      if (
-        !bounds &&
-        map &&
-        useTilesRef.current &&
-        activeTilesConfigRef.current
-      ) {
-        // 1. Check the persistent cache — works even if the area is off-screen
-        const cached = tileFeatureCacheRef.current[areaId];
-        if (cached) {
-          bounds = cached.bounds;
-          if (!Number.isFinite(lat)) lat = cached.lat;
-          if (!Number.isFinite(long)) long = cached.long;
-        } else {
-          // 2. Fall back to querying currently loaded tiles
-          const sourceLayer = activeTilesConfigRef.current.sourceLayer;
-          const features = map.querySourceFeatures("adminSource", {
-            sourceLayer,
-          });
-          const matchingFeature = features.find((f) => {
-            const props = f.properties || {};
-            const fid = String(
-              props.areaID ?? props.areaId ?? props.area_id ?? "",
-            );
-            return fid === areaId;
-          });
-          if (matchingFeature) {
-            const spatial = getSpatialPropsFromTileFeature(matchingFeature);
-            if (spatial) {
-              // Store in cache for next time
-              tileFeatureCacheRef.current[areaId] = spatial;
-              bounds = spatial.bounds;
-              if (!Number.isFinite(lat)) lat = spatial.lat;
-              if (!Number.isFinite(long)) long = spatial.long;
-            }
-          }
-        }
-      }
+      bounds && map.fitBounds(bounds, { padding: 150 });
 
-      const lastUploadDate = convertStringDateToDate(foundArea.lastUpdated);
-      const popupTitle = foundArea.name;
-
-      if (bounds) {
-        map?.fitBounds(bounds, { padding: 150 });
-      } else if (Number.isFinite(lat) && Number.isFinite(long) && map) {
-        // Fallback: fly to the centroid if no bounds are available
-        map.flyTo({ center: [long, lat], zoom: 6 });
-      }
-
+      const lastUploadDate = convertStringDateToDate(areaData.lastUpdated);
+      const popupTitle = areaMetadata.name;
       const popupContent = (
         <PopupContentText>
-          {foundArea.caseCount.toLocaleString()} confirmed case
-          {foundArea.caseCount > 1 ? "s" : ""}
+          {areaData.caseCount.toLocaleString()} confirmed case
+          {areaData.caseCount > 1 ? "s" : ""}
         </PopupContentText>
       );
 
@@ -1072,10 +865,7 @@ export const useChoroplethLayer = (
             closeButton: false,
             closeOnClick: true,
           })
-            .setLngLat([
-              Number.isFinite(long) ? long : 0,
-              Number.isFinite(lat) ? lat : 0,
-            ])
+            .setLngLat([long, lat])
             .setDOMContent(popupElement)
             .addTo(map);
 
@@ -1091,10 +881,7 @@ export const useChoroplethLayer = (
           currentPopupRef.current = popup;
         } else {
           currentPopupRef.current
-            .setLngLat([
-              Number.isFinite(long) ? long : 0,
-              Number.isFinite(lat) ? lat : 0,
-            ])
+            .setLngLat([long, lat])
             .setDOMContent(popupElement);
         }
       }
@@ -1103,5 +890,5 @@ export const useChoroplethLayer = (
       currentPopupRef.current = null;
       map?.fitBounds([0, -12.4, 0, 70.15]);
     }
-  }, [focusedArea, map, data, dispatch, setFocusedArea]);
+  }, [focusedArea, map, data, metadata, dispatch, setFocusedArea]);
 };

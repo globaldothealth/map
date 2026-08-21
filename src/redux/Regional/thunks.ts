@@ -65,3 +65,15 @@ export const fetchRegionalData = createAsyncThunk<
         return rejectWithValue(error.response.message);
     }
 });
+
+export const fetchRegionalMetadata = createAsyncThunk<any, void, { rejectValue: string }>('regional/fetchCountriesMetadata', async (_, { rejectWithValue }) => {
+    const s3Path = `metadata/health_zone.json`;
+    try {
+        const { url } = await getUrl({ path: s3Path, options: { bucket: { bucketName: 'aggregated-map-data', region: 'eu-central-1' } } });
+        return await fetch(url.toString()).then(res => res.json());
+    } catch (err: any) {
+        console.log('ERR', err);
+        if (err.response) return rejectWithValue(err.response.message);
+        throw err;
+    }
+});
