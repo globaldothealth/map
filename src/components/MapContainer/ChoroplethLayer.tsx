@@ -124,35 +124,6 @@ export const useChoroplethLayer = (
       try {
         const dataUnion = data as (CountryData | StateData | RegionalData)[];
 
-        const boundaries: FeatureCollection | null = !useTiles
-          ? {
-              type: "FeatureCollection",
-              features: dataUnion.map((d) => ({
-                type: "Feature" as const,
-                id: d.areaId,
-                geometry: d.geometry as any,
-                properties: {
-                  shapeGroup: d.countryCode,
-                  shapeName: d.name,
-                  shapeType: `ADMIN`,
-                  areaName: d.name,
-                  labelName:
-                    d.name?.startsWith("Other (") && d.name?.endsWith(")")
-                      ? d.name.slice("Other (".length, -1)
-                      : d.name,
-                  countryCode: d.countryCode,
-                  areaId: d.areaId,
-                  lat: d.lat,
-                  long: d.long,
-                  bounds_w: d.bounds[0],
-                  bounds_s: d.bounds[1],
-                  bounds_e: d.bounds[2],
-                  bounds_n: d.bounds[3],
-                },
-              })),
-            }
-          : null;
-
         const sourceId = `adminSource`;
         const sourceLayerProps = useTiles
           ? ({ "source-layer": activeTilesConfig!.sourceLayer } as const)
@@ -208,14 +179,6 @@ export const useChoroplethLayer = (
               promoteId: activeTilesConfig!.promoteId,
             } as any);
           }
-        } else if (map.getSource(sourceId)) {
-          (map.getSource(sourceId) as any).setData(boundaries);
-        } else {
-          map.addSource(sourceId, {
-            type: "geojson",
-            data: boundaries as FeatureCollection,
-            promoteId: "areaId",
-          });
         }
 
         // Clear stale feature-state from previous outbreak/admin view.

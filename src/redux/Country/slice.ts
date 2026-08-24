@@ -2,12 +2,13 @@ import {createSlice} from '@reduxjs/toolkit';
 import {fetchCountriesData, fetchCountryMetadata} from 'src/redux/Country/thunks';
 import {CountryData} from 'src/models/CountryData';
 import {OutbreakNames} from "src/redux/App/slice.ts";
+import {AdminMetadata} from "src/models/AdminMetadata.ts";
 
 interface AppState {
     isLoading: boolean;
     isMetadataLoading: boolean;
     countriesData: Record<OutbreakNames, CountryData[]>;
-    metadata: {[key: string]: {name: string, long: number, lat: number, bounds: number[]}};
+    metadata: AdminMetadata;
     totalNumberOfCases: Record<OutbreakNames, number>;
     lastUpdateDate: Record<OutbreakNames, string>;
 }
