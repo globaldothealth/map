@@ -6,6 +6,7 @@ import { Map, Popup } from "maplibre-gl";
 import MapPopup from "src/components/MapPopup";
 import { PopupContentText } from "src/components/MapPopup/styled";
 import { ChoroplethMapColors } from "src/models/Colors";
+import { AdminMetadata } from "src/models/AdminMetadata.ts";
 import { CountryData } from "src/models/CountryData";
 import { FocusedArea } from "src/models/FocusedArea";
 import { RegionalData } from "src/models/RegionalData";
@@ -18,7 +19,7 @@ export const useChoroplethLayer = (
   map: Map | null,
   adminLevel: number,
   data: CountryData[] | StateData[] | RegionalData[],
-  metadata: { [key: string]: { name: string; long: number; lat: number; bounds: number[] } },
+  metadata: AdminMetadata,
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>,
   mapLoaded: boolean,
   setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>,
@@ -515,7 +516,7 @@ export const useChoroplethLayer = (
     if (areaData && areaMetadata) {
       const {long, lat, bounds} = areaMetadata;
 
-      bounds && map.fitBounds(bounds, { padding: 150 });
+      map && bounds && map.fitBounds(bounds, { padding: 150 });
 
       const lastUploadDate = convertStringDateToDate(areaData.lastUpdated);
       const popupTitle = areaMetadata.name;

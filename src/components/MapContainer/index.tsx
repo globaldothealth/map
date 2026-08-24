@@ -19,10 +19,11 @@ import { OutbreakNames } from 'src/redux/App/slice';
 
 import {getDataLayersFromBounds,} from 'src/utils/helperFunctions';
 import { useChoroplethLayer } from './ChoroplethLayer';
+import {AdminMetadata} from "src/models/AdminMetadata.ts";
 
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
-    metadata: { [key: string]: { name: string; long: number; lat: number; bounds: number[] } };
+    metadata: AdminMetadata;
     focusedArea: FocusedArea | null;
     setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>;
     chartType: ChartTypeNames;
