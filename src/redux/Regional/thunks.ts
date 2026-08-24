@@ -10,14 +10,10 @@ const mapToRegionalData = (cases: FetchedCaseData[]): RegionalData[]  => {
     return cases.map((fetchedCase: any) => {
         return {
             caseCount: fetchedCase.case_count,
-            countryCode: fetchedCase.country_code,
+            countryCode: fetchedCase.id.split('.')[0],
             areaId: fetchedCase.id,
             name: fetchedCase.name,
             lastUpdated: fetchedCase.last_updated,
-            lat: fetchedCase.lat,
-            long: fetchedCase.long,
-            bounds: fetchedCase.bounds,
-            geometry: fetchedCase.geometry,
         };
     })
 }
