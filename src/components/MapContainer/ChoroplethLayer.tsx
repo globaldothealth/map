@@ -37,6 +37,13 @@ export const useChoroplethLayer = (
   const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
   const suppressPopupCloseRef = React.useRef(false);
   const previousFeatureStateIdsRef = React.useRef<(string | number)[]>([]);
+  const skipInitialAutoFitRef = React.useRef(
+    typeof window !== "undefined" &&
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.has("lng") || params.has("lat") || params.has("zoom");
+      })(),
+  );
   const handlersRef = React.useRef<{
     click: ((e: any) => void) | null;
     mousemove: ((e: any) => void) | null;
@@ -47,7 +54,39 @@ export const useChoroplethLayer = (
     mouseleave: null,
    });
 
-   // ─── Setup layer ──────────────────────────────────────────────────────────
+   // ─── Fit map to all available areas when data/metadata changes ───────────
+  useEffect(() => {
+    if (!map || !mapLoaded || !data.length || !Object.keys(metadata).length) return;
+
+    // Preserve deep-link camera from URL on initial load.
+    if (skipInitialAutoFitRef.current) {
+      skipInitialAutoFitRef.current = false;
+      return;
+    }
+
+    let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
+    let found = false;
+
+    for (const area of data) {
+      const entry = metadata[area.areaId];
+      if (!entry?.bounds) continue;
+
+      // Normalise LngLatBoundsLike → [w, s, e, n]
+      const [w, s, e, n] = entry.bounds as number[];
+
+      west  = Math.min(west,  w);
+      south = Math.min(south, s);
+      east  = Math.max(east,  e);
+      north = Math.max(north, n);
+      found = true;
+    }
+
+    if (found) {
+      map.fitBounds([west, south, east, north], { padding: 150, animate: true });
+    }
+  }, [map, mapLoaded, data, metadata]);
+
+  // ─── Setup layer ──────────────────────────────────────────────────────────
    useEffect(() => {
      if (!map || !mapLoaded) return;
 
@@ -438,6 +477,7 @@ export const useChoroplethLayer = (
      map,
      mapLoaded,
      data,
+     metadata,
      adminLevel,
      dataLayerBounds,
      outbreakName,
@@ -557,6 +597,7 @@ export const useChoroplethLayer = (
             popupRootRef.current?.unmount();
             popupRootRef.current = null;
             currentPopupRef.current = null;
+            console.log('mam cie')
             if (!suppressPopupCloseRef.current) {
               dispatch(setFocusedArea(null));
             }

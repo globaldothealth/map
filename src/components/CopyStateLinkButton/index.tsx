@@ -5,18 +5,19 @@ import {Alert, Snackbar} from '@mui/material';
 import {useNavigate} from 'react-router-dom';
 
 import {ChartTypeNames} from 'src/models/ViewParamURLValues';
-// import {CountryData} from 'src/models/CountryData';
-// import {RegionalData} from 'src/models/RegionalData';
-// import {StateData} from 'src/models/StateData';
+import {CountryData} from 'src/models/CountryData';
+import {RegionalData} from 'src/models/RegionalData';
+import {StateData} from 'src/models/StateData';
 import {selectFocusedArea, selectOutbreakName, selectResolution} from 'src/redux/App/selectors';
-// import {setFocusedArea} from 'src/redux/App/slice';
-// import {selectCountriesData} from 'src/redux/Country/selectors';
-import {useAppSelector} from 'src/redux/hooks';
-// import {selectRegionalData} from 'src/redux/Regional/selectors';
-// import {selectStateData} from 'src/redux/State/selectors';
+import {OutbreakNames, setFocusedArea} from 'src/redux/App/slice';
+import {selectCountriesData, selectCountryMetadata} from 'src/redux/Country/selectors';
+import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
+import {selectRegionalData, selectRegionalMetadata} from 'src/redux/Regional/selectors';
+import {selectStateData, selectStateMetadata} from 'src/redux/State/selectors';
 import {URLToFilters} from 'src/utils/helperFunctions';
 
 import {CopyStateLinkButtonContainer} from './styled';
+import {AdminMetadataEntry} from "src/models/AdminMetadata.ts";
 
 interface CopyStateLinkButtonProps {
     map?: RefObject<maplibregl.Map | null>;
@@ -24,45 +25,42 @@ interface CopyStateLinkButtonProps {
 }
 
 const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
-    // const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     const focusedArea = useAppSelector(selectFocusedArea);
-    // const countriesData = useAppSelector(selectCountriesData);
-    // const stateData = useAppSelector(selectStateData);
-    // const regionalData = useAppSelector(selectRegionalData);
+    const countriesData = useAppSelector(selectCountriesData);
+    const countryMetadata = useAppSelector(selectCountryMetadata);
+    const stateData = useAppSelector(selectStateData);
+    const stateMetadata = useAppSelector(selectStateMetadata);
+    const regionalData = useAppSelector(selectRegionalData);
+    const regionalMetadata = useAppSelector(selectRegionalMetadata);
     // const popup = useAppSelector(selectPopup);
     const outbreakName = useAppSelector(selectOutbreakName);
     const resolution = useAppSelector(selectResolution);
 
-    // const handleLocationChange = (
-    //     areaId: string,
-    //     administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
-    // ) => {
-    //     if (administrativeAreaData?.length > 0) {
-    //         const foundAdministrativeArea = administrativeAreaData.find(
-    //             (
-    //                 administrativeAreaEntry:
-    //                     | CountryData
-    //                     | StateData
-    //                     | RegionalData,
-    //             ) => administrativeAreaEntry.areaId === areaId,
-    //         );
-    //         if (
-    //             foundAdministrativeArea &&
-    //             foundAdministrativeArea.areaId !== focusedArea?.areaId
-    //         ) {
-    //             dispatch(
-    //                 setFocusedArea({
-    //                     name: foundAdministrativeArea.name,
-    //                     areaId: foundAdministrativeArea.areaId,
-    //                     countryCode: foundAdministrativeArea.countryCode,
-    //                 }),
-    //             );
-    //         }
-    //     }
-    // };
+    useEffect(() => {
+        console.log('')
+    }, [resolution, countriesData, stateData, regionalData, countryMetadata, stateMetadata, regionalMetadata]);
 
+    const handleLocationChange = (
+        foundDataEntry: CountryData[] | StateData[] | RegionalData[],
+        foundMetadataEntry: AdminMetadataEntry,
+    ) => {
+console.log('LECI CHANGE', {
+    name: foundMetadataEntry.name,
+    areaId: foundDataEntry.areaId,
+    countryCode: foundDataEntry.countryCode,
+});
+                dispatch(
+                    setFocusedArea({
+                        name: foundMetadataEntry.name,
+                        areaId: foundDataEntry.areaId,
+                        countryCode: foundDataEntry.countryCode,
+                    }),
+                );
+    };
+    console.log(focusedArea);
     useEffect(() => {
         if (map && map.current) {
             const newViewValues = URLToFilters(location.search);
@@ -86,6 +84,30 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
                 remainingQueryParams.delete('zoom');
             }
 
+            const areaId = newViewValues.focusedArea
+
+            if(newViewValues.chartType === ChartTypeNames.Country) {
+
+                const countryData = countriesData[OutbreakNames[outbreakName]];
+                if (countryData && Object.values(countryMetadata).length > 0) {
+                    const foundDataEntry = countryData.find(cd => cd.areaId === areaId)
+                    const foundMetadataEntry = countryMetadata[areaId]
+                    if (foundDataEntry && foundMetadataEntry) {
+                        handleLocationChange(foundDataEntry, foundMetadataEntry)
+                    }
+                }
+            }
+            if(newViewValues.chartType === ChartTypeNames.State) {
+                if (stateData && Object.values(stateMetadata) > 0) {
+
+                }
+            }
+            if(newViewValues.chartType === ChartTypeNames.Regional) {
+                if (regionalData && Object.values(regionalMetadata) > 0) {
+
+                }
+            }
+
             const newSearch = remainingQueryParams.toString();
             if (newSearch) {
                 navigate(`${location.pathname}?${newSearch}`, {replace: true});
@@ -93,7 +115,7 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
                 navigate(location.pathname, {replace: true});
             }
         }
-    }, [location.search, map?.current]);
+    }, [location.search, map?.current, resolution, countriesData, stateData, regionalData, countryMetadata, stateMetadata, regionalMetadata]);
 
     const [copyHandler, setCopyHandler] = useState({
         message: `Copy link to view`,
@@ -121,7 +143,7 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
             const mapDataQuery = `resolution=${resolution}&outbreakName=${outbreakName}&lng=${center[0]}&lat=${center[1]}&zoom=${zoom}`;
             const locationHref = window.location.href.split('?')[0];
 
-
+            console.log(focusedArea);
             if (focusedArea?.areaId) {
                 navigator.clipboard.writeText(
                     `${locationHref}?${

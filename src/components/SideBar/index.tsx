@@ -110,6 +110,7 @@ const SideBar = () => {
         countryCode: string,
     ) => {
         if (focusedArea?.areaId === areaId) {
+
             dispatch(setFocusedArea(null));
             dispatch(setPopup({isOpen: false, countryCode: 'worldwide'}));
         } else {
