@@ -2,7 +2,7 @@ import {RefObject, useEffect, useState} from 'react';
 import maplibregl from 'maplibre-gl';
 import {Done as DoneIcon, Link as LinkIcon} from '@mui/icons-material';
 import {Alert, Snackbar} from '@mui/material';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 import {ChartTypeNames} from 'src/models/ViewParamURLValues';
 import {CountryData} from 'src/models/CountryData';
@@ -19,6 +19,8 @@ import {URLToFilters} from 'src/utils/helperFunctions';
 import {CopyStateLinkButtonContainer} from './styled';
 import {AdminMetadataEntry} from "src/models/AdminMetadata.ts";
 
+type AreaDataEntry = CountryData | StateData | RegionalData;
+
 interface CopyStateLinkButtonProps {
     map?: RefObject<maplibregl.Map | null>;
     chartType?: ChartTypeNames;
@@ -27,6 +29,7 @@ interface CopyStateLinkButtonProps {
 const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const routerLocation = useLocation();
 
     const focusedArea = useAppSelector(selectFocusedArea);
     const countriesData = useAppSelector(selectCountriesData);
@@ -39,83 +42,86 @@ const CopyStateLinkButton = ({map, chartType}: CopyStateLinkButtonProps) => {
     const outbreakName = useAppSelector(selectOutbreakName);
     const resolution = useAppSelector(selectResolution);
 
-    useEffect(() => {
-        console.log('')
-    }, [resolution, countriesData, stateData, regionalData, countryMetadata, stateMetadata, regionalMetadata]);
-
     const handleLocationChange = (
-        foundDataEntry: CountryData[] | StateData[] | RegionalData[],
+        foundDataEntry: AreaDataEntry,
         foundMetadataEntry: AdminMetadataEntry,
     ) => {
-console.log('LECI CHANGE', {
-    name: foundMetadataEntry.name,
-    areaId: foundDataEntry.areaId,
-    countryCode: foundDataEntry.countryCode,
-});
-                dispatch(
-                    setFocusedArea({
-                        name: foundMetadataEntry.name,
-                        areaId: foundDataEntry.areaId,
-                        countryCode: foundDataEntry.countryCode,
-                    }),
-                );
+        dispatch(
+            setFocusedArea({
+                name: foundMetadataEntry.name,
+                areaId: foundDataEntry.areaId,
+                countryCode: foundDataEntry.countryCode,
+            }),
+        );
     };
-    console.log(focusedArea);
+
     useEffect(() => {
-        if (map && map.current) {
-            const newViewValues = URLToFilters(location.search);
-            const remainingQueryParams = new URLSearchParams(location.search);
+        if (!map?.current) return;
 
-            // We set the outbreakName and resolution in the App Slice
-            remainingQueryParams.delete('outbreakName');
-            remainingQueryParams.delete('resolution');
+        const newViewValues = URLToFilters(routerLocation.search);
+        const remainingQueryParams = new URLSearchParams(routerLocation.search);
+        const outbreakKey = OutbreakNames[outbreakName];
 
-            const mapRef = map.current;
-            if (newViewValues.lng && newViewValues.lat) {
-                mapRef.setCenter([
-                    newViewValues.lng || 40,
-                    newViewValues.lat || 0,
-                ]);
-                remainingQueryParams.delete('lng');
-                remainingQueryParams.delete('lat');
-            }
-            if (newViewValues.zoom) {
-                mapRef.setZoom(newViewValues.zoom || 2.5);
-                remainingQueryParams.delete('zoom');
-            }
+        // We set the outbreakName and resolution in the App Slice
+        remainingQueryParams.delete('outbreakName');
+        remainingQueryParams.delete('resolution');
 
-            const areaId = newViewValues.focusedArea
+        const mapRef = map.current;
+        if (newViewValues.lng && newViewValues.lat) {
+            mapRef.setCenter([
+                newViewValues.lng || 40,
+                newViewValues.lat || 0,
+            ]);
+            remainingQueryParams.delete('lng');
+            remainingQueryParams.delete('lat');
+        }
+        if (newViewValues.zoom) {
+            mapRef.setZoom(newViewValues.zoom || 2.5);
+            remainingQueryParams.delete('zoom');
+        }
 
-            if(newViewValues.chartType === ChartTypeNames.Country) {
+        const areaId = newViewValues.focusedArea;
 
-                const countryData = countriesData[OutbreakNames[outbreakName]];
-                if (countryData && Object.values(countryMetadata).length > 0) {
-                    const foundDataEntry = countryData.find(cd => cd.areaId === areaId)
-                    const foundMetadataEntry = countryMetadata[areaId]
-                    if (foundDataEntry && foundMetadataEntry) {
-                        handleLocationChange(foundDataEntry, foundMetadataEntry)
-                    }
+        if (areaId) {
+            if (newViewValues.chartType === ChartTypeNames.Country) {
+                const countryEntries = countriesData[outbreakKey];
+                const foundDataEntry = countryEntries?.find((entry) => entry.areaId === areaId);
+                const foundMetadataEntry = countryMetadata[areaId];
+                if (foundDataEntry && foundMetadataEntry) {
+                    handleLocationChange(foundDataEntry, foundMetadataEntry);
+                    remainingQueryParams.delete('chartType');
+                    remainingQueryParams.delete('focusedArea');
                 }
             }
-            if(newViewValues.chartType === ChartTypeNames.State) {
-                if (stateData && Object.values(stateMetadata) > 0) {
-
+            if (newViewValues.chartType === ChartTypeNames.State) {
+                const stateEntries = stateData[outbreakKey];
+                const foundDataEntry = stateEntries?.find((entry) => entry.areaId === areaId);
+                const foundMetadataEntry = stateMetadata[areaId];
+                if (foundDataEntry && foundMetadataEntry) {
+                    handleLocationChange(foundDataEntry, foundMetadataEntry);
+                    remainingQueryParams.delete('chartType');
+                    remainingQueryParams.delete('focusedArea');
                 }
             }
-            if(newViewValues.chartType === ChartTypeNames.Regional) {
-                if (regionalData && Object.values(regionalMetadata) > 0) {
-
+            if (newViewValues.chartType === ChartTypeNames.Regional) {
+                const regionalEntries = regionalData[outbreakKey];
+                const foundDataEntry = regionalEntries?.find((entry) => entry.areaId === areaId);
+                const foundMetadataEntry = regionalMetadata[areaId];
+                if (foundDataEntry && foundMetadataEntry) {
+                    handleLocationChange(foundDataEntry, foundMetadataEntry);
+                    remainingQueryParams.delete('chartType');
+                    remainingQueryParams.delete('focusedArea');
                 }
-            }
-
-            const newSearch = remainingQueryParams.toString();
-            if (newSearch) {
-                navigate(`${location.pathname}?${newSearch}`, {replace: true});
-            } else {
-                navigate(location.pathname, {replace: true});
             }
         }
-    }, [location.search, map?.current, resolution, countriesData, stateData, regionalData, countryMetadata, stateMetadata, regionalMetadata]);
+
+        const newSearch = remainingQueryParams.toString();
+        if (newSearch) {
+            navigate(`${routerLocation.pathname}?${newSearch}`, {replace: true});
+        } else {
+            navigate(routerLocation.pathname, {replace: true});
+        }
+    }, [routerLocation.search, routerLocation.pathname, map?.current, outbreakName, countriesData, stateData, regionalData, countryMetadata, stateMetadata, regionalMetadata, navigate]);
 
     const [copyHandler, setCopyHandler] = useState({
         message: `Copy link to view`,
@@ -143,8 +149,7 @@ console.log('LECI CHANGE', {
             const mapDataQuery = `resolution=${resolution}&outbreakName=${outbreakName}&lng=${center[0]}&lat=${center[1]}&zoom=${zoom}`;
             const locationHref = window.location.href.split('?')[0];
 
-            console.log(focusedArea);
-            if (focusedArea?.areaId) {
+            if (focusedArea?.areaId && chartType) {
                 navigator.clipboard.writeText(
                     `${locationHref}?${
                         mapDataQuery +

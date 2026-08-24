@@ -35,6 +35,7 @@ export const useChoroplethLayer = (
   const dispatch = useAppDispatch();
   const currentPopupRef = React.useRef<Popup | null>(null);
   const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
+  const popupCloseHandlerRef = React.useRef<(() => void) | null>(null);
   const suppressPopupCloseRef = React.useRef(false);
   const previousFeatureStateIdsRef = React.useRef<(string | number)[]>([]);
   const skipInitialAutoFitRef = React.useRef(
@@ -53,6 +54,27 @@ export const useChoroplethLayer = (
     mousemove: null,
     mouseleave: null,
    });
+
+  const removePopupInternally = () => {
+    if (!currentPopupRef.current) {
+      popupRootRef.current?.unmount();
+      popupRootRef.current = null;
+      popupCloseHandlerRef.current = null;
+      return;
+    }
+
+    if (popupCloseHandlerRef.current) {
+      currentPopupRef.current.off("close", popupCloseHandlerRef.current);
+      popupCloseHandlerRef.current = null;
+    }
+
+    suppressPopupCloseRef.current = true;
+    popupRootRef.current?.unmount();
+    popupRootRef.current = null;
+    currentPopupRef.current.remove();
+    currentPopupRef.current = null;
+    suppressPopupCloseRef.current = false;
+  };
 
    // ─── Fit map to all available areas when data/metadata changes ───────────
   useEffect(() => {
@@ -181,15 +203,6 @@ export const useChoroplethLayer = (
           previousFeatureStateIdsRef.current.push(area.areaId);
         }
 
-        // Remove popup if it was opened
-        if (currentPopupRef.current) {
-          popupRootRef.current?.unmount();
-          popupRootRef.current = null;
-          currentPopupRef.current.remove();
-          currentPopupRef.current = null;
-        }
-
-        // Find the first symbol (label) layer so we insert below it
         const firstSymbolLayer = map
           .getStyle()
           .layers?.find((layer) => layer.type === "symbol")?.id;
@@ -379,12 +392,7 @@ export const useChoroplethLayer = (
           const countryCode =
             props.countryCode || props.country_code || props.shapeGroup;
 
-          suppressPopupCloseRef.current = true;
-          if (currentPopupRef.current) {
-            currentPopupRef.current.remove();
-            currentPopupRef.current = null;
-          }
-          suppressPopupCloseRef.current = false;
+          removePopupInternally();
 
           dispatch(
             setFocusedArea({
@@ -542,10 +550,7 @@ export const useChoroplethLayer = (
 
   useEffect(() => {
     if (!focusedArea) {
-      currentPopupRef.current?.remove();
-      popupRootRef.current?.unmount();
-      popupRootRef.current = null;
-      currentPopupRef.current = null;
+      removePopupInternally();
       return;
     }
 
@@ -593,15 +598,18 @@ export const useChoroplethLayer = (
             .setDOMContent(popupElement)
             .addTo(map);
 
-          popup.on("close", () => {
+          const popupCloseHandler = () => {
             popupRootRef.current?.unmount();
             popupRootRef.current = null;
             currentPopupRef.current = null;
-            console.log('mam cie')
+            popupCloseHandlerRef.current = null;
             if (!suppressPopupCloseRef.current) {
               dispatch(setFocusedArea(null));
             }
-          });
+          };
+
+          popupCloseHandlerRef.current = popupCloseHandler;
+          popup.on("close", popupCloseHandler);
 
           currentPopupRef.current = popup;
         } else {
@@ -611,8 +619,7 @@ export const useChoroplethLayer = (
         }
       }
     } else {
-      currentPopupRef.current?.remove();
-      currentPopupRef.current = null;
+      removePopupInternally();
       map?.fitBounds([0, -12.4, 0, 70.15]);
     }
   }, [focusedArea, map, data, metadata, dispatch, setFocusedArea]);

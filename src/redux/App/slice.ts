@@ -88,7 +88,6 @@ export const appSlice = createSlice({
       state.isMapLoading = action.payload;
     },
     setFocusedArea: (state, action: PayloadAction<FocusedArea | null>) => {
-      console.log('sprawdzamy', action.payload);
       state.focusedArea = action.payload;
     },
     setLastUpdateDate: (state, action: PayloadAction<string>) => {
