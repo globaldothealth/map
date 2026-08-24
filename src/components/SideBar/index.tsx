@@ -96,6 +96,10 @@ const SideBar = () => {
     const resolution = useAppSelector(selectResolution);
     const availableResolutionsForOutbreaks = useAppSelector(selectAvailableResolutionsForOutbreaks);
 
+    const activeMetadata = resolution === Resolutions.Admin0 ? countryMetadata
+        : resolution === Resolutions.Admin1 ? stateMetadata
+        : regionalMetadata;
+
     const handleOnClick = () => {
         setOpenSidebar((value) => !value);
     };
@@ -129,8 +133,7 @@ const SideBar = () => {
     ) => {
         const mappedData = (administrativeAreaData as (CountryData | StateData | RegionalData)[]).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0).map(
             (administrativeAreaEntry) => {
-                const metadata = resolution === 'Admin0' ? countryMetadata : resolution === 'Admin1' ? stateMetadata : regionalMetadata;
-                const name = metadata[administrativeAreaEntry.areaId].name || '';
+                const name = activeMetadata[administrativeAreaEntry.areaId]?.name || '';
                 return {
                     name,
                     areaId: administrativeAreaEntry.areaId,
@@ -145,15 +148,16 @@ const SideBar = () => {
     };
 
     useEffect(() => {
+        if (Object.keys(activeMetadata).length === 0) return;
         switch (resolution) {
             case Resolutions.Admin0:
-                if (Object.keys(countryMetadata).length > 0) mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
+                mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin1:
-                if (Object.keys(stateMetadata).length > 0) mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
+                mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin2:
-                if (Object.keys(regionalMetadata).length > 0) mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
+                mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
                 break;
         }
     }, [countriesData, stateData, regionalData, resolution, outbreakName, countryMetadata, stateMetadata, regionalMetadata]);
@@ -163,8 +167,7 @@ const SideBar = () => {
     ) => {
         return administrativeAreaData
             .map((administrativeAreaEntry) => {
-                const metadata = resolution === 'Admin0' ? countryMetadata : resolution === 'Admin1' ? stateMetadata : regionalMetadata;
-                const name = metadata[administrativeAreaEntry.areaId].name || '';
+                const name = activeMetadata[administrativeAreaEntry.areaId]?.name || '';
                 return {
                     caseCount: administrativeAreaEntry.caseCount,
                     countryCode: administrativeAreaEntry.countryCode,
@@ -238,17 +241,18 @@ const SideBar = () => {
     };
 
     const SidebarEntries = () => {
+        if (Object.keys(activeMetadata).length === 0) return null;
         switch (resolution) {
             case Resolutions.Admin0:
-                if (Object.keys(countryMetadata).length > 0) return renderAdministrativeAreaList(
+                return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(countriesData[OutbreakNames[outbreakName]]),
                 );
             case Resolutions.Admin1:
-                if (Object.keys(stateMetadata).length > 0) return renderAdministrativeAreaList(
+                return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(stateData[OutbreakNames[outbreakName]]),
                 );
             case Resolutions.Admin2:
-                if (Object.keys(regionalMetadata).length > 0) return renderAdministrativeAreaList(
+                return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(regionalData[OutbreakNames[outbreakName]]),
                 );
             default:
