@@ -40,16 +40,10 @@ export const useChoroplethLayer = (
     click: ((e: any) => void) | null;
     mousemove: ((e: any) => void) | null;
     mouseleave: (() => void) | null;
-    clickOther: ((e: any) => void) | null;
-    mousemoveOther: ((e: any) => void) | null;
-    mouseleaveOther: (() => void) | null;
   }>({
     click: null,
     mousemove: null,
     mouseleave: null,
-    clickOther: null,
-    mousemoveOther: null,
-    mouseleaveOther: null,
    });
 
    // ─── Setup layer ──────────────────────────────────────────────────────────
@@ -104,7 +98,6 @@ export const useChoroplethLayer = (
         // Remove layers before re-adding so they always reflect current adminLevel and data
         const layersToRemove = [
           "adminJoinLabels",
-          "adminJoinOtherStripe",
           "adminJoinBorder",
           "adminJoin",
           "adminJoinEmpty",
@@ -148,49 +141,6 @@ export const useChoroplethLayer = (
           previousFeatureStateIdsRef.current.push(area.areaId);
         }
 
-        // Create per-level stripe patterns (colored stripes on transparent background)
-        const stripePatternEntries: [string, string][] = [
-          ["stripe-empty", ChoroplethMapColors.empty],
-          ["stripe-level1", ChoroplethMapColors.level1],
-          ["stripe-level2", ChoroplethMapColors.level2],
-          ["stripe-level3", ChoroplethMapColors.level3],
-          ["stripe-level4", ChoroplethMapColors.level4],
-          ["stripe-level5", ChoroplethMapColors.level5],
-          ["stripe-level6", ChoroplethMapColors.level6],
-        ];
-        for (const [name, color] of stripePatternEntries) {
-          if (!map.hasImage(name)) {
-            const size = 10;
-            const canvas = document.createElement("canvas");
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext("2d")!;
-            ctx.clearRect(0, 0, size, size);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, size);
-            ctx.lineTo(size, 0);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, 0);
-            ctx.moveTo(-size / 2, size / 2);
-            ctx.lineTo(size / 2, -size / 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(size / 2, size + size / 2);
-            ctx.lineTo(size + size / 2, size / 2);
-            ctx.stroke();
-            const imageData = ctx.getImageData(0, 0, size, size);
-            map.addImage(name, {
-              width: size,
-              height: size,
-              data: imageData.data as unknown as Uint8Array<ArrayBuffer>,
-            });
-          }
-        }
-
         // Remove popup if it was opened
         if (currentPopupRef.current) {
           popupRootRef.current?.unmount();
@@ -207,21 +157,6 @@ export const useChoroplethLayer = (
         const areaIdsFromData = dataUnion
           .filter((area) => !!area.areaId)
           .map((area) => String(area.areaId));
-        const otherAreaIdsFromData = dataUnion
-          .filter(
-            (area) =>
-              !!area.areaId &&
-              String(area.areaId).startsWith("COD.HEALTH ZONE.OTHER"),
-          )
-          .map((area) => String(area.areaId));
-        const otherAreaIdsWithCasesFromData = dataUnion
-          .filter(
-            (area) =>
-              !!area.areaId &&
-              String(area.areaId).startsWith("COD.HEALTH ZONE.OTHER") &&
-              area.caseCount > 0,
-          )
-          .map((area) => String(area.areaId));
         const areaIdExpression = [
           "to-string",
           [
@@ -233,78 +168,6 @@ export const useChoroplethLayer = (
           ],
         ];
 
-        const otherAreaIdsByStripeLevel = {
-          level1: [] as string[],
-          level2: [] as string[],
-          level3: [] as string[],
-          level4: [] as string[],
-          level5: [] as string[],
-          level6: [] as string[],
-        };
-
-        for (const area of dataUnion) {
-          if (!area.areaId) continue;
-          const areaId = String(area.areaId);
-          if (!areaId.startsWith("COD.HEALTH ZONE.OTHER")) continue;
-          const caseCount = area.caseCount ?? 0;
-          if (caseCount <= 0) continue;
-
-          if (caseCount <= dataLayerBounds.level1.upper.number) {
-            otherAreaIdsByStripeLevel.level1.push(areaId);
-          } else if (caseCount <= dataLayerBounds.level2.upper.number) {
-            otherAreaIdsByStripeLevel.level2.push(areaId);
-          } else if (caseCount <= dataLayerBounds.level3.upper.number) {
-            otherAreaIdsByStripeLevel.level3.push(areaId);
-          } else if (caseCount <= dataLayerBounds.level4.upper.number) {
-            otherAreaIdsByStripeLevel.level4.push(areaId);
-          } else if (caseCount <= dataLayerBounds.level5.upper.number) {
-            otherAreaIdsByStripeLevel.level5.push(areaId);
-          } else {
-            otherAreaIdsByStripeLevel.level6.push(areaId);
-          }
-        }
-
-        const stripePatternExpression = [
-          "case",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level1],
-          ],
-          "stripe-level1",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level2],
-          ],
-          "stripe-level2",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level3],
-          ],
-          "stripe-level3",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level4],
-          ],
-          "stripe-level4",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level5],
-          ],
-          "stripe-level5",
-          [
-            "in",
-            areaIdExpression,
-            ["literal", otherAreaIdsByStripeLevel.level6],
-          ],
-          "stripe-level6",
-          "stripe-empty",
-        ];
-
         const shouldShowBorderExpression = [
           "in",
           areaIdExpression,
@@ -313,35 +176,10 @@ export const useChoroplethLayer = (
 
         map.addLayer(
           {
-            id: "adminJoinOtherStripe",
-            type: "fill",
-            source: sourceId,
-            ...sourceLayerProps,
-            filter: [
-              "in",
-              areaIdExpression,
-              ["literal", otherAreaIdsWithCasesFromData],
-            ],
-            paint: {
-              "fill-pattern": stripePatternExpression,
-            },
-          } as any,
-          firstSymbolLayer,
-        );
-
-        map.addLayer(
-          {
             id: `adminJoin`,
             type: "fill",
             source: sourceId,
             ...sourceLayerProps,
-            filter: [
-              "all",
-              [
-                "!",
-                ["in", areaIdExpression, ["literal", otherAreaIdsFromData]],
-              ],
-            ],
             paint: {
               "fill-color": [
                 "case",
@@ -475,24 +313,6 @@ export const useChoroplethLayer = (
           map.off("mousemove", "adminJoin", handlersRef.current.mousemove);
         if (handlersRef.current.mouseleave)
           map.off("mouseleave", "adminJoin", handlersRef.current.mouseleave);
-        if (handlersRef.current.clickOther)
-          map.off(
-            "click",
-            "adminJoinOtherStripe",
-            handlersRef.current.clickOther,
-          );
-        if (handlersRef.current.mousemoveOther)
-          map.off(
-            "mousemove",
-            "adminJoinOtherStripe",
-            handlersRef.current.mousemoveOther,
-          );
-        if (handlersRef.current.mouseleaveOther)
-          map.off(
-            "mouseleave",
-            "adminJoinOtherStripe",
-            handlersRef.current.mouseleaveOther,
-          );
 
         const clickHandler = (e: any) => {
           const feature = e.features?.[0];
@@ -559,48 +379,14 @@ export const useChoroplethLayer = (
           map.getCanvas().style.cursor = "";
         };
 
-        const hasClickableAdminJoinFeatureAtPoint = (point: any) => {
-          const featuresAtPoint = map.queryRenderedFeatures(point, {
-            layers: ["adminJoin"],
-          });
-          for (const f of featuresAtPoint) {
-            const p = f?.properties || {};
-            const fid = p.areaId || p.areaID || p.area_id || f.id;
-            if (!fid) continue;
-            const fs = map.getFeatureState(featureStateTarget(fid)) as {
-              caseCount?: number;
-            };
-            if ((fs?.caseCount ?? 0) > 0) return true;
-          }
-          return false;
-        };
-
-        const clickOtherHandler = (e: any) => {
-          if (hasClickableAdminJoinFeatureAtPoint(e.point)) return;
-          clickHandler(e);
-        };
-
-        const mousemoveOtherHandler = (e: any) => {
-          if (hasClickableAdminJoinFeatureAtPoint(e.point)) return;
-          mousemoveHandler(e);
-        };
-
-        const mouseleaveOtherHandler = () => mouseleaveHandler();
-
         map.on("click", "adminJoin", clickHandler);
         map.on("mousemove", "adminJoin", mousemoveHandler);
         map.on("mouseleave", "adminJoin", mouseleaveHandler);
-        map.on("click", "adminJoinOtherStripe", clickOtherHandler);
-        map.on("mousemove", "adminJoinOtherStripe", mousemoveOtherHandler);
-        map.on("mouseleave", "adminJoinOtherStripe", mouseleaveOtherHandler);
 
         if (isCancelled) {
           map.off("click", "adminJoin", clickHandler);
           map.off("mousemove", "adminJoin", mousemoveHandler);
           map.off("mouseleave", "adminJoin", mouseleaveHandler);
-          map.off("click", "adminJoinOtherStripe", clickOtherHandler);
-          map.off("mousemove", "adminJoinOtherStripe", mousemoveOtherHandler);
-          map.off("mouseleave", "adminJoinOtherStripe", mouseleaveOtherHandler);
           return;
         }
 
@@ -608,9 +394,6 @@ export const useChoroplethLayer = (
           click: clickHandler,
           mousemove: mousemoveHandler,
           mouseleave: mouseleaveHandler,
-          clickOther: clickOtherHandler,
-          mousemoveOther: mousemoveOtherHandler,
-          mouseleaveOther: mouseleaveOtherHandler,
         };
 
         setMapLoaded(true);
@@ -627,27 +410,16 @@ export const useChoroplethLayer = (
         click,
         mousemove,
         mouseleave,
-        clickOther,
-        mousemoveOther,
-        mouseleaveOther,
       } = handlersRef.current;
       if (map) {
         if (click) map.off("click", "adminJoin", click);
         if (mousemove) map.off("mousemove", "adminJoin", mousemove);
         if (mouseleave) map.off("mouseleave", "adminJoin", mouseleave);
-        if (clickOther) map.off("click", "adminJoinOtherStripe", clickOther);
-        if (mousemoveOther)
-          map.off("mousemove", "adminJoinOtherStripe", mousemoveOther);
-        if (mouseleaveOther)
-          map.off("mouseleave", "adminJoinOtherStripe", mouseleaveOther);
       }
       handlersRef.current = {
         click: null,
         mousemove: null,
         mouseleave: null,
-        clickOther: null,
-        mousemoveOther: null,
-        mouseleaveOther: null,
       };
 
       if (map) {
