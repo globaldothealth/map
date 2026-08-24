@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
-import { FeatureCollection } from 'geojson';
 
 import Legend from 'src/components/Legend';
 import Loader from 'src/components/Loader';
@@ -18,10 +17,7 @@ import CopyStateLinkButton from 'src/components/CopyStateLinkButton';
 import { ChartTypeNames } from 'src/models/ViewParamURLValues';
 import { OutbreakNames } from 'src/redux/App/slice';
 
-import {
-    convertStateDataToFeatureSet,
-    getDataLayersFromBounds,
-} from 'src/utils/helperFunctions';
+import {getDataLayersFromBounds,} from 'src/utils/helperFunctions';
 import { useChoroplethLayer } from './ChoroplethLayer';
 
 interface MapContainerProps {
@@ -61,45 +57,37 @@ const MapContainer = ({
 
         mapRef.on('load', () => {
             setMapLoaded(true);
-        });
-    }, []);
+         });
+     }, []);
 
-    const dataFeatureSet: FeatureCollection = useMemo(() => {
-        if (!data || data.length === 0)
-            return { type: 'FeatureCollection', features: [] };
+     // Adds a choropleth layer to the map and sets up the interaction (Popup and fly to country on click)
+     useChoroplethLayer(
+         map.current,
+         adminLevel,
+         data,
+         metadata,
+         setMapLoaded,
+         mapLoaded,
+         setFocusedArea,
+         focusedArea,
+         dataLayerBounds,
+         outbreakName,
+     );
 
-        return convertStateDataToFeatureSet(data);
-    }, [data]);
-
-    // Adds a choropleth layer to the map and sets up the interaction (Popup and fly to country on click)
-    useChoroplethLayer(
-        map.current,
-        adminLevel,
-        data,
-        metadata,
-        setMapLoaded,
-        mapLoaded,
-        dataFeatureSet,
-        setFocusedArea,
-        focusedArea,
-        dataLayerBounds,
-        outbreakName,
-    );
-
-    return (
-        <>
-            {(!mapLoaded || !dataFeatureSet) && <Loader />}
-            <StyledMapContainer
-                ref={mapContainer}
-                $isLoading={!mapLoaded || !dataFeatureSet}
-            />
-            <Legend
-                title="Confirmed cases"
-                legendRows={getDataLayersFromBounds(dataLayerBounds)}
-            />
-            <CopyStateLinkButton map={map} chartType={chartType} />
-        </>
-    );
+     return (
+         <>
+             {!mapLoaded && <Loader />}
+             <StyledMapContainer
+                 ref={mapContainer}
+                 $isLoading={!mapLoaded}
+             />
+             <Legend
+                 title="Confirmed cases"
+                 legendRows={getDataLayersFromBounds(dataLayerBounds)}
+             />
+             <CopyStateLinkButton map={map} chartType={chartType} />
+         </>
+     );
 };
 
 export default MapContainer;

@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import React, { useEffect } from "react";
 import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
-import { FeatureCollection } from "geojson";
 import { Map, Popup } from "maplibre-gl";
 
 import MapPopup from "src/components/MapPopup";
@@ -22,7 +21,6 @@ export const useChoroplethLayer = (
   metadata: { [key: string]: { name: string; long: number; lat: number; bounds: number[] } },
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>,
   mapLoaded: boolean,
-  dataFeatureSet: FeatureCollection,
   setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>,
   focusedArea: FocusedArea | null,
   dataLayerBounds: {
@@ -38,13 +36,6 @@ export const useChoroplethLayer = (
   const popupRootRef = React.useRef<ReturnType<typeof createRoot> | null>(null);
   const suppressPopupCloseRef = React.useRef(false);
   const previousFeatureStateIdsRef = React.useRef<(string | number)[]>([]);
-  // Keep tile-mode state accessible in effects without adding to dep arrays
-  const useTilesRef = React.useRef(false);
-  const activeTilesConfigRef = React.useRef<{
-    url: string;
-    sourceLayer: string;
-    promoteId: string;
-  } | null>(null);
   const handlersRef = React.useRef<{
     click: ((e: any) => void) | null;
     mousemove: ((e: any) => void) | null;
@@ -59,12 +50,11 @@ export const useChoroplethLayer = (
     clickOther: null,
     mousemoveOther: null,
     mouseleaveOther: null,
-  });
-  console.log(dataFeatureSet)
+   });
 
-  // ─── Setup layer ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!map || !mapLoaded || !dataFeatureSet) return;
+   // ─── Setup layer ──────────────────────────────────────────────────────────
+   useEffect(() => {
+     if (!map || !mapLoaded) return;
 
     let isCancelled = false;
     const admin0TilesUrl = import.meta.env.VITE_ADMIN0_TILES_URL as
@@ -76,66 +66,40 @@ export const useChoroplethLayer = (
     const admin2TilesUrl = import.meta.env.VITE_ADMIN2_TILES_URL as
       | string
       | undefined;
-    const admin0SourceLayer =
-      (import.meta.env.VITE_ADMIN0_TILES_SOURCE_LAYER as string | undefined) ||
-      "admin0";
-    const admin1SourceLayer =
-      (import.meta.env.VITE_ADMIN1_TILES_SOURCE_LAYER as string | undefined) ||
-      "admin1";
-    const admin2SourceLayer =
-      (import.meta.env.VITE_ADMIN2_TILES_SOURCE_LAYER as string | undefined) ||
-      "admin2";
-    const admin0PromoteId =
-      (import.meta.env.VITE_ADMIN0_TILES_PROMOTE_ID as string | undefined) ||
-      "areaID";
-    const admin1PromoteId =
-      (import.meta.env.VITE_ADMIN1_TILES_PROMOTE_ID as string | undefined) ||
-      "areaID";
-    const admin2PromoteId =
-      (import.meta.env.VITE_ADMIN2_TILES_PROMOTE_ID as string | undefined) ||
-      "areaID";
+    const admin0SourceLayer = import.meta.env.VITE_ADMIN0_TILES_SOURCE_LAYER || "admin0";
+    const admin1SourceLayer = import.meta.env.VITE_ADMIN1_TILES_SOURCE_LAYER || "admin1";
+    const admin2SourceLayer = import.meta.env.VITE_ADMIN2_TILES_SOURCE_LAYER || "admin2";
     const activeTilesConfig =
-      adminLevel === 0 && admin0TilesUrl
-        ? {
-            url: admin0TilesUrl,
-            sourceLayer: admin0SourceLayer,
-            promoteId: admin0PromoteId,
-          }
-        : adminLevel === 1 && admin1TilesUrl
-          ? {
-              url: admin1TilesUrl,
-              sourceLayer: admin1SourceLayer,
-              promoteId: admin1PromoteId,
-            }
-          : adminLevel === 2 && admin2TilesUrl
-            ? {
-                url: admin2TilesUrl,
-                sourceLayer: admin2SourceLayer,
-                promoteId: admin2PromoteId,
-              }
-            : null;
-    const useTiles = !!activeTilesConfig;
+       adminLevel === 0 && admin0TilesUrl
+         ? {
+             url: admin0TilesUrl,
+             sourceLayer: admin0SourceLayer,
+           }
+         : adminLevel === 1 && admin1TilesUrl
+           ? {
+               url: admin1TilesUrl,
+               sourceLayer: admin1SourceLayer,
+             }
+           : adminLevel === 2 && admin2TilesUrl
+             ? {
+                 url: admin2TilesUrl,
+                 sourceLayer: admin2SourceLayer,
+               }
+             : null;
 
-    // Keep refs in sync so other effects can read them
-    useTilesRef.current = useTiles;
-    activeTilesConfigRef.current = activeTilesConfig;
+    if (!activeTilesConfig) return;
 
     const setupLayer = async () => {
       try {
         const dataUnion = data as (CountryData | StateData | RegionalData)[];
 
         const sourceId = `adminSource`;
-        const sourceLayerProps = useTiles
-          ? ({ "source-layer": activeTilesConfig!.sourceLayer } as const)
-          : {};
-        const featureStateTarget = (id: string | number) =>
-          useTiles
-            ? {
-                source: sourceId,
-                sourceLayer: activeTilesConfig!.sourceLayer,
-                id,
-              }
-            : { source: sourceId, id };
+        const sourceLayerProps = { "source-layer": activeTilesConfig!.sourceLayer } as const;
+        const featureStateTarget = (id: string | number) => ({
+          source: sourceId,
+          sourceLayer: activeTilesConfig!.sourceLayer,
+          id,
+        });
 
         // Remove layers before re-adding so they always reflect current adminLevel and data
         const layersToRemove = [
@@ -151,34 +115,23 @@ export const useChoroplethLayer = (
 
         const currentSource = map.getSource(sourceId) as any;
         const currentSourceType = currentSource?.type;
-        const expectedSourceType = useTiles ? "vector" : "geojson";
         const styleSource = map.getStyle().sources?.[sourceId] as any;
         const activeTileUrl = activeTilesConfig?.url;
         const currentTileUrl = styleSource?.tiles?.[0];
-        const currentPromoteId = styleSource?.promoteId;
-        const shouldRecreateVectorSource =
-          useTiles &&
-          currentSource &&
-          currentSourceType === "vector" &&
-          (currentTileUrl !== activeTileUrl ||
-            currentPromoteId !== activeTilesConfig?.promoteId);
-
+        const shouldRecreateVectorSource = currentSource && currentSourceType === "vector" && (currentTileUrl !== activeTileUrl);
         if (
           currentSource &&
-          (currentSourceType !== expectedSourceType ||
-            shouldRecreateVectorSource)
+          (currentSourceType !== "vector" || shouldRecreateVectorSource)
         ) {
           map.removeSource(sourceId);
         }
 
-        if (useTiles) {
-          if (!map.getSource(sourceId)) {
-            map.addSource(sourceId, {
-              type: "vector",
-              tiles: [activeTilesConfig!.url],
-              promoteId: activeTilesConfig!.promoteId,
-            } as any);
-          }
+        if (!map.getSource(sourceId)) {
+          map.addSource(sourceId, {
+            type: "vector",
+            tiles: [activeTilesConfig!.url],
+            promoteId: 'areaID',
+          } as any);
         }
 
         // Clear stale feature-state from previous outbreak/admin view.
@@ -699,30 +652,25 @@ export const useChoroplethLayer = (
 
       if (map) {
         for (const id of previousFeatureStateIdsRef.current) {
-          map.removeFeatureState(
-            useTiles
-              ? {
-                  source: "adminSource",
-                  sourceLayer: activeTilesConfig!.sourceLayer,
-                  id,
-                }
-              : { source: "adminSource", id },
-          );
+          map.removeFeatureState({
+            source: "adminSource",
+            sourceLayer: activeTilesConfig!.sourceLayer,
+            id,
+          });
         }
       }
       previousFeatureStateIdsRef.current = [];
     };
-  }, [
-    map,
-    mapLoaded,
-    data,
-    adminLevel,
-    dataFeatureSet,
-    dataLayerBounds,
-    outbreakName,
-    dispatch,
-    setFocusedArea,
-  ]);
+   }, [
+     map,
+     mapLoaded,
+     data,
+     adminLevel,
+     dataLayerBounds,
+     outbreakName,
+     dispatch,
+     setFocusedArea,
+   ]);
 
   // ─── Update choropleth colors when dataLayerBounds change ─────────────────
   useEffect(() => {
