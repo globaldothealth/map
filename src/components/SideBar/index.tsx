@@ -17,7 +17,7 @@ import {FocusedArea} from 'src/models/FocusedArea';
 import {RegionalData} from 'src/models/RegionalData';
 import {StateData} from 'src/models/StateData';
 import {
-    selectCountriesData, selectCountryLastUpdateDate,
+    selectCountriesData, selectCountryLastUpdateDate, selectCountryMetadata,
     selectCountryTotalCases,
     selectCountryTotalCasesIsLoading,
 } from 'src/redux/Country/selectors';
@@ -35,7 +35,7 @@ import {
 import {useAppDispatch, useAppSelector} from 'src/redux/hooks';
 import {
     selectStateData,
-    selectStateLastUpdatedDate,
+    selectStateLastUpdatedDate, selectStateMetadata,
     selectStateTotalCases,
     selectStateTotalCasesIsLoading
 } from 'src/redux/State/selectors';
@@ -56,7 +56,8 @@ import {
     SideBarTitlesSkeleton,
     StyledSideBar,
 } from './styled';
-import {selectRegionalData, selectRegionalLastUpdatedDate, selectRegionalTotalCases, selectRegionalTotalCasesIsLoading} from "src/redux/Regional/selectors.ts";
+import {selectRegionalData, selectRegionalLastUpdatedDate,
+    selectRegionalMetadata, selectRegionalTotalCases, selectRegionalTotalCasesIsLoading} from "src/redux/Regional/selectors.ts";
 
 
 const SideBar = () => {
@@ -69,11 +70,14 @@ const SideBar = () => {
     const dispatch = useAppDispatch();
 
     const countriesData = useAppSelector(selectCountriesData);
+    const countryMetadata = useAppSelector(selectCountryMetadata);
     const lastUpdateCountryDate = useAppSelector(selectCountryLastUpdateDate);
     const lastUpdateStateDate = useAppSelector(selectStateLastUpdatedDate);
     const lastUpdateRegionalDate = useAppSelector(selectRegionalLastUpdatedDate);
     const stateData = useAppSelector(selectStateData);
+    const stateMetadata = useAppSelector(selectStateMetadata);
     const regionalData = useAppSelector(selectRegionalData);
+    const regionalMetadata = useAppSelector(selectRegionalMetadata);
     const focusedArea = useAppSelector(selectFocusedArea);
     const totalCountryCasesCount = useAppSelector(selectCountryTotalCases);
     const totalCountryCasesCountIsLoading = useAppSelector(
@@ -125,8 +129,10 @@ const SideBar = () => {
     ) => {
         const mappedData = (administrativeAreaData as (CountryData | StateData | RegionalData)[]).filter(administrativeAreaEntry => administrativeAreaEntry.caseCount > 0).map(
             (administrativeAreaEntry) => {
+                const metadata = resolution === 'Admin0' ? countryMetadata : resolution === 'Admin1' ? stateMetadata : regionalMetadata;
+                const name = metadata[administrativeAreaEntry.areaId].name || '';
                 return {
-                    name: administrativeAreaEntry.name || '',
+                    name,
                     areaId: administrativeAreaEntry.areaId,
                     // Kosovo is not available in the library
                     countryCode:
@@ -141,27 +147,29 @@ const SideBar = () => {
     useEffect(() => {
         switch (resolution) {
             case Resolutions.Admin0:
-                mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
+                if (Object.keys(countryMetadata).length > 0) mapDataToAutocomplete(countriesData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin1:
-                mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
+                if (Object.keys(stateMetadata).length > 0) mapDataToAutocomplete(stateData[OutbreakNames[outbreakName]]);
                 break;
             case Resolutions.Admin2:
-                mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
+                if (Object.keys(regionalMetadata).length > 0) mapDataToAutocomplete(regionalData[OutbreakNames[outbreakName]]);
                 break;
         }
-    }, [countriesData, stateData, regionalData, resolution, outbreakName]);
+    }, [countriesData, stateData, regionalData, resolution, outbreakName, countryMetadata, stateMetadata, regionalMetadata]);
 
     const getDataForAdministrativeAreaList = (
         administrativeAreaData: CountryData[] | StateData[] | RegionalData[],
     ) => {
         return administrativeAreaData
             .map((administrativeAreaEntry) => {
+                const metadata = resolution === 'Admin0' ? countryMetadata : resolution === 'Admin1' ? stateMetadata : regionalMetadata;
+                const name = metadata[administrativeAreaEntry.areaId].name || '';
                 return {
                     caseCount: administrativeAreaEntry.caseCount,
                     countryCode: administrativeAreaEntry.countryCode,
                     areaId: administrativeAreaEntry.areaId,
-                    name: administrativeAreaEntry.name,
+                    name,
                 };
             })
             .sort(
@@ -232,15 +240,15 @@ const SideBar = () => {
     const SidebarEntries = () => {
         switch (resolution) {
             case Resolutions.Admin0:
-                return renderAdministrativeAreaList(
+                if (Object.keys(countryMetadata).length > 0) return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(countriesData[OutbreakNames[outbreakName]]),
                 );
             case Resolutions.Admin1:
-                return renderAdministrativeAreaList(
+                if (Object.keys(stateMetadata).length > 0) return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(stateData[OutbreakNames[outbreakName]]),
                 );
             case Resolutions.Admin2:
-                return renderAdministrativeAreaList(
+                if (Object.keys(regionalMetadata).length > 0) return renderAdministrativeAreaList(
                     getDataForAdministrativeAreaList(regionalData[OutbreakNames[outbreakName]]),
                 );
             default:

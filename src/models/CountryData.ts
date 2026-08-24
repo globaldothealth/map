@@ -3,5 +3,4 @@ export interface CountryData {
     caseCount: number;
     countryCode: string;
     lastUpdated: string;
-    name: string;
 }

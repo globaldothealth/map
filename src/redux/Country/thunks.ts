@@ -12,7 +12,6 @@ const mapToCountryData = (cases: FetchedCaseData[]): CountryData[] => {
             caseCount: fetchedCase.case_count,
             countryCode: fetchedCase.id.split('.')[0],
             areaId: fetchedCase.id,
-            name: fetchedCase.name,
             lastUpdated: fetchedCase.last_updated,
         };
     });
