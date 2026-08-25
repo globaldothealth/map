@@ -390,29 +390,32 @@ export const useChoroplethLayer = (
           map.off("mouseleave", "adminJoin", handlersRef.current.mouseleave);
 
         const clickHandler = (e: any) => {
-          const feature = e.features?.[0];
-          const props = feature?.properties || {};
-          const areaName = props.areaName || props.shapeName || props.name;
+          // Loop through all features at the click point and find the first one with caseCount > 0
+          const features = e.features || [];
+          let targetFeature = null;
 
-          if (!feature || !areaName) {
+          for (const feature of features) {
+            const areaId = feature.properties?.areaID;
+            if (!areaId) continue;
+
+            const featureState = map.getFeatureState(
+              featureStateTarget(areaId),
+            ) as { caseCount?: number };
+
+            if ((featureState?.caseCount ?? 0) > 0) {
+              targetFeature = feature;
+              break;
+            }
+          }
+
+          if (!targetFeature) {
             dispatch(setFocusedArea(null));
             return;
           }
 
-          const featureId =
-            props.areaId || props.areaID || props.area_id || feature.id;
-          if (!featureId) return;
-
-          const featureState = map.getFeatureState(
-            featureStateTarget(featureId),
-          ) as { caseCount?: number };
-
-          if ((featureState?.caseCount ?? 0) === 0) return;
-
-          const name = String(areaName);
-          const areaId = String(featureId);
-          const countryCode =
-            props.countryCode || props.country_code || props.shapeGroup;
+          const areaId = targetFeature.properties.areaID;
+          const name = metadata[areaId].name;
+          const countryCode = areaId.split('.')[0];
 
           removePopupInternally();
 
