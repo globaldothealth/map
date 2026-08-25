@@ -317,6 +317,7 @@ export const useChoroplethLayer = (
               },
               properties: {
                 name: entry.name,
+                caseCount: area.caseCount,
               },
             };
           });
@@ -368,6 +369,12 @@ export const useChoroplethLayer = (
                 "text-halo-color": "#ffffff",
                 "text-halo-width": 1.5,
                 "text-halo-blur": 0.5,
+                "text-opacity": [
+                  "case",
+                  [">", ["get", "caseCount"], 0],
+                  1,
+                  0.7,
+                ],
               },
             } as any,
             firstSymbolLayer,
