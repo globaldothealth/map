@@ -62,6 +62,13 @@ export function useMaplibreMap(
         );
       });
 
+      // Hide all default place-name labels from the base style
+      map.current.getStyle().layers?.forEach((layer) => {
+        if (layer.type === "symbol") {
+          map.current?.setLayoutProperty(layer.id, "visibility", "none");
+        }
+      });
+
       // Add outline around water bodies (oceans, lakes, seas = coastlines)
       const waterLayer = map.current
         .getStyle()

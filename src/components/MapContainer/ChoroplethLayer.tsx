@@ -304,60 +304,75 @@ export const useChoroplethLayer = (
           firstSymbolLayer,
         );
 
-        if (
-          adminLevel === 2 ||
-          (adminLevel === 1 && outbreakName === "EbolaBVD")
-        ) {
-          map.addLayer(
+        // Build a GeoJSON point source from metadata for label rendering
+        const labelFeatures = dataUnion
+          .filter((area) => !!area.areaId && metadata[area.areaId])
+          .map((area) => {
+            const entry = metadata[area.areaId];
+            return {
+              type: "Feature" as const,
+              geometry: {
+                type: "Point" as const,
+                coordinates: [entry.long, entry.lat],
+              },
+              properties: {
+                name: entry.name,
+              },
+            };
+          });
+
+        const labelSourceId = "adminLabelSource";
+        if (map.getSource(labelSourceId)) {
+          (map.getSource(labelSourceId) as any).setData({
+            type: "FeatureCollection",
+            features: labelFeatures,
+          });
+        } else {
+          map.addSource(labelSourceId, {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: labelFeatures,
+            },
+          });
+        }
+
+        map.addLayer(
             {
               id: "adminJoinLabels",
               type: "symbol",
-              source: sourceId,
-              ...sourceLayerProps,
+              source: labelSourceId,
               layout: {
-                "text-field": [
-                  "coalesce",
-                  ["get", "labelName"],
-                  ["get", "shapeName"],
-                  ["get", "name"],
-                ],
+                "text-field": ["get", "name"],
                 "text-size": [
                   "interpolate",
                   ["linear"],
                   ["zoom"],
-                  3,
-                  11,
-                  6,
-                  14,
-                  10,
-                  16,
+                  3, 13,
+                  6, 16,
+                  10, 18,
                 ],
-                "text-font": ["Open Sans Regular"],
-                "text-max-width": 8,
+                "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+                "text-max-width": 7,
+                "text-letter-spacing": 0.05,
                 "text-anchor": "center",
-                "text-variable-anchor": [
-                  "center",
-                  "top",
-                  "bottom",
-                  "left",
-                  "right",
-                ],
-                "text-radial-offset": 0.35,
+                "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
+                "text-radial-offset": 0.3,
                 "text-justify": "auto",
                 "text-padding": 2,
                 "text-allow-overlap": false,
                 "text-ignore-placement": false,
               },
               paint: {
-                "text-color": "#333333",
+                "text-color": "#666666",
                 "text-halo-color": "#ffffff",
                 "text-halo-width": 1.5,
-                "text-opacity": ["case", shouldShowBorderExpression, 1, 0],
+                "text-halo-blur": 0.5,
               },
             } as any,
             firstSymbolLayer,
           );
-        }
+
 
         // Remove previously registered handlers to prevent duplicates
         if (handlersRef.current.click)
