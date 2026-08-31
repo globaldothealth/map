@@ -305,22 +305,33 @@ export const useChoroplethLayer = (
         );
 
         // Build a GeoJSON point source from metadata for label rendering
-        const labelFeatures = dataUnion
-          .filter((area) => !!area.areaId && metadata[area.areaId])
-          .map((area) => {
-            const entry = metadata[area.areaId];
-            return {
-              type: "Feature" as const,
+        // const labelFeatures = dataUnion
+        //   .filter((area) => !!area.areaId && metadata[area.areaId])
+        //   .map((area) => {
+        //     const entry = metadata[area.areaId];
+        //     return {
+        //       type: "Feature" as const,
+        //       geometry: {
+        //         type: "Point" as const,
+        //         coordinates: [entry.long, entry.lat],
+        //       },
+        //       properties: {
+        //         name: entry.name,
+        //         caseCount: area.caseCount,
+        //       },
+        //     };
+        //   });
+        const labelFeatures = Object.values(metadata).map(md => ({
+          type: "Feature" as const,
               geometry: {
-                type: "Point" as const,
-                coordinates: [entry.long, entry.lat],
-              },
-              properties: {
-                name: entry.name,
-                caseCount: area.caseCount,
-              },
-            };
-          });
+            type: "Point" as const,
+                coordinates: [md.long, md.lat],
+          },
+          properties: {
+            name: md.name,
+                caseCount: 1,
+          },
+        }))
 
         const labelSourceId = "adminLabelSource";
         if (map.getSource(labelSourceId)) {
