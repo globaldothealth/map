@@ -20,6 +20,7 @@ export const useChoroplethLayer = (
   adminLevel: number,
   data: CountryData[] | StateData[] | RegionalData[],
   metadata: AdminMetadata,
+  countryMetadata: AdminMetadata,
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>,
   mapLoaded: boolean,
   setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>,
@@ -159,6 +160,7 @@ export const useChoroplethLayer = (
 
         // Remove layers before re-adding so they always reflect current adminLevel and data
         const layersToRemove = [
+          "countryLabels",
           "adminJoinLabels",
           "adminJoinBorder",
           "adminJoin",
@@ -304,52 +306,107 @@ export const useChoroplethLayer = (
           firstSymbolLayer,
         );
 
-        // Build a GeoJSON point source from metadata for label rendering
-        // const labelFeatures = dataUnion
-        //   .filter((area) => !!area.areaId && metadata[area.areaId])
-        //   .map((area) => {
-        //     const entry = metadata[area.areaId];
-        //     return {
-        //       type: "Feature" as const,
-        //       geometry: {
-        //         type: "Point" as const,
-        //         coordinates: [entry.long, entry.lat],
-        //       },
-        //       properties: {
-        //         name: entry.name,
-        //         caseCount: area.caseCount,
-        //       },
-        //     };
-        //   });
-        const labelFeatures = Object.values(metadata).map(md => ({
+        // Country labels are always visible and always come from countryMetadata.
+        const isSubcountryView = adminLevel !== 0;
+        const countryLabelFeatures = Object.values(countryMetadata).map((entry) => ({
           type: "Feature" as const,
-              geometry: {
+          geometry: {
             type: "Point" as const,
-                coordinates: [md.long, md.lat],
+            coordinates: [entry.long, entry.lat],
           },
           properties: {
-            name: md.name,
-                caseCount: 1,
+            name: entry.name,
           },
-        }))
-
-        const labelSourceId = "adminLabelSource";
-        if (map.getSource(labelSourceId)) {
-          (map.getSource(labelSourceId) as any).setData({
+        }));
+        const countryLabelSourceId = "countryLabelSource";
+        if (map.getSource(countryLabelSourceId)) {
+          (map.getSource(countryLabelSourceId) as any).setData({
             type: "FeatureCollection",
-            features: labelFeatures,
+            features: countryLabelFeatures,
           });
         } else {
-          map.addSource(labelSourceId, {
+          map.addSource(countryLabelSourceId, {
             type: "geojson",
             data: {
               type: "FeatureCollection",
-              features: labelFeatures,
+              features: countryLabelFeatures,
             },
           });
         }
-
         map.addLayer(
+          {
+            id: "countryLabels",
+            type: "symbol",
+            source: countryLabelSourceId,
+            layout: {
+              "text-field": ["get", "name"],
+              "text-size": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                3, isSubcountryView ? 13 : 12,
+                6, isSubcountryView ? 15 : 14,
+                10, isSubcountryView ? 17 : 16,
+              ],
+              "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+              "text-max-width": 8,
+              "text-letter-spacing": 0.05,
+              "text-anchor": "center",
+              "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
+              "text-radial-offset": 0.3,
+              "text-justify": "auto",
+              "text-padding": 2,
+              "text-allow-overlap": false,
+              "text-ignore-placement": false,
+            },
+            paint: {
+              "text-color": isSubcountryView ? "#7a7a7a" : "#666666",
+              "text-halo-color": "#ffffff",
+              "text-halo-width": 1.5,
+              "text-halo-blur": 0.5,
+              "text-opacity": isSubcountryView ? 0.9 : 1,
+            },
+          } as any,
+          firstSymbolLayer,
+        );
+
+        // Avoid duplicate names at admin0, where metadata already represents countries.
+        const shouldRenderAdminLabels = adminLevel !== 0;
+        if (shouldRenderAdminLabels) {
+          const labelFeatures = dataUnion
+            .filter((area) => !!area.areaId && metadata[area.areaId])
+            .map((area) => {
+              const entry = metadata[area.areaId];
+              return {
+                type: "Feature" as const,
+                geometry: {
+                  type: "Point" as const,
+                  coordinates: [entry.long, entry.lat],
+                },
+                properties: {
+                  name: entry.name,
+                  caseCount: area.caseCount,
+                },
+              };
+            });
+
+          const labelSourceId = "adminLabelSource";
+          if (map.getSource(labelSourceId)) {
+            (map.getSource(labelSourceId) as any).setData({
+              type: "FeatureCollection",
+              features: labelFeatures,
+            });
+          } else {
+            map.addSource(labelSourceId, {
+              type: "geojson",
+              data: {
+                type: "FeatureCollection",
+                features: labelFeatures,
+              },
+            });
+          }
+
+          map.addLayer(
             {
               id: "adminJoinLabels",
               type: "symbol",
@@ -390,6 +447,7 @@ export const useChoroplethLayer = (
             } as any,
             firstSymbolLayer,
           );
+        }
 
 
         // Remove previously registered handlers to prevent duplicates
@@ -522,6 +580,7 @@ export const useChoroplethLayer = (
      mapLoaded,
      data,
      metadata,
+     countryMetadata,
      adminLevel,
      dataLayerBounds,
      outbreakName,

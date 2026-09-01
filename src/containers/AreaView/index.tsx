@@ -374,6 +374,7 @@ export const AreaView: React.FC = () => {
         <MapContainer
             data={data}
             metadata={metadata}
+            countryMetadata={countryMetadata}
             focusedArea={focusedArea}
             setFocusedArea={setFocusedArea}
             chartType={chartType}

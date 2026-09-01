@@ -24,6 +24,7 @@ import {AdminMetadata} from "src/models/AdminMetadata.ts";
 interface MapContainerProps {
     data: CountryData[] | StateData[] | RegionalData[];
     metadata: AdminMetadata;
+    countryMetadata: AdminMetadata;
     focusedArea: FocusedArea | null;
     setFocusedArea: ActionCreatorWithPayload<FocusedArea | null>;
     chartType: ChartTypeNames;
@@ -40,6 +41,7 @@ interface MapContainerProps {
 const MapContainer = ({
     data,
     metadata,
+    countryMetadata,
     focusedArea,
     setFocusedArea,
     chartType,
@@ -67,6 +69,7 @@ const MapContainer = ({
          adminLevel,
          data,
          metadata,
+         countryMetadata,
          setMapLoaded,
          mapLoaded,
          setFocusedArea,
