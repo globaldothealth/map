@@ -43,13 +43,11 @@ export function useMaplibreMap(
         "background-color",
         ChoroplethMapColors["land"],
       );
-      const bordersToRestyle = [
-        { id: "boundary_country_inner", width: 0.2 },
-        { id: "boundary_country_outline", width: 0.2 },
-        { id: "boundary_state", width: 0.4 },
-        { id: "boundary_county", width: 1 },
+      const countryBordersToRestyle = [
+        { id: "boundary_country_inner", width: 0.3 },
+        { id: "boundary_country_outline", width: 0.3 },
       ];
-      bordersToRestyle.forEach((borderToRestyle) => {
+      countryBordersToRestyle.forEach((borderToRestyle) => {
         map.current?.setPaintProperty(
           borderToRestyle.id,
           "line-color",
@@ -60,6 +58,21 @@ export function useMaplibreMap(
           "line-width",
           borderToRestyle.width,
         );
+      });
+
+      // Keep only country-level borders visible across zoom levels.
+      const subnationalBorderRegexes = [
+        /boundary_state/i,
+        /boundary_county/i,
+        /boundary_province/i,
+      ];
+      map.current.getStyle().layers?.forEach((layer) => {
+        if (
+          layer.type === "line" &&
+          subnationalBorderRegexes.some((regex) => regex.test(layer.id))
+        ) {
+          map.current?.setLayoutProperty(layer.id, "visibility", "none");
+        }
       });
 
       // Hide all default place-name labels from the base style
