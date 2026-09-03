@@ -306,18 +306,32 @@ export const useChoroplethLayer = (
           firstSymbolLayer,
         );
 
+        // Build country-level totals so labels with non-zero cases can be placed first.
+        const countryCaseCountByCode = dataUnion.reduce<Record<string, number>>(
+          (acc, area) => {
+            const countryCode = String(area.areaId || "").split(".")[0];
+            if (!countryCode) return acc;
+            acc[countryCode] = (acc[countryCode] || 0) + (area.caseCount || 0);
+            return acc;
+          },
+          {},
+        );
+
         // Country labels are always visible and always come from countryMetadata.
         const isSubcountryView = adminLevel !== 0;
-        const countryLabelFeatures = Object.values(countryMetadata).map((entry) => ({
-          type: "Feature" as const,
-          geometry: {
-            type: "Point" as const,
-            coordinates: [entry.long, entry.lat],
-          },
-          properties: {
-            name: entry.name,
-          },
-        }));
+        const countryLabelFeatures = Object.entries(countryMetadata).map(
+          ([countryCode, entry]) => ({
+            type: "Feature" as const,
+            geometry: {
+              type: "Point" as const,
+              coordinates: [entry.long, entry.lat],
+            },
+            properties: {
+              name: entry.name,
+              caseCount: countryCaseCountByCode[countryCode] || 0,
+            },
+          }),
+        );
         const countryLabelSourceId = "countryLabelSource";
         if (map.getSource(countryLabelSourceId)) {
           (map.getSource(countryLabelSourceId) as any).setData({
@@ -358,6 +372,13 @@ export const useChoroplethLayer = (
               "text-padding": 2,
               "text-allow-overlap": false,
               "text-ignore-placement": false,
+              // Lower sort keys are placed first when overlap is disabled.
+              "symbol-sort-key": [
+                "case",
+                [">", ["coalesce", ["get", "caseCount"], 0], 0],
+                0,
+                1,
+              ],
             },
             paint: {
               "text-color": isSubcountryView ? "#7a7a7a" : "#666666",
@@ -431,6 +452,13 @@ export const useChoroplethLayer = (
                 "text-padding": 2,
                 "text-allow-overlap": false,
                 "text-ignore-placement": false,
+                // Lower sort keys are placed first when overlap is disabled.
+                "symbol-sort-key": [
+                  "case",
+                  [">", ["coalesce", ["get", "caseCount"], 0], 0],
+                  0,
+                  1,
+                ],
               },
               paint: {
                 "text-color": "#666666",
