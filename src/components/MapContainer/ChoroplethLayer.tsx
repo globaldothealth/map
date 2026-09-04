@@ -413,12 +413,11 @@ export const useChoroplethLayer = (
               "text-padding": 2,
               "text-allow-overlap": false,
               "text-ignore-placement": false,
-              // Lower sort keys are placed first when overlap is disabled.
+              // Lower sort keys are placed first; negative caseCount sorts higher values first.
               "symbol-sort-key": [
-                "case",
-                [">", ["coalesce", ["get", "caseCount"], 0], 0],
-                0,
-                1,
+                "*",
+                -1,
+                ["coalesce", ["get", "caseCount"], 0],
               ],
             },
             paint: {
@@ -497,12 +496,11 @@ export const useChoroplethLayer = (
                 "text-padding": 2,
                 "text-allow-overlap": false,
                 "text-ignore-placement": false,
-                // Lower sort keys are placed first when overlap is disabled.
+                // Lower sort keys are placed first; negative caseCount sorts higher values first.
                 "symbol-sort-key": [
-                  "case",
-                  [">", ["coalesce", ["get", "caseCount"], 0], 0],
-                  0,
-                  1,
+                  "*",
+                  -1,
+                  ["coalesce", ["get", "caseCount"], 0],
                 ],
               },
               paint: {
