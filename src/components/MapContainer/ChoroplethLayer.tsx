@@ -162,6 +162,7 @@ export const useChoroplethLayer = (
         const layersToRemove = [
           "countryLabels",
           "adminJoinLabels",
+          "adminJoinProvinceBorder",
           "adminJoinBorder",
           "adminJoin",
           "adminJoinEmpty",
@@ -227,6 +228,16 @@ export const useChoroplethLayer = (
           "in",
           areaIdExpression,
           ["literal", areaIdsFromData],
+        ];
+        const isZeroCaseExpression = [
+          "==",
+          ["coalesce", ["feature-state", "caseCount"], 0],
+          0,
+        ];
+        const isNonZeroCaseExpression = [
+          ">",
+          ["coalesce", ["feature-state", "caseCount"], 0],
+          0,
         ];
 
         map.addLayer(
@@ -300,11 +311,40 @@ export const useChoroplethLayer = (
             ...sourceLayerProps,
             paint: {
               "line-color": ChoroplethMapColors["borders"],
-              "line-opacity": ["case", shouldShowBorderExpression, 1, 0],
+              "line-width": 1,
+              "line-opacity": [
+                "case",
+                ["all", shouldShowBorderExpression, isNonZeroCaseExpression],
+                1,
+                0,
+              ],
             },
           } as any,
           firstSymbolLayer,
         );
+
+        if (adminLevel === 2) {
+          map.addLayer(
+            {
+              id: "adminJoinProvinceBorder",
+              type: "line",
+              source: sourceId,
+              ...sourceLayerProps,
+              paint: {
+                "line-color": ChoroplethMapColors["borders"],
+                "line-width": 3,
+                "line-dasharray": [2, 1.5],
+                "line-opacity": [
+                  "case",
+                  ["all", shouldShowBorderExpression, isZeroCaseExpression],
+                  1,
+                  0,
+                ],
+              },
+            } as any,
+            firstSymbolLayer,
+          );
+        }
 
         // Build country-level totals so labels with non-zero cases can be placed first.
         const countryCaseCountByCode = dataUnion.reduce<Record<string, number>>(
@@ -328,6 +368,7 @@ export const useChoroplethLayer = (
             },
             properties: {
               name: entry.name,
+              label: isSubcountryView ? entry.name.toUpperCase() : entry.name,
               caseCount: countryCaseCountByCode[countryCode] || 0,
             },
           }),
@@ -353,14 +394,14 @@ export const useChoroplethLayer = (
             type: "symbol",
             source: countryLabelSourceId,
             layout: {
-              "text-field": ["get", "name"],
+              "text-field": ["get", "label"],
               "text-size": [
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                3, isSubcountryView ? 13 : 12,
-                6, isSubcountryView ? 15 : 14,
-                10, isSubcountryView ? 17 : 16,
+                3, isSubcountryView ? 15 : 12,
+                6, isSubcountryView ? 18 : 14,
+                10, isSubcountryView ? 21 : 16,
               ],
               "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
               "text-max-width": 8,
@@ -406,6 +447,10 @@ export const useChoroplethLayer = (
                 },
                 properties: {
                   name: entry.name,
+                  label:
+                    area.caseCount === 0
+                      ? entry.name.toUpperCase()
+                      : entry.name,
                   caseCount: area.caseCount,
                 },
               };
@@ -433,14 +478,14 @@ export const useChoroplethLayer = (
               type: "symbol",
               source: labelSourceId,
               layout: {
-                "text-field": ["get", "name"],
+                "text-field": ["get", "label"],
                 "text-size": [
                   "interpolate",
                   ["linear"],
                   ["zoom"],
-                  3, 13,
-                  6, 16,
-                  10, 18,
+                  3, 12,
+                  6, 14,
+                  10, 16,
                 ],
                 "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
                 "text-max-width": 7,
@@ -461,7 +506,12 @@ export const useChoroplethLayer = (
                 ],
               },
               paint: {
-                "text-color": "#666666",
+                "text-color": [
+                  "case",
+                  ["==", ["coalesce", ["get", "caseCount"], 0], 0],
+                  "#7a7a7a",
+                  "#666666",
+                ],
                 "text-halo-color": "#ffffff",
                 "text-halo-width": 1.5,
                 "text-halo-blur": 0.5,
