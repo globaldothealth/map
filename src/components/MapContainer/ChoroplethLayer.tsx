@@ -162,6 +162,7 @@ export const useChoroplethLayer = (
         const layersToRemove = [
           "countryLabels",
           "adminJoinLabels",
+          "adminJoinZeroCaseBorder",
           "adminJoinProvinceBorder",
           "adminJoinBorder",
           "adminJoin",
@@ -322,6 +323,28 @@ export const useChoroplethLayer = (
           } as any,
           firstSymbolLayer,
         );
+
+        if (adminLevel === 1) {
+          map.addLayer(
+            {
+              id: "adminJoinZeroCaseBorder",
+              type: "line",
+              source: sourceId,
+              ...sourceLayerProps,
+              paint: {
+                "line-color": ChoroplethMapColors["borders"],
+                "line-width": 1.2,
+                "line-opacity": [
+                  "case",
+                  ["all", shouldShowBorderExpression, isZeroCaseExpression],
+                  0.3,
+                  0,
+                ],
+              },
+            } as any,
+            firstSymbolLayer,
+          );
+        }
 
         if (adminLevel === 2) {
           map.addLayer(

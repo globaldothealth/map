@@ -302,7 +302,10 @@ const SideBar = () => {
         }
     };
 
-    const adminLevelText = resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'State/Province' : 'Health Zone (DRC only)';
+    let adminLevelText = resolution === Resolutions.Admin0 ? 'country' : resolution === Resolutions.Admin1 ? 'State/Province' : 'Health Zone (DRC only)';
+    if (resolution === Resolutions.Admin1 && OutbreakNames[outbreakName] === OutbreakNames.EbolaBVD) {
+        adminLevelText = adminLevelText + ' (DRC only)';
+    }
     const dataLoading = resolution === Resolutions.Admin0 ? totalCountryCasesCountIsLoading : resolution === Resolutions.Admin1 ? totalStateCasesCountIsLoading : totalRegionalCasesCountIsLoading;
 
     return (
@@ -372,7 +375,10 @@ const SideBar = () => {
                         }}
                     >
                         {hoveredOutbreak && (availableResolutionsForOutbreaks[hoveredOutbreak] ?? []).map((res) => {
-                            const label = res === Resolutions.Admin0 ? 'Country level' : res === Resolutions.Admin1 ? 'State/Province level' : "Health Zone level (DRC only)";
+                            let label = res === Resolutions.Admin0 ? 'Country level' : res === Resolutions.Admin1 ? 'State/Province level' : "Health Zone level (DRC only)";
+                            if (res == Resolutions.Admin1 && OutbreakNames[hoveredOutbreak] === OutbreakNames.EbolaBVD) {
+                                label = label + ' (DRC only)';
+                            }
                             return (
                                 <MenuItem
                                     key={res}
