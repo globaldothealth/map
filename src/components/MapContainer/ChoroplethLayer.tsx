@@ -430,8 +430,9 @@ export const useChoroplethLayer = (
               "text-max-width": 8,
               "text-letter-spacing": 0.05,
               "text-anchor": "center",
-              "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
-              "text-radial-offset": 0.3,
+              // "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
+              // "text-radial-offset": 0.3,
+              "text-offset": [0, 0],
               "text-justify": "auto",
               "text-padding": 2,
               "text-allow-overlap": false,
@@ -470,7 +471,7 @@ export const useChoroplethLayer = (
                 properties: {
                   name: entry.name,
                   label:
-                    area.caseCount === 0
+                    adminLevel === 2 && area.caseCount === 0
                       ? entry.name.toUpperCase()
                       : entry.name,
                   caseCount: area.caseCount,
@@ -513,8 +514,9 @@ export const useChoroplethLayer = (
                 "text-max-width": 7,
                 "text-letter-spacing": 0.05,
                 "text-anchor": "center",
-                "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
-                "text-radial-offset": 0.3,
+                // "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
+                // "text-radial-offset": 0.3,
+                "text-offset": [0, 0],
                 "text-justify": "auto",
                 "text-padding": 2,
                 "text-allow-overlap": false,
