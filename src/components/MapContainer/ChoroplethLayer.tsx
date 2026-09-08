@@ -356,7 +356,7 @@ export const useChoroplethLayer = (
               paint: {
                 "line-color": ChoroplethMapColors["borders"],
                 "line-width": 3,
-                "line-dasharray": [2, 1.5],
+                // "line-dasharray": [2, 1.5],
                 "line-opacity": [
                   "case",
                   ["all", shouldShowBorderExpression, isZeroCaseExpression],
