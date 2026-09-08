@@ -428,7 +428,7 @@ export const useChoroplethLayer = (
               ],
               "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
               "text-max-width": 8,
-              "text-letter-spacing": 0.05,
+              "text-letter-spacing": 0.1,
               "text-anchor": "center",
               // "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
               // "text-radial-offset": 0.3,
@@ -447,7 +447,7 @@ export const useChoroplethLayer = (
             paint: {
               "text-color": isSubcountryView ? "#7a7a7a" : "#666666",
               "text-halo-color": "#ffffff",
-              "text-halo-width": 1.5,
+              "text-halo-width": 2,
               "text-halo-blur": 0.5,
               "text-opacity": isSubcountryView ? 0.9 : 1,
             },
@@ -532,11 +532,11 @@ export const useChoroplethLayer = (
                 "text-color": [
                   "case",
                   ["==", ["coalesce", ["get", "caseCount"], 0], 0],
-                  "#7a7a7a",
+                  "#8a8a8a",
                   "#666666",
                 ],
                 "text-halo-color": "#ffffff",
-                "text-halo-width": 1.5,
+                "text-halo-width": 1.2,
                 "text-halo-blur": 0.5,
                 "text-opacity": [
                   "case",
