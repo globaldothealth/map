@@ -14,7 +14,6 @@ import { StateData } from "src/models/StateData";
 import { useAppDispatch } from "src/redux/hooks";
 import { convertStringDateToDate } from "src/utils/helperFunctions";
 
-
 export const useChoroplethLayer = (
   map: Map | null,
   adminLevel: number,
@@ -54,7 +53,7 @@ export const useChoroplethLayer = (
     click: null,
     mousemove: null,
     mouseleave: null,
-   });
+  });
 
   const removePopupInternally = () => {
     if (!currentPopupRef.current) {
@@ -77,9 +76,10 @@ export const useChoroplethLayer = (
     suppressPopupCloseRef.current = false;
   };
 
-   // ─── Fit map to all available areas when data/metadata changes ───────────
+  // ─── Fit map to all available areas when data/metadata changes ───────────
   useEffect(() => {
-    if (!map || !mapLoaded || !data.length || !Object.keys(metadata).length) return;
+    if (!map || !mapLoaded || !data.length || !Object.keys(metadata).length)
+      return;
 
     // Preserve deep-link camera from URL on initial load.
     if (skipInitialAutoFitRef.current) {
@@ -87,7 +87,10 @@ export const useChoroplethLayer = (
       return;
     }
 
-    let west = Infinity, south = Infinity, east = -Infinity, north = -Infinity;
+    let west = Infinity,
+      south = Infinity,
+      east = -Infinity,
+      north = -Infinity;
     let found = false;
 
     for (const area of data) {
@@ -97,21 +100,24 @@ export const useChoroplethLayer = (
       // Normalise LngLatBoundsLike → [w, s, e, n]
       const [w, s, e, n] = entry.bounds as number[];
 
-      west  = Math.min(west,  w);
+      west = Math.min(west, w);
       south = Math.min(south, s);
-      east  = Math.max(east,  e);
+      east = Math.max(east, e);
       north = Math.max(north, n);
       found = true;
     }
 
     if (found) {
-      map.fitBounds([west, south, east, north], { padding: 150, animate: true });
+      map.fitBounds([west, south, east, north], {
+        padding: 150,
+        animate: true,
+      });
     }
   }, [map, mapLoaded, data, metadata]);
 
   // ─── Setup layer ──────────────────────────────────────────────────────────
-   useEffect(() => {
-     if (!map || !mapLoaded) return;
+  useEffect(() => {
+    if (!map || !mapLoaded) return;
 
     let isCancelled = false;
     const admin0TilesUrl = import.meta.env.VITE_ADMIN0_TILES_URL as
@@ -123,26 +129,29 @@ export const useChoroplethLayer = (
     const admin2TilesUrl = import.meta.env.VITE_ADMIN2_TILES_URL as
       | string
       | undefined;
-    const admin0SourceLayer = import.meta.env.VITE_ADMIN0_TILES_SOURCE_LAYER || "admin0";
-    const admin1SourceLayer = import.meta.env.VITE_ADMIN1_TILES_SOURCE_LAYER || "admin1";
-    const admin2SourceLayer = import.meta.env.VITE_ADMIN2_TILES_SOURCE_LAYER || "admin2";
+    const admin0SourceLayer =
+      import.meta.env.VITE_ADMIN0_TILES_SOURCE_LAYER || "admin0";
+    const admin1SourceLayer =
+      import.meta.env.VITE_ADMIN1_TILES_SOURCE_LAYER || "admin1";
+    const admin2SourceLayer =
+      import.meta.env.VITE_ADMIN2_TILES_SOURCE_LAYER || "admin2";
     const activeTilesConfig =
-       adminLevel === 0 && admin0TilesUrl
-         ? {
-             url: admin0TilesUrl,
-             sourceLayer: admin0SourceLayer,
-           }
-         : adminLevel === 1 && admin1TilesUrl
-           ? {
-               url: admin1TilesUrl,
-               sourceLayer: admin1SourceLayer,
-             }
-           : adminLevel === 2 && admin2TilesUrl
-             ? {
-                 url: admin2TilesUrl,
-                 sourceLayer: admin2SourceLayer,
-               }
-             : null;
+      adminLevel === 0 && admin0TilesUrl
+        ? {
+            url: admin0TilesUrl,
+            sourceLayer: admin0SourceLayer,
+          }
+        : adminLevel === 1 && admin1TilesUrl
+          ? {
+              url: admin1TilesUrl,
+              sourceLayer: admin1SourceLayer,
+            }
+          : adminLevel === 2 && admin2TilesUrl
+            ? {
+                url: admin2TilesUrl,
+                sourceLayer: admin2SourceLayer,
+              }
+            : null;
 
     if (!activeTilesConfig) return;
 
@@ -151,7 +160,9 @@ export const useChoroplethLayer = (
         const dataUnion = data as (CountryData | StateData | RegionalData)[];
 
         const sourceId = `adminSource`;
-        const sourceLayerProps = { "source-layer": activeTilesConfig!.sourceLayer } as const;
+        const sourceLayerProps = {
+          "source-layer": activeTilesConfig!.sourceLayer,
+        } as const;
         const featureStateTarget = (id: string | number) => ({
           source: sourceId,
           sourceLayer: activeTilesConfig!.sourceLayer,
@@ -162,6 +173,8 @@ export const useChoroplethLayer = (
         const layersToRemove = [
           "countryLabels",
           "adminJoinLabels",
+          "adminJoinLabelsAdjust",
+          "adminJoinLabelsFixed",
           "adminJoinZeroCaseBorder",
           "adminJoinProvinceBorder",
           "adminJoinBorder",
@@ -177,7 +190,10 @@ export const useChoroplethLayer = (
         const styleSource = map.getStyle().sources?.[sourceId] as any;
         const activeTileUrl = activeTilesConfig?.url;
         const currentTileUrl = styleSource?.tiles?.[0];
-        const shouldRecreateVectorSource = currentSource && currentSourceType === "vector" && (currentTileUrl !== activeTileUrl);
+        const shouldRecreateVectorSource =
+          currentSource &&
+          currentSourceType === "vector" &&
+          currentTileUrl !== activeTileUrl;
         if (
           currentSource &&
           (currentSourceType !== "vector" || shouldRecreateVectorSource)
@@ -189,7 +205,7 @@ export const useChoroplethLayer = (
           map.addSource(sourceId, {
             type: "vector",
             tiles: [activeTilesConfig!.url],
-            promoteId: 'areaID',
+            promoteId: "areaID",
           } as any);
         }
 
@@ -210,6 +226,8 @@ export const useChoroplethLayer = (
         const firstSymbolLayer = map
           .getStyle()
           .layers?.find((layer) => layer.type === "symbol")?.id;
+        const countryLabelsCanAdjust = adminLevel === 1 || adminLevel === 2;
+        const isAdmin2View = adminLevel === 2;
 
         const areaIdsFromData = dataUnion
           .filter((area) => !!area.areaId)
@@ -422,16 +440,21 @@ export const useChoroplethLayer = (
                 "interpolate",
                 ["linear"],
                 ["zoom"],
-                3, isSubcountryView ? 15 : 12,
-                6, isSubcountryView ? 18 : 14,
-                10, isSubcountryView ? 21 : 16,
+                3,
+                isSubcountryView ? 15 : 12,
+                6,
+                isSubcountryView ? 18 : 14,
+                10,
+                isSubcountryView ? 21 : 16,
               ],
               "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
               "text-max-width": 8,
               "text-letter-spacing": 0.1,
               "text-anchor": "center",
-              // "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
-              // "text-radial-offset": 0.3,
+              "text-variable-anchor": countryLabelsCanAdjust
+                ? ["center", "top", "bottom", "left", "right"]
+                : ["center"],
+              "text-radial-offset": countryLabelsCanAdjust ? 0.75 : 0,
               "text-offset": [0, 0],
               "text-justify": "auto",
               "text-padding": 2,
@@ -462,6 +485,9 @@ export const useChoroplethLayer = (
             .filter((area) => !!area.areaId && metadata[area.areaId])
             .map((area) => {
               const entry = metadata[area.areaId];
+              // In admin2 datasets, caseCount==0 entries represent province/state labels.
+              const labelKind =
+                area.caseCount === 0 ? "provinceState" : "healthZone";
               return {
                 type: "Feature" as const,
                 geometry: {
@@ -475,6 +501,7 @@ export const useChoroplethLayer = (
                       ? entry.name.toUpperCase()
                       : entry.name,
                   caseCount: area.caseCount,
+                  labelKind,
                 },
               };
             });
@@ -495,61 +522,100 @@ export const useChoroplethLayer = (
             });
           }
 
-          map.addLayer(
-            {
-              id: "adminJoinLabels",
-              type: "symbol",
-              source: labelSourceId,
-              layout: {
-                "text-field": ["get", "label"],
-                "text-size": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  3, 12,
-                  6, 14,
-                  10, 16,
-                ],
-                "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
-                "text-max-width": 7,
-                "text-letter-spacing": 0.05,
-                "text-anchor": "center",
-                // "text-variable-anchor": ["center", "top", "bottom", "left", "right"],
-                // "text-radial-offset": 0.3,
-                "text-offset": [0, 0],
-                "text-justify": "auto",
-                "text-padding": 2,
-                "text-allow-overlap": false,
-                "text-ignore-placement": false,
-                // Lower sort keys are placed first; negative caseCount sorts higher values first.
-                "symbol-sort-key": [
-                  "*",
-                  -1,
-                  ["coalesce", ["get", "caseCount"], 0],
-                ],
-              },
-              paint: {
-                "text-color": [
-                  "case",
-                  ["==", ["coalesce", ["get", "caseCount"], 0], 0],
-                  "#8a8a8a",
-                  "#666666",
-                ],
-                "text-halo-color": "#ffffff",
-                "text-halo-width": 1.2,
-                "text-halo-blur": 0.5,
-                "text-opacity": [
-                  "case",
-                  [">", ["get", "caseCount"], 0],
-                  1,
-                  0.7,
-                ],
-              },
-            } as any,
-            firstSymbolLayer,
-          );
-        }
+          const baseAdminLabelLayout = {
+            "text-field": ["get", "label"],
+            "text-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              3,
+              12,
+              6,
+              14,
+              10,
+              16,
+            ],
+            "text-font": ["Open Sans Semibold", "Noto Sans Regular"],
+            "text-max-width": 7,
+            "text-letter-spacing": 0.05,
+            "text-anchor": "center",
+            "text-offset": [0, 0],
+            "text-justify": "auto",
+            "text-padding": 2,
+            "text-allow-overlap": false,
+            "text-ignore-placement": false,
+            // Lower sort keys are placed first; negative caseCount sorts higher values first.
+            "symbol-sort-key": ["*", -1, ["coalesce", ["get", "caseCount"], 0]],
+          } as const;
 
+          const baseAdminLabelPaint = {
+            "text-color": [
+              "case",
+              ["==", ["coalesce", ["get", "caseCount"], 0], 0],
+              "#8a8a8a",
+              "#666666",
+            ],
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.2,
+            "text-halo-blur": 0.5,
+            "text-opacity": ["case", [">", ["get", "caseCount"], 0], 1, 0.7],
+          } as const;
+
+          if (!isAdmin2View) {
+            map.addLayer(
+              {
+                id: "adminJoinLabels",
+                type: "symbol",
+                source: labelSourceId,
+                layout: {
+                  ...baseAdminLabelLayout,
+                  "text-variable-anchor": ["center"],
+                  "text-radial-offset": 0,
+                },
+                paint: baseAdminLabelPaint,
+              } as any,
+              firstSymbolLayer,
+            );
+          } else {
+            map.addLayer(
+              {
+                id: "adminJoinLabelsAdjust",
+                type: "symbol",
+                source: labelSourceId,
+                filter: ["==", ["get", "labelKind"], "provinceState"],
+                layout: {
+                  ...baseAdminLabelLayout,
+                  "text-variable-anchor": [
+                    "center",
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                  ],
+                  "text-radial-offset": 2,
+                },
+                paint: baseAdminLabelPaint,
+              } as any,
+              firstSymbolLayer,
+            );
+
+            map.addLayer(
+              {
+                id: "adminJoinLabelsFixed",
+                type: "symbol",
+                source: labelSourceId,
+                filter: ["==", ["get", "labelKind"], "healthZone"],
+                layout: {
+                  ...baseAdminLabelLayout,
+                  "text-variable-anchor": ["center"],
+                  "text-radial-offset": 0,
+                },
+                paint: baseAdminLabelPaint,
+              } as any,
+              firstSymbolLayer,
+            );
+          }
+        }
 
         // Remove previously registered handlers to prevent duplicates
         if (handlersRef.current.click)
@@ -585,7 +651,7 @@ export const useChoroplethLayer = (
 
           const areaId = targetFeature.properties.areaID;
           const name = metadata[areaId].name;
-          const countryCode = areaId.split('.')[0];
+          const countryCode = areaId.split(".")[0];
 
           removePopupInternally();
 
@@ -593,7 +659,7 @@ export const useChoroplethLayer = (
             setFocusedArea({
               name,
               areaId,
-              countryCode
+              countryCode,
             }),
           );
         };
@@ -649,11 +715,7 @@ export const useChoroplethLayer = (
 
     return () => {
       isCancelled = true;
-      const {
-        click,
-        mousemove,
-        mouseleave,
-      } = handlersRef.current;
+      const { click, mousemove, mouseleave } = handlersRef.current;
       if (map) {
         if (click) map.off("click", "adminJoin", click);
         if (mousemove) map.off("mousemove", "adminJoin", mousemove);
@@ -676,18 +738,18 @@ export const useChoroplethLayer = (
       }
       previousFeatureStateIdsRef.current = [];
     };
-   }, [
-     map,
-     mapLoaded,
-     data,
-     metadata,
-     countryMetadata,
-     adminLevel,
-     dataLayerBounds,
-     outbreakName,
-     dispatch,
-     setFocusedArea,
-   ]);
+  }, [
+    map,
+    mapLoaded,
+    data,
+    metadata,
+    countryMetadata,
+    adminLevel,
+    dataLayerBounds,
+    outbreakName,
+    dispatch,
+    setFocusedArea,
+  ]);
 
   // ─── Update choropleth colors when dataLayerBounds change ─────────────────
   useEffect(() => {
@@ -751,11 +813,11 @@ export const useChoroplethLayer = (
     }
 
     const areaId = focusedArea.areaId;
-    const areaData = data.find(rd => rd.areaId == areaId)
+    const areaData = data.find((rd) => rd.areaId == areaId);
     const areaMetadata = metadata[areaId];
 
     if (areaData && areaMetadata) {
-      const {long, lat, bounds} = areaMetadata;
+      const { long, lat, bounds } = areaMetadata;
 
       map && bounds && map.fitBounds(bounds, { padding: 150 });
 
