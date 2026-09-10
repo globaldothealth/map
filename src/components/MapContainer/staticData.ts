@@ -258,7 +258,7 @@ export const significantEventsData = [
     dateStart: "2026-05-10",
     relatedCaseStatus: "",
     description:
-      "The MV Hondius arrived in the Canary Islands and was anchored off the coast at the Port of Granadilla in Tenerife. A total of 122 people (87 guests, 35 crew) disembarked and were repatriated to their home countries. Twenty-seven people (25 crew, 2 medical staff) remained onboard to return the vessel to Rotterdam, the Netherlands. The ship departed from Tenerife on May 11 with a provisional date of arrival in Rotterdam on May 18.",
+      'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and quarantined with other American passengers from the ship in Nebraska. This case has been removed from the official count of confirmed cases. The individual completed the required 42-day quarantine period on June 22.',
   },
   {
     marker: 14,
