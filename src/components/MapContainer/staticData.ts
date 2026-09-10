@@ -256,7 +256,7 @@ export const significantEventsData = [
     location: "Nebraska, US",
     date: "May 10th 2026",
     dateStart: "2026-05-10",
-    relatedCaseStatus: "",
+    relatedCaseStatus: "non-case",
     description:
       'Gh_ID16 is an adult male from the US. He initially tested "faintly" positive during medical evaluation in Tenerife on May 10 and was considered positive out of an abundance of caution, but further testing was negative. He was evacuated to the US and quarantined with other American passengers from the ship in Nebraska. This case has been removed from the official count of confirmed cases. The individual completed the required 42-day quarantine period on June 22.',
   },
