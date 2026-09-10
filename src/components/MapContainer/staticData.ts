@@ -157,7 +157,7 @@ export const significantEventsData = [
     location: "%ship-04-11",
     date: "April 11th 2026",
     dateStart: "2026-04-11",
-    relatedCaseStatus: "Probable",
+    relatedCaseStatus: "Probable Case",
     description:
       "Case 1 (Gh_ID1), a 70 year old Dutch male (index case), developed symptoms of fever, headache, and mild diarrhea on April 3. His condition progressed on April 6 to include dizziness, tachychardia, and tachypnoea, with further clinical deterioration. He died on board the vessel on April 11. No microbiological tests were performed and he is considered a probable case. His body was removed from the ship in Saint Helena on April 24.",
   },
@@ -166,7 +166,7 @@ export const significantEventsData = [
     location: "Tristan da Cunha",
     date: "April 14th 2026",
     dateStart: "2026-04-14",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 8 (Gh_ID12), a 65 year old British male, disembarked the ship in Tristan da Cunha, where he is a local resident, on April 15. He reported onset of symptoms on April 28 with diarrhea, and fever on April 30. He was admitted to hospital on May 2. Lab testing confirmed a positive hantavirus test result for the individual, who was previously considered a probable case. He has since recovered (as of June 10) and is now clinically well at home in Tristan de Cunha.",
   },
@@ -184,7 +184,7 @@ export const significantEventsData = [
     location: "Johannesburg, South Africa",
     date: "April 25th 2026",
     dateStart: "2026-04-25",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 2 (Gh_ID2) is a 69 year old Dutch female and wife of Case 1. She disembarked the ship in Saint Helena on April 24 with gastrointestinal symptoms (onset April 22) and flew to Johannesburg, South Africa.  Her condition worsened during travel. She boarded a connecting flight to Europe, but was too ill to take her scheduled flight and was taken off the plane in Johannesburg and died upon arrival at the emergency department on April 26. Post-mortem PCR testing confirmed hantavirus infection on May 4.",
   },
@@ -193,7 +193,7 @@ export const significantEventsData = [
     location: "Johannesburg, South Africa",
     date: "May 2nd 2026",
     dateStart: "2026-05-02",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 3 (Gh_ID3), a 60 year old British male, developed symptoms of febrile illness, shortness of breath, and signs of pneumonia while onbaord the ship on April 21. His condition worsened on April 26 and he was medically evacuated from Ascension to South Africa on April 27 and was hospitalized in the ICU.  PCR testing confirmed hantavirus infection on May 2. NICD reports that he has since been discharged from the hospital and has returned to the United Kingdom.",
   },
@@ -202,7 +202,7 @@ export const significantEventsData = [
     location: "%ship-05-02",
     date: "May 2nd 2026",
     dateStart: "2026-05-02",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 4 (Gh_ID4), an 80 year old German female, developed fever, malaise, and respiratory symptoms on April 23. She developed pneumonia and died on May 2. Post-mortem sampling confirmed Andes virus on May 8.",
   },
@@ -211,7 +211,7 @@ export const significantEventsData = [
     location: "Zurich, Switzerland",
     date: "May 5th 2026",
     dateStart: "2026-05-05",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 7 (Gh_ID5), a 64 year old male of Swiss nationality, disembarked the ship in Saint Helena on April 22. He flew back to Switzerland on April 27-28 through South Africa and Qatar. He developed symptoms of fever, headache, fatigue, and nausea on May 1 after arrival in Switzerland and was hospitalized in isolation. PCR testing confirmed Andes virus on May 5. He has since recovered as of May 29th.",
   },
@@ -229,7 +229,7 @@ export const significantEventsData = [
     location: "Praia, Cape Verde",
     date: "May 6th 2026",
     dateStart: "2026-05-07",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 5 (Gh_ID8), a 41 year old Dutch male, working as the ship doctor, reported onset of symptoms on April 30, including fever, fatigue, muscle pain and mild respiratory symptoms. He was one of three suspected cases removed from the ship in Cape Verde. PCR testing confirmed Andes virus on May 7 and he was medically evacuated to the Netherlands. He has since recovered as of May 20th",
   },
@@ -238,7 +238,7 @@ export const significantEventsData = [
     location: "Praia, Cape Verde",
     date: "May 6th 2026",
     dateStart: "2026-05-07",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 6 (Gh_ID7), a 56 year old British male working as a ship expedition guide, developed symptoms on April 28, including high fever, fatigue and diarrhea. PCR testing confirmed Andes virus on May 7. He was one of three suspected cases removed from the ship in Cape Verde and was medically evacuated to the Netherlands on May 7 for treatment.  He has since recovered and medically evacuated back to the United Kingdom on May 28th for self-isolation.",
   },
@@ -265,7 +265,7 @@ export const significantEventsData = [
     location: "Paris, France",
     date: "May 11th 2026",
     dateStart: "2026-05-11",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 9 (Gh_ID15), a 73 year old French female, developed symptoms during the evacuation flight from Tenerife to Paris on May 10. Her symptoms worsened and she tested positive for hantavirus on May 11 and was admitted to a Paris hospital in critical condition. She has since recovered from the hantavirus infection as of June 21, but remained in intensive care for months. On August 6, the French Ministry of Health announced that she was transferred to a convalescent center.",
   },
@@ -274,7 +274,7 @@ export const significantEventsData = [
     location: "Madrid, Spain",
     date: "May 12th 2026",
     dateStart: "2026-05-11",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 10 (Gh_ID18), a 70 year old Spanish female, tested provisionally positive after disembarking from the ship in Tenerife and was evacuated to Spain for quarantine at Gómez Ulla Hospital in Madrid. The patient subsequently developed symptoms and was confirmed as positive on May 11. She has since recovered as of June 4.",
   },
@@ -283,7 +283,7 @@ export const significantEventsData = [
     location: "Vancouver Island, British Columbia, Canada",
     date: "May 17th 2026",
     dateStart: "2026-05-16",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 11 (Gh_ID20) is a Canadian citizen who was confirmed positive for Andes hantavirus on May 16 following a presumptive positive test result the day prior. The patient developed mild symptoms on May 14 and was transported to a hospital in Vancouver for care along with their spouse, who also had mild symptoms but tested negative. The couple were passengers on the MV Hondius. Their spouse never tested positive, and Case 11 has since recovered as of June 6.",
   },
@@ -292,7 +292,7 @@ export const significantEventsData = [
     location: "Netherlands",
     date: "May 22nd 2026",
     dateStart: "2026-05-20",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 12 (Gh_ID23) is a Dutch national who was confirmed positive for hantavirus on May 20.  The person was a crew member who left the ship in Tenerife, Canary Islands, Spain, was repatriated, and was isolating in home quarantine prior to the positive test. Laboratory tests by RIVM, which are administered every week to all persons in quarantine in the Netherlands, indicated that the person has Andes virus. The patient was subsequently admitted to hospital and put in isolation. They subsequently experienced symptom onset on May 27. They have since recovered as of June 18.",
   },
@@ -301,7 +301,7 @@ export const significantEventsData = [
     location: "Spain",
     date: "May 25th 2026",
     dateStart: "2026-05-25",
-    relatedCaseStatus: "Confirmed",
+    relatedCaseStatus: "Confirmed Case",
     description:
       "Case 13 (Gh_ID24) is a Spanish national who was confirmed positive for hantavirus on May 25. This is the second positive case among the fourteen Spanish nationals aboard the ship who were evacuated from Tenerife to Madrid. The patient had been in preventive quarantine at the Gomez Ulla Hospital in Madrid and was detected during the periodic checks carried out on the contacts under follow-up. Following PCR confirmation, the patient was transferred to the High-Level Isolation Unit of the hospital under specialized medical supervision with biosafety measures in place. They subsequently experienced symptom onset on May 31. The patient has since recovered as of June 22.",
   },

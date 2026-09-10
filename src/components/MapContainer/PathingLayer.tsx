@@ -368,7 +368,7 @@ export const usePathingLayer = (
           if (i > 0)
             html +=
               '<hr style="border:none;border-top:1px solid #ddd;margin:10px 0;">';
-          html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${ev.date}${ev.relatedCaseStatus ? " - " + ev.relatedCaseStatus + " Case" : ""}</p><p style="color:#454545">${ev.description}</p>`;
+          html += `<p style="font-weight:500;margin-bottom:6px;color:#1e1e1e">${ev.date}${ev.relatedCaseStatus ? " - " + ev.relatedCaseStatus : ""}</p><p style="color:#454545">${ev.description}</p>`;
         });
         html += "</div>";
 
