@@ -399,20 +399,6 @@ export const useChoroplethLayer = (
 
         // Country labels are always visible and always come from countryMetadata.
         const isSubcountryView = adminLevel !== 0;
-        const getBoundsSizePriority = (bounds?: number[]) => {
-          if (!bounds || bounds.length !== 4) return 0;
-
-          const [w, s, e, n] = bounds;
-          const widthDeg = e >= w ? e - w : e + 360 - w;
-          const heightDeg = Math.max(0, n - s);
-          const midLatRad = (((s + n) / 2) * Math.PI) / 180;
-
-          // Approximate bbox area in lon/lat with latitude correction.
-          return (
-            Math.max(0, widthDeg) * heightDeg * Math.max(0, Math.cos(midLatRad))
-          );
-        };
-
         const countryLabelFeatures = Object.entries(countryMetadata).map(
           ([countryCode, entry]) => ({
             type: "Feature" as const,
@@ -424,7 +410,7 @@ export const useChoroplethLayer = (
               name: entry.name,
               label: entry.name.toUpperCase(),
               caseCount: countryCaseCountByCode[countryCode] || 0,
-              sizePriority: getBoundsSizePriority(entry.bounds as number[]),
+              sizePriority: Math.max(0, entry.size || 0),
             },
           }),
         );
