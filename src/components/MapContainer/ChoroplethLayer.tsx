@@ -226,7 +226,6 @@ export const useChoroplethLayer = (
         const firstSymbolLayer = map
           .getStyle()
           .layers?.find((layer) => layer.type === "symbol")?.id;
-        const countryLabelsCanAdjust = adminLevel === 1 || adminLevel === 2;
         const isAdmin2View = adminLevel === 2;
 
         const areaIdsFromData = dataUnion
@@ -400,6 +399,20 @@ export const useChoroplethLayer = (
 
         // Country labels are always visible and always come from countryMetadata.
         const isSubcountryView = adminLevel !== 0;
+        const getBoundsSizePriority = (bounds?: number[]) => {
+          if (!bounds || bounds.length !== 4) return 0;
+
+          const [w, s, e, n] = bounds;
+          const widthDeg = e >= w ? e - w : e + 360 - w;
+          const heightDeg = Math.max(0, n - s);
+          const midLatRad = (((s + n) / 2) * Math.PI) / 180;
+
+          // Approximate bbox area in lon/lat with latitude correction.
+          return (
+            Math.max(0, widthDeg) * heightDeg * Math.max(0, Math.cos(midLatRad))
+          );
+        };
+
         const countryLabelFeatures = Object.entries(countryMetadata).map(
           ([countryCode, entry]) => ({
             type: "Feature" as const,
@@ -409,8 +422,9 @@ export const useChoroplethLayer = (
             },
             properties: {
               name: entry.name,
-              label: isSubcountryView ? entry.name.toUpperCase() : entry.name,
+              label: entry.name.toUpperCase(),
               caseCount: countryCaseCountByCode[countryCode] || 0,
+              sizePriority: getBoundsSizePriority(entry.bounds as number[]),
             },
           }),
         );
@@ -451,20 +465,18 @@ export const useChoroplethLayer = (
               "text-max-width": 8,
               "text-letter-spacing": 0.1,
               "text-anchor": "center",
-              "text-variable-anchor": countryLabelsCanAdjust
-                ? ["center", "top", "bottom", "left", "right"]
-                : ["center"],
-              "text-radial-offset": countryLabelsCanAdjust ? 0.75 : 0,
+              "text-variable-anchor": ["center"],
+              "text-radial-offset": 0,
               "text-offset": [0, 0],
               "text-justify": "auto",
               "text-padding": 2,
               "text-allow-overlap": false,
               "text-ignore-placement": false,
-              // Lower sort keys are placed first; negative caseCount sorts higher values first.
+              // Lower sort keys are placed first; negative sizePriority sorts larger countries first.
               "symbol-sort-key": [
                 "*",
                 -1,
-                ["coalesce", ["get", "caseCount"], 0],
+                ["coalesce", ["get", "sizePriority"], 0],
               ],
             },
             paint: {
@@ -585,14 +597,8 @@ export const useChoroplethLayer = (
                 filter: ["==", ["get", "labelKind"], "provinceState"],
                 layout: {
                   ...baseAdminLabelLayout,
-                  "text-variable-anchor": [
-                    "center",
-                    "top",
-                    "bottom",
-                    "left",
-                    "right",
-                  ],
-                  "text-radial-offset": 2,
+                  "text-variable-anchor": ["center"],
+                  "text-radial-offset": 0,
                 },
                 paint: baseAdminLabelPaint,
               } as any,
